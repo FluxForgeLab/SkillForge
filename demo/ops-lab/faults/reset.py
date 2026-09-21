@@ -3,18 +3,29 @@
 import logging
 import sys
 
-from dockerutil import docker_client, project_name, start_service, wait_until_healthy
-from nginxfault import restore_nginx_upstream
+from dockerutil import (
+    docker_client,
+    is_running,
+    project_name,
+    require_container,
+    restart_service,
+    start_service,
+    wait_until_healthy,
+)
+from nginxfault import DEFAULT_UPSTREAM_PORT, write_upstream_port
 
 
 def reset(*, client=None) -> None:
     docker = client if client is not None else docker_client()
     project = project_name()
-    restore_nginx_upstream(docker, project)
+    write_upstream_port(DEFAULT_UPSTREAM_PORT)
     start_service(docker, project, "backend")
     wait_until_healthy(docker, project, "backend")
-    # nginx resolves `backend` at start; if F1 raced nginx boot, nginx has exited.
-    start_service(docker, project, "nginx")
+    nginx = require_container(docker, project, "nginx")
+    if is_running(nginx):
+        restart_service(docker, project, "nginx")
+    else:
+        start_service(docker, project, "nginx")
     wait_until_healthy(docker, project, "nginx")
 
 

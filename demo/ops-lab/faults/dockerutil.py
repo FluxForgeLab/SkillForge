@@ -77,6 +77,16 @@ def start_service(client: docker.DockerClient, project: str, service: str) -> No
     container.start()
 
 
+def restart_service(client: docker.DockerClient, project: str, service: str) -> None:
+    container = require_container(client, project, service)
+    logger.info("restarting service %s", service)
+    try:
+        container.restart()
+    except DockerException:
+        logger.exception("failed to restart service %s", service)
+        raise
+
+
 def wait_until_healthy(
     client: docker.DockerClient,
     project: str,

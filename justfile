@@ -23,6 +23,10 @@ lint:
 test:
     uv run pytest -m "not integration"
 
+# 集成测（需要 Docker / ops-lab）
+test-integration:
+    uv run pytest -m integration -v
+
 # ops-lab 启动（C1.2 之后）
 lab-up:
     docker compose -f demo/ops-lab/docker-compose.yml -p skillforge-lab up -d --build

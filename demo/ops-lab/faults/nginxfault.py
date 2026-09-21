@@ -36,12 +36,16 @@ def apply_upstream_port(port: int, client, project: str) -> None:
         nginx_reload(client, project)
 
 
-def restore_nginx_upstream(client, project: str, *, port: int = DEFAULT_UPSTREAM_PORT) -> None:
-    write_upstream_port(port)
+def reload_nginx_upstream_if_running(client, project: str) -> None:
     container = require_container(client, project, "nginx")
     if is_running(container):
         nginx_test(client, project)
         nginx_reload(client, project)
+
+
+def restore_nginx_upstream(client, project: str, *, port: int = DEFAULT_UPSTREAM_PORT) -> None:
+    write_upstream_port(port)
+    reload_nginx_upstream_if_running(client, project)
 
 
 def write_f3_invalid_conf() -> None:

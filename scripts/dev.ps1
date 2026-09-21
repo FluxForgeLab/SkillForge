@@ -45,6 +45,9 @@ switch ($Command) {
     "test" {
         Invoke-Checked { uv run pytest -m "not integration" }
     }
+    "test-integration" {
+        Invoke-Checked { uv run pytest -m integration -v }
+    }
     "lab-up" {
         Invoke-Checked {
             docker compose -f demo/ops-lab/docker-compose.yml -p skillforge-lab up -d --build
@@ -87,6 +90,7 @@ usage: .\scripts\dev.ps1 <command> [args]
   web          Vite http://127.0.0.1:5173
   lint         ruff + apps/web lint
   test         pytest -m "not integration"
+  test-integration pytest -m integration (needs Docker)
   lab-up       ops-lab compose up (C1.2+)
   lab-down     ops-lab compose down (no -v)
   lab-reset    faults/reset.py (C1.4+)

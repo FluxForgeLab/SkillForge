@@ -13,7 +13,7 @@ description: 启动、复位、注入故障并验证 demo/ops-lab（nginx + back
 docker compose -f demo/ops-lab/docker-compose.yml -p skillforge-lab up -d --build   # 启动
 python demo/ops-lab/verifier/verify.py                                              # 健康检查，exit 0 = 健康
 python demo/ops-lab/faults/inject.py <fault_id>                                     # 注入故障
-python demo/ops-lab/faults/reset.py                                                 # 复位到健康态
+python demo/ops-lab/faults/reset.py                                                 # 复位（写回 8080 conf，拉起 backend，restart nginx）
 python demo/ops-lab/faults/incident.py <fault_id>                                   # 模拟告警 JSON
 docker compose -f demo/ops-lab/docker-compose.yml -p skillforge-lab down             # 停止（just lab-down）
 docker compose -f demo/ops-lab/docker-compose.yml -p skillforge-lab down -v         # 销毁栈和匿名 volume，默认不要用

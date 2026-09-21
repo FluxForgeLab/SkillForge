@@ -171,12 +171,12 @@ def test_reset_starts_backend_and_nginx(monkeypatch: pytest.MonkeyPatch) -> None
     client = FakeClient({"backend": backend, "nginx": nginx})
     restored: list[int] = []
 
-    def fake_restore(docker, project: str, *, port: int = 8080) -> None:
-        del docker, project
+    def fake_write(port: int) -> None:
         restored.append(port)
 
     monkeypatch.setattr(reset, "project_name", lambda: "skillforge-lab")
-    monkeypatch.setattr(reset, "restore_nginx_upstream", fake_restore)
+    monkeypatch.setattr(reset, "write_upstream_port", fake_write)
+    monkeypatch.setattr(reset, "restart_service", lambda _c, _p, _s: None)
     reset.reset(client=client)
     assert restored == [8080]
     assert backend.start_calls == 1
@@ -195,6 +195,14 @@ def test_reset_restore_reloads_when_nginx_running(monkeypatch: pytest.MonkeyPatc
     nginxfault.restore_nginx_upstream(client, "skillforge-lab")
     assert ports == [8080]
     assert nginx.exec_calls == [["nginx", "-t"], ["nginx", "-s", "reload"]]
+
+
+def test_reload_nginx_upstream_if_running_skips_when_stopped() -> None:
+    _dockerutil, nginxfault, _inject, _reset = _load_faults()
+    nginx = FakeContainer("nginx", running=False)
+    client = FakeClient({"nginx": nginx})
+    nginxfault.reload_nginx_upstream_if_running(client, "skillforge-lab")
+    assert nginx.exec_calls == []
 
 
 def test_write_f3_invalid_conf_keeps_upstream_port() -> None:
