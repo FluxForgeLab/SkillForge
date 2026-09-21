@@ -2,39 +2,39 @@
   "schema_version": 1,
   "diagram_type": "architecture",
   "meta": {
-    "title": "SkillForge Phase 2 控制面（C2.1–C2.8 规划）",
-    "subtitle": "C2.1–C2.2 已落地；双状态机流转见 domain-pipeline-state.html · domain-skill-version-state.html。",
+    "title": "SkillForge Phase 2 控制面（C2.1–C2.8 已落地）",
+    "subtitle": "实线=代码已调用。虚线=库已实现、HTTP 尚未挂上。状态机：domain-*-state.html。",
     "output": "phase2-control-plane.html",
     "quality_profile": "showcase",
     "visual_preset": "editorial",
     "repository": {
       "url": "https://github.com/FluxForgeLab/SkillForge.git",
-      "revision": "96dcafe9bb2a7c1ce417e4036961db32fd2e7729"
+      "revision": "8dae42729b90a25f3ca1139ddcc5838f3bbfb4ad"
     },
     "views": [
       {
-        "id": "api-surface",
-        "label": "API 层",
-        "focus": ["web", "api", "registry", "models"],
-        "note": "C2.4 FastAPI + WS · C2.8 projects · C2.5 gateway。"
+        "id": "http-path",
+        "label": "HTTP 已接线",
+        "focus": ["web", "api", "sqlite", "tracing"],
+        "note": "projects 写 SQLite；lifespan 订阅 bus → WS /api/events。"
       },
       {
-        "id": "state-machines",
-        "label": "双状态机（C2.2）",
-        "focus": ["domain"],
-        "note": "PipelineState 与 SkillVersionStatus 分离（R4）；详图见 domain-*-state.html。"
+        "id": "model-lib",
+        "label": "模型库",
+        "focus": ["models", "llm", "api"],
+        "note": "Gateway.generate emit model_*；默认 Fake；OpenAI 走 /chat/completions。无 HTTP 入口。"
       },
       {
-        "id": "persistence",
-        "label": "持久化",
-        "focus": ["domain", "db", "sqlite", "registry", "artifacts"],
-        "note": "C2.1 schema · C2.7 产物目录 · repos 随 C2.3+。"
+        "id": "registry-lib",
+        "label": "Registry 库",
+        "focus": ["registry", "artifacts", "sqlite"],
+        "note": "create_version 落盘+INSERT；transition 走 C2.2 表。无 /api/skills。"
       },
       {
         "id": "observe",
         "label": "追踪",
-        "focus": ["tracing", "sqlite"],
-        "note": "C2.3 bus + sink；api WS 与 models emit 均汇入 tracing。"
+        "focus": ["api", "tracing", "sqlite"],
+        "note": "emit：sink 先写库，再 bus.publish。"
       }
     ]
   },
@@ -43,55 +43,26 @@
       "id": "config",
       "type": "security",
       "label": "config.py",
-      "sublabel": "Settings（已有）",
+      "sublabel": "Settings",
       "tag": "C0.3",
-      "pos": [40, 80],
-      "size": [118, 52]
-    },
-    {
-      "id": "web",
-      "type": "frontend",
-      "label": "Web",
-      "sublabel": ":5173 → :8000",
-      "tag": "C0.4",
-      "pos": [40, 240],
-      "size": [118, 52]
-    },
-    {
-      "id": "api",
-      "type": "backend",
-      "label": "api/",
-      "sublabel": "FastAPI · WS /events",
-      "tag": "C2.4",
-      "pos": [240, 240],
-      "size": [132, 52],
-      "sources": [{ "path": "docs/execution-plan.md", "line": 149, "end_line": 149, "label": "C2.4" }]
-    },
-    {
-      "id": "domain",
-      "type": "backend",
-      "label": "domain/",
-      "sublabel": "state_machines · 实体",
-      "tag": "C2.2",
-      "pos": [240, 400],
+      "pos": [240, 80],
       "size": [132, 52],
       "sources": [
-        {
-          "path": "skillforge/domain/state_machines.py",
-          "line": 10,
-          "end_line": 58,
-          "label": "转移表"
-        }
+        { "path": "skillforge/config.py", "line": 26, "end_line": 42, "label": "ports · dirs" }
       ]
     },
     {
       "id": "models",
       "type": "cloud",
       "label": "models/",
-      "sublabel": "gateway · structured",
-      "tag": "C2.5",
-      "pos": [440, 80],
-      "size": [132, 52]
+      "sublabel": "Gateway · structured",
+      "tag": "C2.6",
+      "pos": [480, 80],
+      "size": [132, 52],
+      "sources": [
+        { "path": "skillforge/models/gateway.py", "line": 42, "end_line": 70, "label": "emit+generate" },
+        { "path": "skillforge/models/structured.py", "line": 121, "end_line": 147, "label": "schema retry" }
+      ]
     },
     {
       "id": "llm",
@@ -99,36 +70,80 @@
       "label": "LLM HTTP",
       "sublabel": "OpenAI-compatible",
       "tag": "C2.5",
-      "pos": [640, 80],
-      "size": [118, 52]
+      "pos": [720, 80],
+      "size": [128, 52],
+      "sources": [
+        {
+          "path": "skillforge/models/adapters/openai_compatible.py",
+          "line": 77,
+          "end_line": 82,
+          "label": "/chat/completions"
+        }
+      ]
+    },
+    {
+      "id": "web",
+      "type": "frontend",
+      "label": "Web",
+      "sublabel": ":5173 脚手架",
+      "tag": "C0.4",
+      "pos": [40, 260],
+      "size": [128, 52],
+      "sources": [
+        { "path": "apps/web/src/App.tsx", "line": 3, "end_line": 10, "label": "no API client" }
+      ]
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "api/",
+      "sublabel": ":8000 health · WS · projects",
+      "tag": "C2.8",
+      "pos": [240, 260],
+      "size": [132, 52],
+      "sources": [
+        { "path": "skillforge/api/main.py", "line": 32, "end_line": 64, "label": "lifespan · routes" },
+        { "path": "skillforge/api/ws.py", "line": 53, "end_line": 65, "label": "WS /events" },
+        { "path": "skillforge/api/routers/projects.py", "line": 58, "end_line": 85, "label": "CRUD" }
+      ]
     },
     {
       "id": "registry",
       "type": "backend",
       "label": "registry/",
-      "sublabel": "manifest · 版本链",
+      "sublabel": "SkillRegistry",
       "tag": "C2.7",
-      "pos": [440, 240],
-      "size": [132, 52]
+      "pos": [480, 260],
+      "size": [132, 52],
+      "sources": [
+        { "path": "skillforge/registry/service.py", "line": 70, "end_line": 117, "label": "create_version" },
+        { "path": "skillforge/registry/service.py", "line": 131, "end_line": 137, "label": "transition" }
+      ]
     },
     {
       "id": "artifacts",
       "type": "external",
       "label": "skills/generated/",
-      "sublabel": "产物树",
+      "sublabel": "manifest + sha256",
       "tag": "C2.7",
-      "pos": [640, 240],
-      "size": [118, 52]
+      "pos": [720, 260],
+      "size": [128, 52],
+      "sources": [
+        { "path": "skillforge/registry/store.py", "line": 24, "end_line": 61, "label": "write_version" }
+      ]
     },
     {
-      "id": "db",
-      "type": "backend",
-      "label": "db/",
-      "sublabel": "schema · init",
-      "tag": "C2.1",
-      "pos": [440, 400],
+      "id": "tracing",
+      "type": "messagebus",
+      "label": "tracing/",
+      "sublabel": "sink then bus",
+      "tag": "C2.3",
+      "pos": [240, 440],
       "size": [132, 52],
-      "sources": [{ "path": "docs/execution-plan.md", "line": 146, "end_line": 146, "label": "C2.1" }]
+      "sources": [
+        { "path": "skillforge/tracing/emitter.py", "line": 59, "end_line": 62, "label": "write+publish" },
+        { "path": "skillforge/tracing/sink.py", "line": 31, "end_line": 34, "label": "INSERT" }
+      ]
     },
     {
       "id": "sqlite",
@@ -136,78 +151,134 @@
       "label": "SQLite",
       "sublabel": "system of record",
       "tag": "C2.1",
-      "pos": [440, 560],
-      "size": [132, 52]
+      "pos": [480, 440],
+      "size": [132, 52],
+      "sources": [
+        { "path": "skillforge/db/schema.sql", "line": 1, "end_line": 8, "label": "no FTS" },
+        { "path": "skillforge/db/repositories/projects.py", "line": 11, "end_line": 22, "label": "projects" }
+      ]
     },
     {
-      "id": "tracing",
-      "type": "messagebus",
-      "label": "tracing/",
-      "sublabel": "bus · sqlite sink",
-      "tag": "C2.3",
-      "pos": [640, 560],
-      "size": [118, 52]
+      "id": "domain",
+      "type": "backend",
+      "label": "domain/",
+      "sublabel": "双状态机 · 实体",
+      "tag": "C2.2",
+      "pos": [40, 440],
+      "size": [128, 52],
+      "sources": [
+        {
+          "path": "skillforge/domain/state_machines.py",
+          "line": 45,
+          "end_line": 58,
+          "label": "SkillVersion 表"
+        }
+      ]
     }
   ],
   "boundaries": [
     {
       "kind": "region",
-      "label": "skillforge/ 包（Phase 2 规划）",
-      "wraps": ["config", "api", "domain", "models", "registry", "db", "tracing"]
+      "label": "skillforge/ 包",
+      "wraps": ["config", "models", "api", "registry", "tracing", "sqlite"]
     }
   ],
   "connections": [
-    { "id": "web-api", "from": "web", "to": "api", "variant": "dashed" },
-    { "id": "api-models", "from": "api", "to": "models", "variant": "dashed" },
-    { "id": "api-registry", "from": "api", "to": "registry", "variant": "dashed" },
-    { "id": "api-domain", "from": "api", "to": "domain", "variant": "dashed" },
-    { "id": "models-llm", "from": "models", "to": "llm", "variant": "dashed" },
-    { "id": "domain-db", "from": "domain", "to": "db", "variant": "dashed" },
-    { "id": "registry-db", "from": "registry", "to": "db", "variant": "dashed" },
-    { "id": "registry-artifacts", "from": "registry", "to": "artifacts", "variant": "dashed" },
-    { "id": "db-sqlite", "from": "db", "to": "sqlite", "variant": "dashed" },
-    { "id": "trace-sqlite", "from": "tracing", "to": "sqlite", "variant": "dashed" }
+    {
+      "id": "web-api",
+      "from": "web",
+      "to": "api",
+      "variant": "dashed",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "api-registry",
+      "from": "api",
+      "to": "registry",
+      "variant": "dashed",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "registry-artifacts",
+      "from": "registry",
+      "to": "artifacts",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "models-llm",
+      "from": "models",
+      "to": "llm",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "api-tracing",
+      "from": "api",
+      "to": "tracing",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "tracing-sqlite",
+      "from": "tracing",
+      "to": "sqlite",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "api-sqlite",
+      "from": "api",
+      "to": "sqlite",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "registry-sqlite",
+      "from": "registry",
+      "to": "sqlite",
+      "fromSide": "bottom",
+      "toSide": "top"
+    }
   ],
   "cards": [
     {
-      "dot": "slate",
-      "title": "目录 ↔ Commit",
-      "items": [
-        "db/ C2.1 ✓ · domain/ C2.2 ✓ · tracing/ C2.3 · api/ C2.4",
-        "models/ C2.5–2.6 · registry/ C2.7 · POST/GET /api/projects C2.8"
-      ]
-    },
-    {
       "dot": "emerald",
-      "title": "tracing 订阅与 emit",
+      "title": "已接线",
       "items": [
-        "api/ WS /api/events 订阅 in-process bus（C2.4 + C2.3）。",
-        "models/ 每次 gateway 调用 emit model_request/response（C2.5）。"
+        "POST/GET /api/projects → repositories.projects → SQLite。",
+        "lifespan：initialize_database + bus.subscribe → WS broadcast。",
+        "emit：SqliteTraceSink 再 EventBus.publish。",
+        "SkillRegistry.create_version / transition；非法 PUBLISH 被拒。"
       ]
     },
     {
       "dot": "amber",
-      "title": "config.py",
+      "title": "虚线",
       "items": [
-        "C0.3 已有：data_dir、sqlite_path、model_base_url、opslab_*。",
-        "api/deps 注入 Settings；不在此图画边以免交叉。"
+        "Web 无 fetch/WS 客户端（App.tsx 脚手架）。",
+        "无 /api/skills；Compiler（C6.7）才会调 registry。",
+        "无 HTTP 调 ModelGateway；C3.6 Runtime 才会 generate。"
       ]
     },
     {
       "dot": "cyan",
-      "title": "R4 · 双状态机（C2.2）",
+      "title": "R4 双状态机",
       "items": [
-        "Pipeline：INGESTED→…→CANDIDATE→EVALUATING→PASSED|FAILED→APPROVED→PUBLISHED",
-        "SkillVersion：DRAFT→CANDIDATE→VALIDATED→APPROVED→PUBLISHED；各阶段可→REJECTED",
-        "详图：domain-pipeline-state.html · domain-skill-version-state.html"
+        "domain/ 在包外左侧：类型库，被 registry.transition 使用。",
+        "Pipeline ≠ SkillVersionStatus；自动终点 ≤ CANDIDATE。",
+        "domain-pipeline-state.html · domain-skill-version-state.html"
       ]
     },
     {
       "dot": "rose",
-      "title": "R12 · Ops Lab",
+      "title": "R12 · 尚未做",
       "items": [
-        "schema 无 FTS；检索投影在 knowledge/retrieval。",
-        "demo/ops-lab 仍由 C1 脚本驱动；C3 OpsLabToolAdapter 再接 lab。"
+        "schema.sql 无 FTS；检索投影在 Phase 5。",
+        "config 被各模块读取，不在图上连边。",
+        "C3：golden skill、Sandbox、OpsLab adapter。"
       ]
     }
   ]

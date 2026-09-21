@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="generator" content="archify 2.12.0">
-  <title>SkillForge Phase 2 控制面（C2.1–C2.8 规划） Diagram</title>
+  <title>SkillForge Phase 2 控制面（C2.1–C2.8 已落地） Diagram</title>
   <script>
     // Resolve the theme before first paint so light-preference users don't
     // see a dark flash. The toolbar script below re-applies with UI state.
@@ -4496,13 +4496,13 @@
     <div class="header">
       <div class="header-row">
         <div class="pulse-dot"></div>
-        <h1>SkillForge Phase 2 控制面（C2.1–C2.8 规划）</h1>
+        <h1>SkillForge Phase 2 控制面（C2.1–C2.8 已落地）</h1>
       </div>
-      <p class="subtitle">C2.1–C2.2 已落地；双状态机流转见 domain-pipeline-state.html · domain-skill-version-state.html。</p>
+      <p class="subtitle">实线=代码已调用。虚线=库已实现、HTTP 尚未挂上。状态机：domain-*-state.html。</p>
     </div>
 
-    <script id="archify-guided-views-data" type="application/json">[{"id":"api-surface","label":"API 层","focus":["web","api","registry","models"],"note":"C2.4 FastAPI + WS · C2.8 projects · C2.5 gateway。"},{"id":"state-machines","label":"双状态机（C2.2）","focus":["domain"],"note":"PipelineState 与 SkillVersionStatus 分离（R4）；详图见 domain-*-state.html。"},{"id":"persistence","label":"持久化","focus":["domain","db","sqlite","registry","artifacts"],"note":"C2.1 schema · C2.7 产物目录 · repos 随 C2.3+。"},{"id":"observe","label":"追踪","focus":["tracing","sqlite"],"note":"C2.3 bus + sink；api WS 与 models emit 均汇入 tracing。"}]</script>
-    <script id="archify-source-evidence-data" type="application/json">{"schemaVersion":1,"verified":true,"repository":{"url":"https://github.com/FluxForgeLab/SkillForge","revision":"96dcafe9bb2a7c1ce417e4036961db32fd2e7729","shortRevision":"96dcafe"},"referenceCount":3,"nodes":{"api":[{"path":"docs/execution-plan.md","line":149,"endLine":149,"label":"C2.4","href":"https://github.com/FluxForgeLab/SkillForge/blob/96dcafe9bb2a7c1ce417e4036961db32fd2e7729/docs/execution-plan.md#L149"}],"domain":[{"path":"skillforge/domain/state_machines.py","line":10,"endLine":58,"label":"转移表","href":"https://github.com/FluxForgeLab/SkillForge/blob/96dcafe9bb2a7c1ce417e4036961db32fd2e7729/skillforge/domain/state_machines.py#L10-L58"}],"db":[{"path":"docs/execution-plan.md","line":146,"endLine":146,"label":"C2.1","href":"https://github.com/FluxForgeLab/SkillForge/blob/96dcafe9bb2a7c1ce417e4036961db32fd2e7729/docs/execution-plan.md#L146"}]}}</script>
+    <script id="archify-guided-views-data" type="application/json">[{"id":"http-path","label":"HTTP 已接线","focus":["web","api","sqlite","tracing"],"note":"projects 写 SQLite；lifespan 订阅 bus → WS /api/events。"},{"id":"model-lib","label":"模型库","focus":["models","llm","api"],"note":"Gateway.generate emit model_*；默认 Fake；OpenAI 走 /chat/completions。无 HTTP 入口。"},{"id":"registry-lib","label":"Registry 库","focus":["registry","artifacts","sqlite"],"note":"create_version 落盘+INSERT；transition 走 C2.2 表。无 /api/skills。"},{"id":"observe","label":"追踪","focus":["api","tracing","sqlite"],"note":"emit：sink 先写库，再 bus.publish。"}]</script>
+    <script id="archify-source-evidence-data" type="application/json">{"schemaVersion":1,"verified":true,"repository":{"url":"https://github.com/FluxForgeLab/SkillForge","revision":"8dae42729b90a25f3ca1139ddcc5838f3bbfb4ad","shortRevision":"8dae427"},"referenceCount":16,"nodes":{"config":[{"path":"skillforge/config.py","line":26,"endLine":42,"label":"ports · dirs","href":"https://github.com/FluxForgeLab/SkillForge/blob/8dae42729b90a25f3ca1139ddcc5838f3bbfb4ad/skillforge/config.py#L26-L42"}],"models":[{"path":"skillforge/models/gateway.py","line":42,"endLine":70,"label":"emit+generate","href":"https://github.com/FluxForgeLab/SkillForge/blob/8dae42729b90a25f3ca1139ddcc5838f3bbfb4ad/skillforge/models/gateway.py#L42-L70"},{"path":"skillforge/models/structured.py","line":121,"endLine":147,"label":"schema retry","href":"https://github.com/FluxForgeLab/SkillForge/blob/8dae42729b90a25f3ca1139ddcc5838f3bbfb4ad/skillforge/models/structured.py#L121-L147"}],"llm":[{"path":"skillforge/models/adapters/openai_compatible.py","line":77,"endLine":82,"label":"/chat/completions","href":"https://github.com/FluxForgeLab/SkillForge/blob/8dae42729b90a25f3ca1139ddcc5838f3bbfb4ad/skillforge/models/adapters/openai_compatible.py#L77-L82"}],"web":[{"path":"apps/web/src/App.tsx","line":3,"endLine":10,"label":"no API client","href":"https://github.com/FluxForgeLab/SkillForge/blob/8dae42729b90a25f3ca1139ddcc5838f3bbfb4ad/apps/web/src/App.tsx#L3-L10"}],"api":[{"path":"skillforge/api/main.py","line":32,"endLine":64,"label":"lifespan · routes","href":"https://github.com/FluxForgeLab/SkillForge/blob/8dae42729b90a25f3ca1139ddcc5838f3bbfb4ad/skillforge/api/main.py#L32-L64"},{"path":"skillforge/api/ws.py","line":53,"endLine":65,"label":"WS /events","href":"https://github.com/FluxForgeLab/SkillForge/blob/8dae42729b90a25f3ca1139ddcc5838f3bbfb4ad/skillforge/api/ws.py#L53-L65"},{"path":"skillforge/api/routers/projects.py","line":58,"endLine":85,"label":"CRUD","href":"https://github.com/FluxForgeLab/SkillForge/blob/8dae42729b90a25f3ca1139ddcc5838f3bbfb4ad/skillforge/api/routers/projects.py#L58-L85"}],"registry":[{"path":"skillforge/registry/service.py","line":70,"endLine":117,"label":"create_version","href":"https://github.com/FluxForgeLab/SkillForge/blob/8dae42729b90a25f3ca1139ddcc5838f3bbfb4ad/skillforge/registry/service.py#L70-L117"},{"path":"skillforge/registry/service.py","line":131,"endLine":137,"label":"transition","href":"https://github.com/FluxForgeLab/SkillForge/blob/8dae42729b90a25f3ca1139ddcc5838f3bbfb4ad/skillforge/registry/service.py#L131-L137"}],"artifacts":[{"path":"skillforge/registry/store.py","line":24,"endLine":61,"label":"write_version","href":"https://github.com/FluxForgeLab/SkillForge/blob/8dae42729b90a25f3ca1139ddcc5838f3bbfb4ad/skillforge/registry/store.py#L24-L61"}],"tracing":[{"path":"skillforge/tracing/emitter.py","line":59,"endLine":62,"label":"write+publish","href":"https://github.com/FluxForgeLab/SkillForge/blob/8dae42729b90a25f3ca1139ddcc5838f3bbfb4ad/skillforge/tracing/emitter.py#L59-L62"},{"path":"skillforge/tracing/sink.py","line":31,"endLine":34,"label":"INSERT","href":"https://github.com/FluxForgeLab/SkillForge/blob/8dae42729b90a25f3ca1139ddcc5838f3bbfb4ad/skillforge/tracing/sink.py#L31-L34"}],"sqlite":[{"path":"skillforge/db/schema.sql","line":1,"endLine":8,"label":"no FTS","href":"https://github.com/FluxForgeLab/SkillForge/blob/8dae42729b90a25f3ca1139ddcc5838f3bbfb4ad/skillforge/db/schema.sql#L1-L8"},{"path":"skillforge/db/repositories/projects.py","line":11,"endLine":22,"label":"projects","href":"https://github.com/FluxForgeLab/SkillForge/blob/8dae42729b90a25f3ca1139ddcc5838f3bbfb4ad/skillforge/db/repositories/projects.py#L11-L22"}],"domain":[{"path":"skillforge/domain/state_machines.py","line":45,"endLine":58,"label":"SkillVersion 表","href":"https://github.com/FluxForgeLab/SkillForge/blob/8dae42729b90a25f3ca1139ddcc5838f3bbfb4ad/skillforge/domain/state_machines.py#L45-L58"}]}}</script>
     <div class="guided-views no-print" id="guided-views" hidden aria-label="Guided diagram views">
       <button id="guided-view-prev" type="button" aria-label="Previous guided view" title="Previous guided view ([)">&#8592;</button>
       <div class="guided-view-copy">
@@ -4544,9 +4544,9 @@
 
     <!-- Main Diagram -->
     <div class="diagram-container" data-detail-level="read">
-      <svg viewBox="0 0 828 700" role="img" aria-labelledby="archify-diagram-title archify-diagram-description" data-preset="editorial" data-quality-profile="showcase">
-        <title id="archify-diagram-title">SkillForge Phase 2 控制面（C2.1–C2.8 规划）</title>
-        <desc id="archify-diagram-description">C2.1–C2.2 已落地；双状态机流转见 domain-pipeline-state.html · domain-skill-version-state.html。</desc>
+      <svg viewBox="0 0 888 580" role="img" aria-labelledby="archify-diagram-title archify-diagram-description" data-preset="editorial" data-quality-profile="showcase">
+        <title id="archify-diagram-title">SkillForge Phase 2 控制面（C2.1–C2.8 已落地）</title>
+        <desc id="archify-diagram-description">实线=代码已调用。虚线=库已实现、HTTP 尚未挂上。状态机：domain-*-state.html。</desc>
         <!-- Definitions -->
         <defs>
           <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
@@ -4570,162 +4570,148 @@
         <rect width="100%" height="100%" fill="url(#grid)" />
 
         <!-- Boundaries (behind everything) -->
-        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="0" x="10" y="50" width="778" height="582" rx="12" class="c-region" stroke-width="1"/>
-        <text x="18" y="68" class="t-cloud" font-size="9" font-weight="600">skillforge/ 包（Phase 2 规划）</text>
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="0" x="210" y="50" width="432" height="462" rx="12" class="c-region" stroke-width="1"/>
+        <text x="218" y="68" class="t-cloud" font-size="9" font-weight="600">skillforge/ 包</text>
 
         <!-- Connection paths (before components for correct z-order) -->
-        <path data-edge-from="web" data-edge-to="api" data-edge-key="0" data-edge-id="web-api" data-composition-points="158,266;240,266" d="M 158 266 L 240 266" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
-        <path data-edge-from="api" data-edge-to="models" data-edge-key="1" data-edge-id="api-models" data-composition-points="372,259;406,259;406,106;440,106" d="M 372 259 L 398 259 Q 406 259 406 251 L 406 114 Q 406 106 414 106 L 440 106" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
-        <path data-edge-from="api" data-edge-to="registry" data-edge-key="2" data-edge-id="api-registry" data-composition-points="372,273;396,273;396,289;416,289;416,266;440,266" d="M 372 273 L 388 273 Q 396 273 396 281 L 396 281 Q 396 289 404 289 L 408 289 Q 416 289 416 281 L 416 274 Q 416 266 424 266 L 440 266" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
-        <path data-edge-from="api" data-edge-to="domain" data-edge-key="3" data-edge-id="api-domain" data-composition-points="306,292;306,400" d="M 306 292 L 306 400" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
-        <path data-edge-from="models" data-edge-to="llm" data-edge-key="4" data-edge-id="models-llm" data-composition-points="572,106;640,106" d="M 572 106 L 640 106" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
-        <path data-edge-from="domain" data-edge-to="db" data-edge-key="5" data-edge-id="domain-db" data-composition-points="372,426;440,426" d="M 372 426 L 440 426" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
-        <path data-edge-from="registry" data-edge-to="db" data-edge-key="6" data-edge-id="registry-db" data-composition-points="506,292;506,400" d="M 506 292 L 506 400" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
-        <path data-edge-from="registry" data-edge-to="artifacts" data-edge-key="7" data-edge-id="registry-artifacts" data-composition-points="572,266;640,266" d="M 572 266 L 640 266" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
-        <path data-edge-from="db" data-edge-to="sqlite" data-edge-key="8" data-edge-id="db-sqlite" data-composition-points="506,452;506,560" d="M 506 452 L 506 560" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
-        <path data-edge-from="tracing" data-edge-to="sqlite" data-edge-key="9" data-edge-id="trace-sqlite" data-composition-points="640,586;572,586" d="M 640 586 L 572 586" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
+        <path data-edge-from="web" data-edge-to="api" data-edge-key="0" data-edge-id="web-api" data-composition-points="168,286;240,286" d="M 168 286 L 240 286" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
+        <path data-edge-from="api" data-edge-to="registry" data-edge-key="1" data-edge-id="api-registry" data-composition-points="372,286;480,286" d="M 372 286 L 480 286" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
+        <path data-edge-from="registry" data-edge-to="artifacts" data-edge-key="2" data-edge-id="registry-artifacts" data-composition-points="612,286;720,286" d="M 612 286 L 720 286" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="models" data-edge-to="llm" data-edge-key="3" data-edge-id="models-llm" data-composition-points="612,106;720,106" d="M 612 106 L 720 106" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="api" data-edge-to="tracing" data-edge-key="4" data-edge-id="api-tracing" data-composition-points="299,312;299,336;322,336;322,416;306,416;306,440" d="M 299 312 L 299 328 Q 299 336 307 336 L 314 336 Q 322 336 322 344 L 322 408 Q 322 416 314 416 L 314 416 Q 306 416 306 424 L 306 440" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="tracing" data-edge-to="sqlite" data-edge-key="5" data-edge-id="tracing-sqlite" data-composition-points="372,466;480,466" d="M 372 466 L 480 466" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="api" data-edge-to="sqlite" data-edge-key="6" data-edge-id="api-sqlite" data-composition-points="313,312;313,376;539,376;539,440" d="M 313 312 L 313 368 Q 313 376 321 376 L 531 376 Q 539 376 539 384 L 539 440" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="registry" data-edge-to="sqlite" data-edge-key="7" data-edge-id="registry-sqlite" data-composition-points="546,312;546,336;569,336;569,416;553,416;553,440" d="M 546 312 L 546 328 Q 546 336 554 336 L 561 336 Q 569 336 569 344 L 569 408 Q 569 416 561 416 L 561 416 Q 553 416 553 424 L 553 440" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
 
         <!-- Components -->
-        <g id="node-config" data-node-id="config" data-node-label="config.py" tabindex="0" role="button" aria-label="Focus config.py, Settings（已有）, skillforge/ 包（Phase 2 规划）" aria-pressed="false" data-node-kind="security" data-node-sublabel="Settings（已有）" data-node-tag="C0.3" data-node-context="skillforge/ 包（Phase 2 规划）">
-          <title>config.py · Settings（已有） · skillforge/ 包（Phase 2 规划） · C0.3</title>
-          <rect x="40" y="80" width="118" height="52" rx="6" class="c-mask"/>
-          <rect x="40" y="80" width="118" height="52" rx="6" class="c-security" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(46 86) scale(0.6875)">
+        <g id="node-config" data-node-id="config" data-node-label="config.py" tabindex="0" role="button" aria-label="Focus config.py, Settings, skillforge/ 包" aria-pressed="false" data-node-kind="security" data-node-sublabel="Settings" data-node-tag="C0.3" data-node-context="skillforge/ 包">
+          <title>config.py · Settings · skillforge/ 包 · C0.3</title>
+          <rect x="240" y="80" width="132" height="52" rx="6" class="c-mask"/>
+          <rect x="240" y="80" width="132" height="52" rx="6" class="c-security" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(246 86) scale(0.6875)">
             <path d="M8 2.2 13 4v3.5c0 3.1-1.8 5.4-5 6.5-3.2-1.1-5-3.4-5-6.5V4Z"/>
             <path d="m5.8 8 1.5 1.5 3-3"/>
           </g>
-          <text data-detail-anchor x="99" y="104" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">config.py</text>
-        <text data-detail="context" x="99" y="120" class="t-muted" font-size="9" text-anchor="middle">Settings（已有）</text>
-        <text data-detail="fine" x="99" y="124" class="t-security" font-size="7" text-anchor="middle">C0.3</text>
+          <text data-detail-anchor x="306" y="104" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">config.py</text>
+        <text data-detail="context" x="306" y="120" class="t-muted" font-size="9" text-anchor="middle">Settings</text>
+        <text data-detail="fine" x="306" y="124" class="t-security" font-size="7" text-anchor="middle">C0.3</text>
         </g>
 
-        <g id="node-web" data-node-id="web" data-node-label="Web" tabindex="0" role="button" aria-label="Focus Web, :5173 → :8000, Architecture component" aria-pressed="false" data-node-kind="frontend" data-node-sublabel=":5173 → :8000" data-node-tag="C0.4" data-node-context="Architecture component">
-          <title>Web · :5173 → :8000 · Architecture component · C0.4</title>
-          <rect x="40" y="240" width="118" height="52" rx="6" class="c-mask"/>
-          <rect x="40" y="240" width="118" height="52" rx="6" class="c-frontend" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(46 246) scale(0.6875)">
+        <g id="node-models" data-node-id="models" data-node-label="models/" tabindex="0" role="button" aria-label="Focus models/, Gateway · structured, skillforge/ 包" aria-pressed="false" data-node-kind="cloud" data-node-sublabel="Gateway · structured" data-node-tag="C2.6" data-node-context="skillforge/ 包">
+          <title>models/ · Gateway · structured · skillforge/ 包 · C2.6</title>
+          <rect x="480" y="80" width="132" height="52" rx="6" class="c-mask"/>
+          <rect x="480" y="80" width="132" height="52" rx="6" class="c-cloud" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="cloud" class="semantic-sigil s-cloud" transform="translate(486 86) scale(0.6875)">
+            <path d="M4.3 12.5h7.3a2.4 2.4 0 0 0 .2-4.8 4 4 0 0 0-7.5-1.3A3.1 3.1 0 0 0 4.3 12.5Z"/>
+          </g>
+          <text data-detail-anchor x="546" y="104" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">models/</text>
+        <text data-detail="context" x="546" y="120" class="t-muted" font-size="9" text-anchor="middle">Gateway · structured</text>
+        <text data-detail="fine" x="546" y="124" class="t-cloud" font-size="7" text-anchor="middle">C2.6</text>
+        </g>
+
+        <g id="node-llm" data-node-id="llm" data-node-label="LLM HTTP" tabindex="0" role="button" aria-label="Focus LLM HTTP, OpenAI-compatible, Architecture component" aria-pressed="false" data-node-kind="external" data-node-sublabel="OpenAI-compatible" data-node-tag="C2.5" data-node-context="Architecture component">
+          <title>LLM HTTP · OpenAI-compatible · Architecture component · C2.5</title>
+          <rect x="720" y="80" width="128" height="52" rx="6" class="c-mask"/>
+          <rect x="720" y="80" width="128" height="52" rx="6" class="c-external" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(726 86) scale(0.6875)">
+            <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
+            <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
+          </g>
+          <text data-detail-anchor x="784" y="104" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">LLM HTTP</text>
+        <text data-detail="context" x="784" y="120" class="t-muted" font-size="9" text-anchor="middle">OpenAI-compatible</text>
+        <text data-detail="fine" x="784" y="124" class="t-external" font-size="7" text-anchor="middle">C2.5</text>
+        </g>
+
+        <g id="node-web" data-node-id="web" data-node-label="Web" tabindex="0" role="button" aria-label="Focus Web, :5173 脚手架, Architecture component" aria-pressed="false" data-node-kind="frontend" data-node-sublabel=":5173 脚手架" data-node-tag="C0.4" data-node-context="Architecture component">
+          <title>Web · :5173 脚手架 · Architecture component · C0.4</title>
+          <rect x="40" y="260" width="128" height="52" rx="6" class="c-mask"/>
+          <rect x="40" y="260" width="128" height="52" rx="6" class="c-frontend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(46 266) scale(0.6875)">
             <rect x="2" y="3" width="12" height="10" rx="2"/>
             <path d="M2 6.5h12"/>
             <circle cx="4.1" cy="4.8" r=".7" class="sigil-fill"/>
             <circle cx="6.3" cy="4.8" r=".7" class="sigil-fill"/>
           </g>
-          <text data-detail-anchor x="99" y="264" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Web</text>
-        <text data-detail="context" x="99" y="280" class="t-muted" font-size="9" text-anchor="middle">:5173 → :8000</text>
-        <text data-detail="fine" x="99" y="284" class="t-frontend" font-size="7" text-anchor="middle">C0.4</text>
+          <text data-detail-anchor x="104" y="284" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Web</text>
+        <text data-detail="context" x="104" y="300" class="t-muted" font-size="9" text-anchor="middle">:5173 脚手架</text>
+        <text data-detail="fine" x="104" y="304" class="t-frontend" font-size="7" text-anchor="middle">C0.4</text>
         </g>
 
-        <g id="node-api" data-node-id="api" data-node-label="api/" tabindex="0" role="button" aria-label="Focus api/, FastAPI · WS /events, skillforge/ 包（Phase 2 规划）" aria-pressed="false" data-node-kind="backend" data-node-sublabel="FastAPI · WS /events" data-node-tag="C2.4" data-node-context="skillforge/ 包（Phase 2 规划）">
-          <title>api/ · FastAPI · WS /events · skillforge/ 包（Phase 2 规划） · C2.4</title>
-          <rect x="240" y="240" width="132" height="52" rx="6" class="c-mask"/>
-          <rect x="240" y="240" width="132" height="52" rx="6" class="c-backend" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(246 246) scale(0.6875)">
+        <g id="node-api" data-node-id="api" data-node-label="api/" tabindex="0" role="button" aria-label="Focus api/, :8000 health · WS · projects, skillforge/ 包" aria-pressed="false" data-node-kind="backend" data-node-sublabel=":8000 health · WS · projects" data-node-tag="C2.8" data-node-context="skillforge/ 包">
+          <title>api/ · :8000 health · WS · projects · skillforge/ 包 · C2.8</title>
+          <rect x="240" y="260" width="132" height="52" rx="6" class="c-mask"/>
+          <rect x="240" y="260" width="132" height="52" rx="6" class="c-backend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(246 266) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
-          <text data-detail-anchor x="306" y="264" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">api/</text>
-        <text data-detail="context" x="306" y="280" class="t-muted" font-size="9" text-anchor="middle">FastAPI · WS /events</text>
-        <text data-detail="fine" x="306" y="284" class="t-backend" font-size="7" text-anchor="middle">C2.4</text>
+          <text data-detail-anchor x="306" y="284" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">api/</text>
+        <text data-detail="context" x="306" y="300" class="t-muted" font-size="9" text-anchor="middle">:8000 health · WS · projects</text>
+        <text data-detail="fine" x="306" y="304" class="t-backend" font-size="7" text-anchor="middle">C2.8</text>
         </g>
 
-        <g id="node-domain" data-node-id="domain" data-node-label="domain/" tabindex="0" role="button" aria-label="Focus domain/, state_machines · 实体, skillforge/ 包（Phase 2 规划）" aria-pressed="false" data-node-kind="backend" data-node-sublabel="state_machines · 实体" data-node-tag="C2.2" data-node-context="skillforge/ 包（Phase 2 规划）">
-          <title>domain/ · state_machines · 实体 · skillforge/ 包（Phase 2 规划） · C2.2</title>
-          <rect x="240" y="400" width="132" height="52" rx="6" class="c-mask"/>
-          <rect x="240" y="400" width="132" height="52" rx="6" class="c-backend" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(246 406) scale(0.6875)">
+        <g id="node-registry" data-node-id="registry" data-node-label="registry/" tabindex="0" role="button" aria-label="Focus registry/, SkillRegistry, skillforge/ 包" aria-pressed="false" data-node-kind="backend" data-node-sublabel="SkillRegistry" data-node-tag="C2.7" data-node-context="skillforge/ 包">
+          <title>registry/ · SkillRegistry · skillforge/ 包 · C2.7</title>
+          <rect x="480" y="260" width="132" height="52" rx="6" class="c-mask"/>
+          <rect x="480" y="260" width="132" height="52" rx="6" class="c-backend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(486 266) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
-          <text data-detail-anchor x="306" y="424" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">domain/</text>
-        <text data-detail="context" x="306" y="440" class="t-muted" font-size="9" text-anchor="middle">state_machines · 实体</text>
-        <text data-detail="fine" x="306" y="444" class="t-backend" font-size="7" text-anchor="middle">C2.2</text>
+          <text data-detail-anchor x="546" y="284" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">registry/</text>
+        <text data-detail="context" x="546" y="300" class="t-muted" font-size="9" text-anchor="middle">SkillRegistry</text>
+        <text data-detail="fine" x="546" y="304" class="t-backend" font-size="7" text-anchor="middle">C2.7</text>
         </g>
 
-        <g id="node-models" data-node-id="models" data-node-label="models/" tabindex="0" role="button" aria-label="Focus models/, gateway · structured, skillforge/ 包（Phase 2 规划）" aria-pressed="false" data-node-kind="cloud" data-node-sublabel="gateway · structured" data-node-tag="C2.5" data-node-context="skillforge/ 包（Phase 2 规划）">
-          <title>models/ · gateway · structured · skillforge/ 包（Phase 2 规划） · C2.5</title>
-          <rect x="440" y="80" width="132" height="52" rx="6" class="c-mask"/>
-          <rect x="440" y="80" width="132" height="52" rx="6" class="c-cloud" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="cloud" class="semantic-sigil s-cloud" transform="translate(446 86) scale(0.6875)">
-            <path d="M4.3 12.5h7.3a2.4 2.4 0 0 0 .2-4.8 4 4 0 0 0-7.5-1.3A3.1 3.1 0 0 0 4.3 12.5Z"/>
-          </g>
-          <text data-detail-anchor x="506" y="104" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">models/</text>
-        <text data-detail="context" x="506" y="120" class="t-muted" font-size="9" text-anchor="middle">gateway · structured</text>
-        <text data-detail="fine" x="506" y="124" class="t-cloud" font-size="7" text-anchor="middle">C2.5</text>
-        </g>
-
-        <g id="node-llm" data-node-id="llm" data-node-label="LLM HTTP" tabindex="0" role="button" aria-label="Focus LLM HTTP, OpenAI-compatible, Architecture component" aria-pressed="false" data-node-kind="external" data-node-sublabel="OpenAI-compatible" data-node-tag="C2.5" data-node-context="Architecture component">
-          <title>LLM HTTP · OpenAI-compatible · Architecture component · C2.5</title>
-          <rect x="640" y="80" width="118" height="52" rx="6" class="c-mask"/>
-          <rect x="640" y="80" width="118" height="52" rx="6" class="c-external" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(646 86) scale(0.6875)">
+        <g id="node-artifacts" data-node-id="artifacts" data-node-label="skills/generated/" tabindex="0" role="button" aria-label="Focus skills/generated/, manifest + sha256, Architecture component" aria-pressed="false" data-node-kind="external" data-node-sublabel="manifest + sha256" data-node-tag="C2.7" data-node-context="Architecture component">
+          <title>skills/generated/ · manifest + sha256 · Architecture component · C2.7</title>
+          <rect x="720" y="260" width="128" height="52" rx="6" class="c-mask"/>
+          <rect x="720" y="260" width="128" height="52" rx="6" class="c-external" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(726 266) scale(0.6875)">
             <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
             <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
           </g>
-          <text data-detail-anchor x="699" y="104" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">LLM HTTP</text>
-        <text data-detail="context" x="699" y="120" class="t-muted" font-size="9" text-anchor="middle">OpenAI-compatible</text>
-        <text data-detail="fine" x="699" y="124" class="t-external" font-size="7" text-anchor="middle">C2.5</text>
+          <text data-detail-anchor x="784" y="284" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">skills/generated/</text>
+        <text data-detail="context" x="784" y="300" class="t-muted" font-size="9" text-anchor="middle">manifest + sha256</text>
+        <text data-detail="fine" x="784" y="304" class="t-external" font-size="7" text-anchor="middle">C2.7</text>
         </g>
 
-        <g id="node-registry" data-node-id="registry" data-node-label="registry/" tabindex="0" role="button" aria-label="Focus registry/, manifest · 版本链, skillforge/ 包（Phase 2 规划）" aria-pressed="false" data-node-kind="backend" data-node-sublabel="manifest · 版本链" data-node-tag="C2.7" data-node-context="skillforge/ 包（Phase 2 规划）">
-          <title>registry/ · manifest · 版本链 · skillforge/ 包（Phase 2 规划） · C2.7</title>
-          <rect x="440" y="240" width="132" height="52" rx="6" class="c-mask"/>
-          <rect x="440" y="240" width="132" height="52" rx="6" class="c-backend" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(446 246) scale(0.6875)">
-            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
-          </g>
-          <text data-detail-anchor x="506" y="264" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">registry/</text>
-        <text data-detail="context" x="506" y="280" class="t-muted" font-size="9" text-anchor="middle">manifest · 版本链</text>
-        <text data-detail="fine" x="506" y="284" class="t-backend" font-size="7" text-anchor="middle">C2.7</text>
-        </g>
-
-        <g id="node-artifacts" data-node-id="artifacts" data-node-label="skills/generated/" tabindex="0" role="button" aria-label="Focus skills/generated/, 产物树, Architecture component" aria-pressed="false" data-node-kind="external" data-node-sublabel="产物树" data-node-tag="C2.7" data-node-context="Architecture component">
-          <title>skills/generated/ · 产物树 · Architecture component · C2.7</title>
-          <rect x="640" y="240" width="118" height="52" rx="6" class="c-mask"/>
-          <rect x="640" y="240" width="118" height="52" rx="6" class="c-external" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(646 246) scale(0.6875)">
-            <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
-            <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
-          </g>
-          <text data-detail-anchor x="699" y="264" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">skills/generated/</text>
-        <text data-detail="context" x="699" y="280" class="t-muted" font-size="9" text-anchor="middle">产物树</text>
-        <text data-detail="fine" x="699" y="284" class="t-external" font-size="7" text-anchor="middle">C2.7</text>
-        </g>
-
-        <g id="node-db" data-node-id="db" data-node-label="db/" tabindex="0" role="button" aria-label="Focus db/, schema · init, skillforge/ 包（Phase 2 规划）" aria-pressed="false" data-node-kind="backend" data-node-sublabel="schema · init" data-node-tag="C2.1" data-node-context="skillforge/ 包（Phase 2 规划）">
-          <title>db/ · schema · init · skillforge/ 包（Phase 2 规划） · C2.1</title>
-          <rect x="440" y="400" width="132" height="52" rx="6" class="c-mask"/>
-          <rect x="440" y="400" width="132" height="52" rx="6" class="c-backend" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(446 406) scale(0.6875)">
-            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
-          </g>
-          <text data-detail-anchor x="506" y="424" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">db/</text>
-        <text data-detail="context" x="506" y="440" class="t-muted" font-size="9" text-anchor="middle">schema · init</text>
-        <text data-detail="fine" x="506" y="444" class="t-backend" font-size="7" text-anchor="middle">C2.1</text>
-        </g>
-
-        <g id="node-sqlite" data-node-id="sqlite" data-node-label="SQLite" tabindex="0" role="button" aria-label="Focus SQLite, system of record, Architecture component" aria-pressed="false" data-node-kind="database" data-node-sublabel="system of record" data-node-tag="C2.1" data-node-context="Architecture component">
-          <title>SQLite · system of record · Architecture component · C2.1</title>
-          <rect x="440" y="560" width="132" height="52" rx="6" class="c-mask"/>
-          <rect x="440" y="560" width="132" height="52" rx="6" class="c-database" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(446 566) scale(0.6875)">
-            <ellipse cx="8" cy="4" rx="5" ry="2"/>
-            <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
-          </g>
-          <text data-detail-anchor x="506" y="584" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">SQLite</text>
-        <text data-detail="context" x="506" y="600" class="t-muted" font-size="9" text-anchor="middle">system of record</text>
-        <text data-detail="fine" x="506" y="604" class="t-database" font-size="7" text-anchor="middle">C2.1</text>
-        </g>
-
-        <g id="node-tracing" data-node-id="tracing" data-node-label="tracing/" tabindex="0" role="button" aria-label="Focus tracing/, bus · sqlite sink, skillforge/ 包（Phase 2 规划）" aria-pressed="false" data-node-kind="messagebus" data-node-sublabel="bus · sqlite sink" data-node-tag="C2.3" data-node-context="skillforge/ 包（Phase 2 规划）">
-          <title>tracing/ · bus · sqlite sink · skillforge/ 包（Phase 2 规划） · C2.3</title>
-          <rect x="640" y="560" width="118" height="52" rx="6" class="c-mask"/>
-          <rect x="640" y="560" width="118" height="52" rx="6" class="c-messagebus" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="messagebus" class="semantic-sigil s-messagebus" transform="translate(646 566) scale(0.6875)">
+        <g id="node-tracing" data-node-id="tracing" data-node-label="tracing/" tabindex="0" role="button" aria-label="Focus tracing/, sink then bus, skillforge/ 包" aria-pressed="false" data-node-kind="messagebus" data-node-sublabel="sink then bus" data-node-tag="C2.3" data-node-context="skillforge/ 包">
+          <title>tracing/ · sink then bus · skillforge/ 包 · C2.3</title>
+          <rect x="240" y="440" width="132" height="52" rx="6" class="c-mask"/>
+          <rect x="240" y="440" width="132" height="52" rx="6" class="c-messagebus" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="messagebus" class="semantic-sigil s-messagebus" transform="translate(246 446) scale(0.6875)">
             <path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11"/>
             <circle cx="5" cy="4.5" r="1" class="sigil-fill"/>
             <circle cx="10.5" cy="8" r="1" class="sigil-fill"/>
             <circle cx="7" cy="11.5" r="1" class="sigil-fill"/>
           </g>
-          <text data-detail-anchor x="699" y="584" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">tracing/</text>
-        <text data-detail="context" x="699" y="600" class="t-muted" font-size="9" text-anchor="middle">bus · sqlite sink</text>
-        <text data-detail="fine" x="699" y="604" class="t-messagebus" font-size="7" text-anchor="middle">C2.3</text>
+          <text data-detail-anchor x="306" y="464" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">tracing/</text>
+        <text data-detail="context" x="306" y="480" class="t-muted" font-size="9" text-anchor="middle">sink then bus</text>
+        <text data-detail="fine" x="306" y="484" class="t-messagebus" font-size="7" text-anchor="middle">C2.3</text>
+        </g>
+
+        <g id="node-sqlite" data-node-id="sqlite" data-node-label="SQLite" tabindex="0" role="button" aria-label="Focus SQLite, system of record, skillforge/ 包" aria-pressed="false" data-node-kind="database" data-node-sublabel="system of record" data-node-tag="C2.1" data-node-context="skillforge/ 包">
+          <title>SQLite · system of record · skillforge/ 包 · C2.1</title>
+          <rect x="480" y="440" width="132" height="52" rx="6" class="c-mask"/>
+          <rect x="480" y="440" width="132" height="52" rx="6" class="c-database" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(486 446) scale(0.6875)">
+            <ellipse cx="8" cy="4" rx="5" ry="2"/>
+            <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
+          </g>
+          <text data-detail-anchor x="546" y="464" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">SQLite</text>
+        <text data-detail="context" x="546" y="480" class="t-muted" font-size="9" text-anchor="middle">system of record</text>
+        <text data-detail="fine" x="546" y="484" class="t-database" font-size="7" text-anchor="middle">C2.1</text>
+        </g>
+
+        <g id="node-domain" data-node-id="domain" data-node-label="domain/" tabindex="0" role="button" aria-label="Focus domain/, 双状态机 · 实体, Architecture component" aria-pressed="false" data-node-kind="backend" data-node-sublabel="双状态机 · 实体" data-node-tag="C2.2" data-node-context="Architecture component">
+          <title>domain/ · 双状态机 · 实体 · Architecture component · C2.2</title>
+          <rect x="40" y="440" width="128" height="52" rx="6" class="c-mask"/>
+          <rect x="40" y="440" width="128" height="52" rx="6" class="c-backend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(46 446) scale(0.6875)">
+            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
+          </g>
+          <text data-detail-anchor x="104" y="464" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">domain/</text>
+        <text data-detail="context" x="104" y="480" class="t-muted" font-size="9" text-anchor="middle">双状态机 · 实体</text>
+        <text data-detail="fine" x="104" y="484" class="t-backend" font-size="7" text-anchor="middle">C2.2</text>
         </g>
 
         <!-- Connection labels -->
@@ -4738,38 +4724,36 @@
 
 
 
-
-
         <!-- Legend -->
         <g data-legend-bridge>
-          <text x="40" y="671" class="t-primary" font-size="9" font-weight="600">Legend</text>
+          <text x="40" y="551" class="t-primary" font-size="9" font-weight="600">Legend</text>
           <g data-legend-kind="security">
-            <rect x="40" y="676" width="14" height="9" rx="2" class="c-security" stroke-width="1"/>
-            <text x="60" y="684" class="t-muted" font-size="8">Security</text>
-          </g>
-          <g data-legend-kind="frontend">
-            <rect x="144" y="676" width="14" height="9" rx="2" class="c-frontend" stroke-width="1"/>
-            <text x="164" y="684" class="t-muted" font-size="8">Frontend</text>
-          </g>
-          <g data-legend-kind="backend">
-            <rect x="248" y="676" width="14" height="9" rx="2" class="c-backend" stroke-width="1"/>
-            <text x="268" y="684" class="t-muted" font-size="8">Backend</text>
+            <rect x="40" y="556" width="14" height="9" rx="2" class="c-security" stroke-width="1"/>
+            <text x="60" y="564" class="t-muted" font-size="8">Security</text>
           </g>
           <g data-legend-kind="cloud">
-            <rect x="347" y="676" width="14" height="9" rx="2" class="c-cloud" stroke-width="1"/>
-            <text x="367" y="684" class="t-muted" font-size="8">Cloud</text>
+            <rect x="144" y="556" width="14" height="9" rx="2" class="c-cloud" stroke-width="1"/>
+            <text x="164" y="564" class="t-muted" font-size="8">Cloud</text>
           </g>
           <g data-legend-kind="external">
-            <rect x="436" y="676" width="14" height="9" rx="2" class="c-external" stroke-width="1"/>
-            <text x="456" y="684" class="t-muted" font-size="8">External</text>
+            <rect x="233" y="556" width="14" height="9" rx="2" class="c-external" stroke-width="1"/>
+            <text x="253" y="564" class="t-muted" font-size="8">External</text>
           </g>
-          <g data-legend-kind="database">
-            <rect x="540" y="676" width="14" height="9" rx="2" class="c-database" stroke-width="1"/>
-            <text x="560" y="684" class="t-muted" font-size="8">Database</text>
+          <g data-legend-kind="frontend">
+            <rect x="337" y="556" width="14" height="9" rx="2" class="c-frontend" stroke-width="1"/>
+            <text x="357" y="564" class="t-muted" font-size="8">Frontend</text>
+          </g>
+          <g data-legend-kind="backend">
+            <rect x="441" y="556" width="14" height="9" rx="2" class="c-backend" stroke-width="1"/>
+            <text x="461" y="564" class="t-muted" font-size="8">Backend</text>
           </g>
           <g data-legend-kind="messagebus">
-            <rect x="644" y="676" width="14" height="9" rx="2" class="c-messagebus" stroke-width="1"/>
-            <text x="664" y="684" class="t-muted" font-size="8">Message bus</text>
+            <rect x="540" y="556" width="14" height="9" rx="2" class="c-messagebus" stroke-width="1"/>
+            <text x="560" y="564" class="t-muted" font-size="8">Message bus</text>
+          </g>
+          <g data-legend-kind="database">
+            <rect x="659" y="556" width="14" height="9" rx="2" class="c-database" stroke-width="1"/>
+            <text x="679" y="564" class="t-muted" font-size="8">Database</text>
           </g>
         </g>
       </svg>
@@ -4957,57 +4941,50 @@
     <div class="cards">
       <div class="card">
         <div class="card-header">
-          <div class="card-dot slate"></div>
-          <h3>目录 ↔ Commit</h3>
-        </div>
-        <ul>
-          <li>&bull; db/ C2.1 ✓ · domain/ C2.2 ✓ · tracing/ C2.3 · api/ C2.4</li>
-          <li>&bull; models/ C2.5–2.6 · registry/ C2.7 · POST/GET /api/projects C2.8</li>
-        </ul>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
           <div class="card-dot emerald"></div>
-          <h3>tracing 订阅与 emit</h3>
+          <h3>已接线</h3>
         </div>
         <ul>
-          <li>&bull; api/ WS /api/events 订阅 in-process bus（C2.4 + C2.3）。</li>
-          <li>&bull; models/ 每次 gateway 调用 emit model_request/response（C2.5）。</li>
+          <li>&bull; POST/GET /api/projects → repositories.projects → SQLite。</li>
+          <li>&bull; lifespan：initialize_database + bus.subscribe → WS broadcast。</li>
+          <li>&bull; emit：SqliteTraceSink 再 EventBus.publish。</li>
+          <li>&bull; SkillRegistry.create_version / transition；非法 PUBLISH 被拒。</li>
         </ul>
       </div>
 
       <div class="card">
         <div class="card-header">
           <div class="card-dot amber"></div>
-          <h3>config.py</h3>
+          <h3>虚线</h3>
         </div>
         <ul>
-          <li>&bull; C0.3 已有：data_dir、sqlite_path、model_base_url、opslab_*。</li>
-          <li>&bull; api/deps 注入 Settings；不在此图画边以免交叉。</li>
+          <li>&bull; Web 无 fetch/WS 客户端（App.tsx 脚手架）。</li>
+          <li>&bull; 无 /api/skills；Compiler（C6.7）才会调 registry。</li>
+          <li>&bull; 无 HTTP 调 ModelGateway；C3.6 Runtime 才会 generate。</li>
         </ul>
       </div>
 
       <div class="card">
         <div class="card-header">
           <div class="card-dot cyan"></div>
-          <h3>R4 · 双状态机（C2.2）</h3>
+          <h3>R4 双状态机</h3>
         </div>
         <ul>
-          <li>&bull; Pipeline：INGESTED→…→CANDIDATE→EVALUATING→PASSED|FAILED→APPROVED→PUBLISHED</li>
-          <li>&bull; SkillVersion：DRAFT→CANDIDATE→VALIDATED→APPROVED→PUBLISHED；各阶段可→REJECTED</li>
-          <li>&bull; 详图：domain-pipeline-state.html · domain-skill-version-state.html</li>
+          <li>&bull; domain/ 在包外左侧：类型库，被 registry.transition 使用。</li>
+          <li>&bull; Pipeline ≠ SkillVersionStatus；自动终点 ≤ CANDIDATE。</li>
+          <li>&bull; domain-pipeline-state.html · domain-skill-version-state.html</li>
         </ul>
       </div>
 
       <div class="card">
         <div class="card-header">
           <div class="card-dot rose"></div>
-          <h3>R12 · Ops Lab</h3>
+          <h3>R12 · 尚未做</h3>
         </div>
         <ul>
-          <li>&bull; schema 无 FTS；检索投影在 knowledge/retrieval。</li>
-          <li>&bull; demo/ops-lab 仍由 C1 脚本驱动；C3 OpsLabToolAdapter 再接 lab。</li>
+          <li>&bull; schema.sql 无 FTS；检索投影在 Phase 5。</li>
+          <li>&bull; config 被各模块读取，不在图上连边。</li>
+          <li>&bull; C3：golden skill、Sandbox、OpsLab adapter。</li>
         </ul>
       </div>
     </div>

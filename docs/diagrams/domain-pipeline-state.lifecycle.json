@@ -3,7 +3,7 @@
   "diagram_type": "lifecycle",
   "meta": {
     "title": "PipelineState（C2.2 已实现）",
-    "subtitle": "ensure_pipeline_transition · C8.1 PipelineRun.state · FAILED 终态无出边",
+    "subtitle": "ensure_pipeline_transition 已落地 · C8.1 才会持久化 PipelineRun.state",
     "output": "domain-pipeline-state.html",
     "viewBox": [980, 720],
     "visual_preset": "editorial",

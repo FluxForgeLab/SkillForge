@@ -2,117 +2,137 @@
   "schema_version": 1,
   "diagram_type": "architecture",
   "meta": {
-    "title": "SkillForge：C0–C1 已落地 + Phase 2 控制面",
-    "subtitle": "实线=C0/C1。C2.1–C2.2 已落地；Phase 2 详图 + 状态机见 phase2-control-plane.html 与 domain-*-state.html。",
+    "title": "SkillForge：C0–C2 已落地",
+    "subtitle": "实线=已接线。Web 仍是 Vite 脚手架（CORS 已放行）。详图：phase2-control-plane.html · domain-*-state.html。",
     "output": "c0-c1-architecture.html",
     "quality_profile": "showcase",
     "visual_preset": "editorial",
     "repository": {
       "url": "https://github.com/FluxForgeLab/SkillForge.git",
-      "revision": "96dcafe9bb2a7c1ce417e4036961db32fd2e7729"
+      "revision": "8dae42729b90a25f3ca1139ddcc5838f3bbfb4ad"
     },
     "views": [
       {
         "id": "ops-lab",
-        "label": "C1 Ops Lab（已落地）",
-        "focus": ["operator", "just", "nginx", "backend", "mockdb", "verifier", "faults"],
-        "note": ":8088 演示入口；F1–F3；catalog；C1.8 集成测。"
+        "label": "C1 Ops Lab",
+        "focus": ["operator", "nginx", "backend", "mockdb", "verifier", "faults"],
+        "note": "宿主 :8088；F1–F3 inject/reset；verifier 五字段 JSON。"
       },
       {
-        "id": "phase2",
-        "label": "Phase 2 模块",
-        "focus": ["api", "domain", "sqlite", "tracing", "models", "registry"],
-        "note": "C2.1 db · C2.2 domain 状态机；详图 phase2-control-plane + domain-*-state.html。"
+        "id": "control-plane",
+        "label": "Phase 2 控制面",
+        "focus": ["web", "api", "sqlite", "tracing", "registry", "models"],
+        "note": "C2.1–C2.8 已提交。HTTP 已接 SQLite；Gateway/Registry 是库，尚未挂路由。"
       },
       {
-        "id": "dev-entry",
-        "label": "C0 开发入口",
-        "focus": ["web", "just"],
-        "note": "Vite :5173；just/dev.ps1。"
+        "id": "api-surface",
+        "label": "API 表面",
+        "focus": ["web", "api", "sqlite"],
+        "note": "GET /health · WS /api/events · POST/GET /api/projects。Vite 尚未调用。"
       }
     ]
   },
   "components": [
+    {
+      "id": "web",
+      "type": "frontend",
+      "label": "Web",
+      "sublabel": "Vite :5173 脚手架",
+      "tag": "C0.4",
+      "pos": [40, 80],
+      "size": [128, 56],
+      "sources": [
+        { "path": "apps/web/src/App.tsx", "line": 3, "end_line": 10, "label": "scaffold" },
+        { "path": "apps/web/vite.config.ts", "line": 13, "end_line": 17, "label": "host 5173" }
+      ]
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "api/",
+      "sublabel": "health · WS · projects",
+      "tag": "C2.8",
+      "pos": [240, 80],
+      "size": [132, 56],
+      "sources": [
+        { "path": "skillforge/api/main.py", "line": 59, "end_line": 64, "label": "routes" },
+        { "path": "skillforge/api/routers/projects.py", "line": 58, "end_line": 85, "label": "projects" }
+      ]
+    },
+    {
+      "id": "models",
+      "type": "cloud",
+      "label": "models/",
+      "sublabel": "Gateway · structured",
+      "tag": "C2.6",
+      "pos": [440, 80],
+      "size": [132, 56],
+      "sources": [
+        { "path": "skillforge/models/gateway.py", "line": 42, "end_line": 70, "label": "generate" }
+      ]
+    },
+    {
+      "id": "sqlite",
+      "type": "database",
+      "label": "SQLite",
+      "sublabel": "schema · repos",
+      "tag": "C2.1",
+      "pos": [240, 220],
+      "size": [132, 56],
+      "sources": [
+        { "path": "skillforge/db/schema.sql", "line": 1, "end_line": 8, "label": "projects" },
+        { "path": "skillforge/db/repositories/projects.py", "line": 11, "end_line": 22, "label": "insert" }
+      ]
+    },
+    {
+      "id": "registry",
+      "type": "backend",
+      "label": "registry/",
+      "sublabel": "manifest · 版本链",
+      "tag": "C2.7",
+      "pos": [440, 220],
+      "size": [132, 56],
+      "sources": [
+        { "path": "skillforge/registry/service.py", "line": 70, "end_line": 117, "label": "create_version" }
+      ]
+    },
+    {
+      "id": "tracing",
+      "type": "messagebus",
+      "label": "tracing/",
+      "sublabel": "sink → bus",
+      "tag": "C2.3",
+      "pos": [40, 220],
+      "size": [132, 56],
+      "sources": [
+        { "path": "skillforge/tracing/emitter.py", "line": 59, "end_line": 62, "label": "sink then bus" }
+      ]
+    },
     {
       "id": "operator",
       "type": "external",
       "label": "操作者",
       "sublabel": "浏览器 / curl",
       "pos": [40, 360],
-      "size": [118, 56]
+      "size": [128, 56]
     },
     {
-      "id": "web",
-      "type": "frontend",
-      "label": "Web",
-      "sublabel": "Vite :5173",
-      "tag": "C0.4",
-      "pos": [40, 80],
-      "size": [118, 56]
+      "id": "verifier",
+      "type": "security",
+      "label": "verifier",
+      "sublabel": "五字段 JSON",
+      "tag": "C1.3",
+      "pos": [680, 220],
+      "size": [120, 56]
     },
     {
-      "id": "just",
-      "type": "external",
-      "label": "just / dev.ps1",
-      "sublabel": "lab-* · test-integration",
-      "tag": "C0.5",
-      "pos": [40, 520],
-      "size": [118, 56]
-    },
-    {
-      "id": "api",
-      "type": "backend",
-      "label": "api/",
-      "sublabel": "FastAPI C2.4",
-      "tag": "C2.4",
-      "pos": [240, 80],
-      "size": [120, 52]
-    },
-    {
-      "id": "models",
-      "type": "cloud",
-      "label": "models/",
-      "sublabel": "C2.5–2.6",
-      "tag": "C2.5",
-      "pos": [400, 80],
-      "size": [120, 52]
-    },
-    {
-      "id": "registry",
-      "type": "backend",
-      "label": "registry/",
-      "sublabel": "C2.7 · C2.8",
-      "tag": "C2.7",
-      "pos": [400, 180],
-      "size": [120, 52]
-    },
-    {
-      "id": "domain",
-      "type": "backend",
-      "label": "domain/",
-      "sublabel": "C2.2 已落地",
-      "tag": "C2.2",
-      "pos": [240, 180],
-      "size": [120, 52]
-    },
-    {
-      "id": "sqlite",
-      "type": "database",
-      "label": "db/ + SQLite",
-      "sublabel": "C2.1 已落地",
-      "tag": "C2.1",
-      "pos": [240, 280],
-      "size": [120, 52],
-      "sources": [{ "path": "docs/execution-plan.md", "line": 146, "end_line": 146, "label": "C2.1" }]
-    },
-    {
-      "id": "tracing",
-      "type": "messagebus",
-      "label": "tracing/",
-      "sublabel": "C2.3",
-      "tag": "C2.3",
-      "pos": [400, 280],
-      "size": [120, 52]
+      "id": "faults",
+      "type": "security",
+      "label": "faults",
+      "sublabel": "F1–F3 catalog",
+      "tag": "C1.7",
+      "pos": [860, 220],
+      "size": [120, 56]
     },
     {
       "id": "nginx",
@@ -127,7 +147,7 @@
       "id": "backend",
       "type": "backend",
       "label": "backend",
-      "sublabel": "C1.1",
+      "sublabel": "ops-lab",
       "tag": "C1.1",
       "pos": [860, 360],
       "size": [120, 56]
@@ -136,47 +156,17 @@
       "id": "mockdb",
       "type": "database",
       "label": "mock-db",
-      "sublabel": "C1.2",
+      "sublabel": "deny restart",
       "tag": "C1.2",
       "pos": [1040, 360],
       "size": [118, 56]
-    },
-    {
-      "id": "verifier",
-      "type": "security",
-      "label": "verifier",
-      "sublabel": "C1.3",
-      "tag": "C1.3",
-      "pos": [680, 220],
-      "size": [120, 54]
-    },
-    {
-      "id": "faults",
-      "type": "security",
-      "label": "faults",
-      "sublabel": "C1.7",
-      "tag": "C1.7",
-      "pos": [860, 220],
-      "size": [120, 54]
     }
   ],
   "boundaries": [
     {
       "kind": "region",
-      "label": "宿主机",
-      "wraps": [
-        "operator",
-        "web",
-        "just",
-        "api",
-        "models",
-        "registry",
-        "domain",
-        "sqlite",
-        "tracing",
-        "verifier",
-        "faults"
-      ]
+      "label": "宿主机 skillforge/",
+      "wraps": ["web", "api", "models", "sqlite", "registry", "tracing", "operator", "verifier", "faults"]
     },
     {
       "kind": "region",
@@ -194,23 +184,34 @@
       "toSide": "left"
     },
     {
+      "id": "api-sqlite",
+      "from": "api",
+      "to": "sqlite",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "registry-sqlite",
+      "from": "registry",
+      "to": "sqlite",
+      "fromSide": "left",
+      "toSide": "right"
+    },
+    {
+      "id": "tracing-sqlite",
+      "from": "tracing",
+      "to": "sqlite",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
       "id": "op-nginx",
       "from": "operator",
       "to": "nginx",
       "label": ":8088",
       "variant": "emphasis",
       "fromSide": "right",
-      "toSide": "left",
-      "labelAt": [420, 340]
-    },
-    {
-      "id": "just-lab",
-      "from": "just",
-      "to": "nginx",
-      "label": "lab-up",
-      "fromSide": "right",
-      "toSide": "left",
-      "via": [[580, 548], [580, 388]]
+      "toSide": "left"
     },
     {
       "id": "ngx-be",
@@ -238,8 +239,7 @@
       "from": "faults",
       "to": "backend",
       "fromSide": "bottom",
-      "toSide": "top",
-      "labelAt": [920, 300]
+      "toSide": "top"
     },
     {
       "id": "f-ngx",
@@ -251,35 +251,37 @@
   ],
   "cards": [
     {
-      "dot": "slate",
-      "title": "Phase 2 详图",
-      "items": [
-        "模块依赖：docs/diagrams/phase2-control-plane.html。",
-        "状态流转：domain-pipeline-state.html · domain-skill-version-state.html。"
-      ]
-    },
-    {
       "dot": "emerald",
-      "title": "实线 vs 虚线",
+      "title": "已接线",
       "items": [
-        "实线：C0–C1（:5173、:8088、Ops Lab、verifier、faults）。",
-        "虚线：Web→api 与 Phase 2 六个框（C2 落地后改实线）。"
+        "api → SQLite：POST/GET /api/projects（C2.8）。",
+        "api lifespan 订阅 bus，WS /api/events 推 TraceEvent（C2.4）。",
+        "tracing：先 sqlite sink 再 bus.publish（C2.3）。",
+        "registry 写 skill_versions + skills/generated（C2.7），无 HTTP。"
       ]
     },
     {
       "dot": "amber",
-      "title": "Phase 2 六块",
+      "title": "虚线＝未消费",
       "items": [
-        "db C2.1 ✓ · domain C2.2 ✓（双状态机）· tracing C2.3 · api C2.4",
-        "models C2.5–2.6 · registry C2.7（含 C2.8 projects API）"
+        "Web 仍是 Hello 脚手架；CORS 已允许 :5173。",
+        "models/ 已实现 Gateway+structured；无 API 路由调用它。"
+      ]
+    },
+    {
+      "dot": "slate",
+      "title": "详图",
+      "items": [
+        "控制面模块：phase2-control-plane.html。",
+        "双状态机：domain-pipeline-state.html · domain-skill-version-state.html。"
       ]
     },
     {
       "dot": "cyan",
-      "title": "Phase 3",
+      "title": "下一步 C3",
       "items": [
-        "C3：golden Skill、Sandbox、Runtime、OpsLabToolAdapter。",
-        "检索 R12：FTS 投影不在 schema.sql。"
+        "golden skill、Sandbox、Runtime、OpsLabToolAdapter。",
+        "schema.sql 仍无 FTS（R12）。"
       ]
     }
   ]

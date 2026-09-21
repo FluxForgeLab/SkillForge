@@ -4498,7 +4498,7 @@
         <div class="pulse-dot"></div>
         <h1>PipelineState（C2.2 已实现）</h1>
       </div>
-      <p class="subtitle">ensure_pipeline_transition · C8.1 PipelineRun.state · FAILED 终态无出边</p>
+      <p class="subtitle">ensure_pipeline_transition 已落地 · C8.1 才会持久化 PipelineRun.state</p>
     </div>
 
     <script id="archify-guided-views-data" type="application/json">[{"id":"main-rail","label":"主轨","focus":["p_ingested","p_extracted","p_drafted","p_validating","p_candidate"],"note":"INGESTED → … → CANDIDATE（与 SkillVersionStatus.CANDIDATE 不同名异义）。"},{"id":"eval-publish","label":"评测与发布","focus":["p_evaluating","p_passed","p_approved","p_published"],"note":"EVALUATING → PASSED | FAILED；仅 PASSED → APPROVED → PUBLISHED。"},{"id":"terminal","label":"终态","focus":["p_failed","p_published"],"note":"禁止 FAILED → APPROVED（test_domain_state_machines）。"}]</script>
@@ -4546,7 +4546,7 @@
     <div class="diagram-container" data-detail-level="read">
       <svg viewBox="0 0 980 720" role="img" aria-labelledby="archify-diagram-title archify-diagram-description" data-preset="editorial" data-quality-profile="showcase">
         <title id="archify-diagram-title">PipelineState（C2.2 已实现）</title>
-        <desc id="archify-diagram-description">ensure_pipeline_transition · C8.1 PipelineRun.state · FAILED 终态无出边</desc>
+        <desc id="archify-diagram-description">ensure_pipeline_transition 已落地 · C8.1 才会持久化 PipelineRun.state</desc>
         <!-- Definitions -->
         <defs>
           <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">

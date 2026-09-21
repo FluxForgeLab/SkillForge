@@ -3,7 +3,7 @@
   "diagram_type": "lifecycle",
   "meta": {
     "title": "SkillVersionStatus（C2.2 已实现）",
-    "subtitle": "ensure_skill_version_transition · skill_versions.status · 自动流程 ≤ CANDIDATE",
+    "subtitle": "SkillRegistry.transition · C2.7 已调用转移表 · 自动流程 ≤ CANDIDATE",
     "output": "domain-skill-version-state.html",
     "viewBox": [980, 780],
     "visual_preset": "editorial",
@@ -138,9 +138,9 @@
       "dot": "amber",
       "title": "治理边界",
       "items": [
-        "Evolution 自动终点 ≤ CANDIDATE（C7.6）",
-        "非法 DRAFT→PUBLISHED 被转移表拒绝",
-        "registry C2.7 调用 transition_skill_version"
+        "C2.7 SkillRegistry.transition 已走转移表",
+        "非法 DRAFT→PUBLISHED 单测拒绝",
+        "approve/publish 复制 published/ 仍待 C7.6"
       ]
     },
     {

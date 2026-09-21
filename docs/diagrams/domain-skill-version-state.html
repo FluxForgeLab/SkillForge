@@ -4498,7 +4498,7 @@
         <div class="pulse-dot"></div>
         <h1>SkillVersionStatus（C2.2 已实现）</h1>
       </div>
-      <p class="subtitle">ensure_skill_version_transition · skill_versions.status · 自动流程 ≤ CANDIDATE</p>
+      <p class="subtitle">SkillRegistry.transition · C2.7 已调用转移表 · 自动流程 ≤ CANDIDATE</p>
     </div>
 
     <script id="archify-guided-views-data" type="application/json">[{"id":"happy-path","label":"主路径","focus":["sv_draft","sv_candidate","sv_validated","sv_approved","sv_published"],"note":"DRAFT→CANDIDATE（C6.7）→ VALIDATED → APPROVED → PUBLISHED。"},{"id":"reject","label":"REJECTED","focus":["sv_draft","sv_candidate","sv_validated","sv_rejected"],"note":"DRAFT / CANDIDATE / VALIDATED 均可 → REJECTED。"},{"id":"governance","label":"治理","focus":["sv_candidate","sv_approved","sv_published"],"note":"APPROVED / PUBLISHED 仅人工 API（C7.6）；禁止 DRAFT→PUBLISHED。"}]</script>
@@ -4546,7 +4546,7 @@
     <div class="diagram-container" data-detail-level="read">
       <svg viewBox="0 0 980 780" role="img" aria-labelledby="archify-diagram-title archify-diagram-description" data-preset="editorial" data-quality-profile="showcase">
         <title id="archify-diagram-title">SkillVersionStatus（C2.2 已实现）</title>
-        <desc id="archify-diagram-description">ensure_skill_version_transition · skill_versions.status · 自动流程 ≤ CANDIDATE</desc>
+        <desc id="archify-diagram-description">SkillRegistry.transition · C2.7 已调用转移表 · 自动流程 ≤ CANDIDATE</desc>
         <!-- Definitions -->
         <defs>
           <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
@@ -4891,9 +4891,9 @@
           <h3>治理边界</h3>
         </div>
         <ul>
-          <li>&bull; Evolution 自动终点 ≤ CANDIDATE（C7.6）</li>
-          <li>&bull; 非法 DRAFT→PUBLISHED 被转移表拒绝</li>
-          <li>&bull; registry C2.7 调用 transition_skill_version</li>
+          <li>&bull; C2.7 SkillRegistry.transition 已走转移表</li>
+          <li>&bull; 非法 DRAFT→PUBLISHED 单测拒绝</li>
+          <li>&bull; approve/publish 复制 published/ 仍待 C7.6</li>
         </ul>
       </div>
 
