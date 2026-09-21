@@ -1,0 +1,58 @@
+version: 1
+project: skillforge-lab
+health_url: "http://127.0.0.1:8088/health"
+
+faults:
+  - id: backend_stopped
+    fixture: backend_stopped
+    label: F1
+    description: Backend container stopped; edge /health returns 502.
+    expected_after_inject:
+      http_status: 502
+      backend_running: false
+      nginx_config_valid: false
+      upstream_port_matches: true
+      db_running: true
+    incident:
+      title: "Ops alert: service health check failing"
+      summary: "Edge proxy reports 502 for GET /health; backend may be down."
+      symptoms:
+        - "HTTP 502 on http://127.0.0.1:8088/health"
+        - "Monitoring: skillforge-lab backend unreachable"
+
+  - id: nginx_wrong_upstream
+    fixture: nginx_wrong_upstream
+    label: F2
+    description: Nginx upstream points to backend:8081 while backend listens on 8080.
+    expected_after_inject:
+      http_status: 502
+      backend_running: true
+      nginx_config_valid: true
+      upstream_port_matches: false
+      db_running: true
+    incident:
+      title: "Ops alert: upstream proxy misconfiguration"
+      summary: "502 from nginx; upstream port may not match backend listen port."
+      symptoms:
+        - "HTTP 502 on http://127.0.0.1:8088/health"
+        - "Reverse proxy upstream mismatch suspected"
+
+  - id: nginx_bad_config_reload
+    fixture: nginx_bad_config_reload
+    label: F3
+    description: Invalid nginx.conf on disk; nginx -t fails and reload cannot apply fix.
+    expected_after_inject:
+      http_status: 502
+      backend_running: true
+      nginx_config_valid: false
+      upstream_port_matches: false
+      db_running: true
+    incident:
+      title: "Ops alert: nginx config reload blocked"
+      summary: "502 persists; nginx configuration test fails after attempted change."
+      symptoms:
+        - "HTTP 502 on http://127.0.0.1:8088/health"
+        - "nginx -t reported syntax or validation errors"
+
+reset:
+  command: reset

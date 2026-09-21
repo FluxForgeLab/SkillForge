@@ -15,6 +15,7 @@ def _load_faults():
         sys.path.insert(0, str(_FAULTS_DIR))
     sys.modules.pop("dockerutil", None)
     sys.modules.pop("nginxfault", None)
+    sys.modules.pop("catalog", None)
     sys.modules.pop("inject", None)
     sys.modules.pop("reset", None)
     dockerutil = importlib.import_module("dockerutil")

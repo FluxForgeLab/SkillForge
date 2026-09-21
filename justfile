@@ -46,3 +46,7 @@ lab-verify:
 # 注入故障：just lab-inject backend_stopped | nginx_wrong_upstream | nginx_bad_config_reload
 lab-inject FAULT:
     uv run python demo/ops-lab/faults/inject.py {{FAULT}}
+
+# 模拟告警 JSON（C1.7+）
+lab-incident FAULT:
+    uv run python demo/ops-lab/faults/incident.py {{FAULT}}

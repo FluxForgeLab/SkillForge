@@ -14,21 +14,24 @@ docker compose -f demo/ops-lab/docker-compose.yml -p skillforge-lab up -d --buil
 python demo/ops-lab/verifier/verify.py                                              # 健康检查，exit 0 = 健康
 python demo/ops-lab/faults/inject.py <fault_id>                                     # 注入故障
 python demo/ops-lab/faults/reset.py                                                 # 复位到健康态
+python demo/ops-lab/faults/incident.py <fault_id>                                   # 模拟告警 JSON
 docker compose -f demo/ops-lab/docker-compose.yml -p skillforge-lab down             # 停止（just lab-down）
 docker compose -f demo/ops-lab/docker-compose.yml -p skillforge-lab down -v         # 销毁栈和匿名 volume，默认不要用
 ```
 
-`just lab-up | lab-verify | lab-inject backend_stopped | lab-reset | lab-down` 是同义快捷方式。Windows 无 just 时用 `.\scripts\dev.ps1 lab-up`。`lab-down` 不带 `-v`。
+`just lab-up | lab-verify | lab-inject <fault> | lab-incident <fault> | lab-reset | lab-down` 是同义快捷方式。Windows 无 just 时用 `.\scripts\dev.ps1 lab-up`。`lab-down` 不带 `-v`。
 
-## 故障目录（demo/ops-lab/faults/catalog.yaml）
+## 故障目录（权威：`demo/ops-lab/faults/catalog.yaml`）
 
-| fault_id | 现象 | verifier 特征 |
+| fault_id | label | 注入后 verifier 要点（完整五字段见 yaml `expected_after_inject`） |
 |---|---|---|
-| `backend_stopped` (F1) | 502 | `backend_running=false` |
-| `nginx_wrong_upstream` (F2) | 502 | `upstream_port_matches=false` |
-| `nginx_bad_config_reload` (F3) | 502，reload 失败 | `nginx_config_valid=false` 且 `upstream_port_matches=false` |
+| `backend_stopped` | F1 | `http_status=502`, `backend_running=false` |
+| `nginx_wrong_upstream` | F2 | `http_status=502`, `upstream_port_matches=false` |
+| `nginx_bad_config_reload` | F3 | `http_status=502`, `nginx_config_valid=false`, `upstream_port_matches=false` |
 
-新增故障：在 catalog 登记 → inject/reset 各加一个分支 → verifier 若需新字段同步 evals 与 evaluator 断言 → `tests/integration/test_ops_lab.py` 加用例。
+`catalog.py` 供 inject / incident / 后续 evaluator 加载；`fixture` 字段与 `evals.json` 对齐（C4.1）。
+
+新增故障：在 **catalog.yaml** 登记 → `inject.py` / `reset.py` 各加实现 → 若 verifier 需新字段则同步 evals → `tests/integration/test_ops_lab.py` 加用例（C1.8+）。
 
 ## 验证 verifier 输出
 
@@ -41,6 +44,6 @@ python demo/ops-lab/verifier/verify.py | python -m json.tool
 ## 排错
 
 - `up` 后 verifier 立即 502：等待 backend 就绪（`docker compose ... logs backend`），verifier 内置 10s 重试。
-- 端口冲突：改 compose 中 nginx 的 `8088:80` 映射，同时改 verifier 与 `Settings.ops_lab_base_url`。
+- 端口冲突：改 compose 中 nginx 的 `8088:80` 映射，同时改 `catalog.yaml` 的 `health_url` 与 `Settings.opslab_base_url`。
 - Windows 本机是 x86_64，DGX 是 aarch64：镜像必须是 multi-arch；不要在 Dockerfile 里下载架构相关二进制。
 - 不要手动 `docker exec` 改容器内配置来"修好"环境，那会掩盖 inject/reset 的 bug；改 faults 脚本。

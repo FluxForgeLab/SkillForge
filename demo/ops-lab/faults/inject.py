@@ -3,6 +3,7 @@
 import logging
 import sys
 
+from catalog import require_fault
 from dockerutil import docker_client, project_name, stop_service
 from nginxfault import (
     F2_WRONG_UPSTREAM_PORT,
@@ -13,15 +14,10 @@ from nginxfault import (
 FAULT_BACKEND_STOPPED = "backend_stopped"
 FAULT_NGINX_WRONG_UPSTREAM = "nginx_wrong_upstream"
 FAULT_NGINX_BAD_CONFIG_RELOAD = "nginx_bad_config_reload"
-KNOWN_FAULTS = frozenset(
-    {FAULT_BACKEND_STOPPED, FAULT_NGINX_WRONG_UPSTREAM, FAULT_NGINX_BAD_CONFIG_RELOAD}
-)
 
 
 def inject(fault_id: str, *, client=None) -> None:
-    if fault_id not in KNOWN_FAULTS:
-        known = ", ".join(sorted(KNOWN_FAULTS))
-        raise ValueError(f"unknown fault_id {fault_id!r}; known: {known}")
+    require_fault(fault_id)
     docker = client if client is not None else docker_client()
     project = project_name()
     if fault_id == FAULT_BACKEND_STOPPED:

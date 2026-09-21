@@ -72,6 +72,14 @@ switch ($Command) {
         $faultId = $CommandArgs[0]
         Invoke-Checked { uv run python demo/ops-lab/faults/inject.py $faultId }
     }
+    "lab-incident" {
+        if ($CommandArgs.Count -lt 1 -or [string]::IsNullOrWhiteSpace($CommandArgs[0])) {
+            Write-Error "usage: .\scripts\dev.ps1 lab-incident <fault_id>"
+            exit 1
+        }
+        $faultId = $CommandArgs[0]
+        Invoke-Checked { uv run python demo/ops-lab/faults/incident.py $faultId }
+    }
     default {
         Write-Host @"
 usage: .\scripts\dev.ps1 <command> [args]
@@ -85,6 +93,7 @@ usage: .\scripts\dev.ps1 <command> [args]
   lab-reset-all faults/reset_all.py (C1.6+, same as lab-reset)
   lab-verify   verifier/verify.py (C1.3+)
   lab-inject   faults/inject.py <fault_id>
+  lab-incident faults/incident.py <fault_id> (C1.7+)
 "@
         if ($Command -ne "") {
             exit 1

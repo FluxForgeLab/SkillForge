@@ -1,4 +1,4 @@
-"""Reset ops-lab to a healthy backend. Host-side; does not use the sandbox."""
+"""Reset ops-lab to a healthy baseline (catalog reset.command). Host-side; not the sandbox."""
 
 import logging
 import sys
