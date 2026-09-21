@@ -13,6 +13,7 @@ SkillForge 把企业 Runbook 编译为可执行、可评测、可迭代、可治
 | 需要 | 读 |
 |---|---|
 | 为什么这么设计 | `docs/SkillForge_Architecture_Design_v0.1.md` |
+| 检索层（FTS5 → LanceDB）怎么做到不重构 | `docs/retrieval-layer.md` |
 | 现在做什么、做到什么程度算完成 | `docs/execution-plan.md`（§0 是对设计文档的审阅调整，§3 是 commit 清单） |
 | 环境操作、评测、写 Skill 的具体步骤 | `.cursor/skills/*/SKILL.md` |
 | 连通性 / 打不开 / connection refused | `.cursor/skills/diagnose-listen/SKILL.md`；约束见 `measure-before-story` |
@@ -80,7 +81,8 @@ uv run skillforge demo
 
 ## 已拍板的决策（不重新讨论）
 
-- 单一 Python 包 + 单一 `pyproject.toml`（uv、ruff、pytest）；SQLite + FTS5，无 ORM、无向量库。
+- 单一 Python 包 + 单一 `pyproject.toml`（uv、ruff、pytest）；SQLite 永远是 system of record；无 ORM。
+- 检索是投影：`knowledge/retrieval` 端口（`RetrievalIndex` 后端 / `Retriever` 门面 / `Indexer` 重建），MVP 后端 `sqlite_fts`，优化阶段（Phase 12）切 `lancedb`——只改 Settings + `skillforge index rebuild`，不改 schema、不迁数据、不改调用方。MVP 不安装 lancedb、不加载 embedding 模型。设计：`docs/retrieval-layer.md`。
 - 所有模型调用经 `ModelGateway`；结构化输出经 `models/structured.py`。
 - 两个执行面：`Sandbox`（生成脚本）与 `OpsLabToolAdapter`（控制面白名单 docker/nginx 操作）。
 - 两个状态机：`PipelineState` 与 `SkillVersionStatus`。
@@ -106,7 +108,8 @@ uv run skillforge demo
 
 ## 不要做
 
-- 引入 agent framework、ORM、向量库、K8s、多 Agent 互聊。
+- 引入 agent framework、ORM、K8s、多 Agent 互聊；MVP 阶段安装 lancedb 或 embedding 模型。
+- 在 `schema.sql` 加 FTS 表；在 compiler / evolution / api 里写 `MATCH` 或 `import lancedb`；让 `RetrievalHit` 携带领域对象。
 - 为了让 case 通过改 `expected`；为了拉大 uplift 削弱 Control arm。
 - 在 Day 9（Delivery）改架构。
 - 手动 `docker exec` 修环境来掩盖 inject/reset 的 bug。

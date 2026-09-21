@@ -22,7 +22,8 @@ Verifier 判定 → 新 Case 让 v0.1 失败 → Failure Analyzer → v0.2 Patch
 ## 已拍板的架构决策（不要重新讨论）
 
 - 单一 Python 包 `skillforge/`，单一 `pyproject.toml`（uv）；FastAPI 在 `skillforge/api/`。
-- SQLite + FTS5，不引入向量库；纯 SQL + pydantic，不引入 ORM。
+- SQLite 永远是 system of record（项目、版本、状态机、trace、chunks、knowledge units）；纯 SQL + pydantic，不引入 ORM。
+- 检索是**投影**：走 `knowledge/retrieval` 端口（`RetrievalIndex` / `Retriever` 门面 / `Indexer`），后端 MVP 为 `SqliteFtsIndex`，优化阶段（Phase 12，DoD 之后）换 `LanceDbIndex`，切换不改 schema、不迁数据、不改调用方。MVP **不安装 lancedb、不加载 embedding 模型**。设计见 `docs/retrieval-layer.md`。
 - 所有模型调用经 `skillforge/models/gateway.py`，业务层不得直接调模型 SDK。
 - 两个执行面：`Sandbox`（跑生成脚本）与 `OpsLabToolAdapter`（控制面白名单 docker/nginx 操作）。
 - 两个状态机：`PipelineState`（流程）与 `SkillVersionStatus`（版本），不要混用。
@@ -32,5 +33,5 @@ Verifier 判定 → 新 Case 让 v0.1 失败 → Failure Analyzer → v0.2 Patch
 
 ## 非目标
 
-不做通用 Chatbot、工作流平台、IAM、K8s、多 Agent 互聊、向量库、3D UI。目标机器 DGX Spark 是 **aarch64**，
+不做通用 Chatbot、工作流平台、IAM、K8s、多 Agent 互聊、3D UI；MVP 阶段不装向量库 / embedding 模型。目标机器 DGX Spark 是 **aarch64**，
 只用 multi-arch 镜像。

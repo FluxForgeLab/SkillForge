@@ -8,7 +8,8 @@ alwaysApply: false
 
 - Python 3.12，`uv` 管理依赖，`ruff` 负责 lint + format（line-length 100）。所有公共函数带类型注解。
 - 领域对象一律 pydantic v2 `BaseModel`（`skillforge/domain/`）；跨模块传递用领域对象，不传裸 dict。
-- 数据库：`sqlite3` + `skillforge/db/schema.sql`，仓储函数放 `skillforge/db/repositories/`，SQL 用参数绑定，禁止字符串拼接。
+- 数据库：`sqlite3` + `skillforge/db/schema.sql`（只有普通表，**不含 FTS5 虚拟表/trigger**）。仓储函数放 `skillforge/db/repositories/`，SQL 用参数绑定，禁止字符串拼接。
+- 检索：业务模块只 `from skillforge.knowledge.retrieval import Retriever, RetrievalHit, RetrievalQuery`；`sqlite3` 只允许出现在 `db/` 与 `knowledge/retrieval/backends/sqlite_fts.py`，`lancedb`/`pyarrow` 只允许在 `knowledge/retrieval/backends/`（ruff banned-api 锁定）。`RetrievalHit.score` 只用于排序/阈值，不做跨后端绝对比较；命中后要完整对象回 SQLite 仓储取。新增后端必须先通过 `tests/unit/retrieval/test_contract.py`。
 - 异步：I/O 边界（模型调用、docker、HTTP）用 `async`；纯计算保持同步。FastAPI handler 全部 `async def`。
 - 模型调用只通过 `ModelGateway.generate(ModelRequest)`；需要结构化输出用 `models/structured.py`，不要手写 JSON 解析重试。
 - 每个核心阶段 emit `TraceEvent`（`skillforge/tracing/`），事件类型只用设计文档 §19 列出的枚举。

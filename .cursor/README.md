@@ -32,3 +32,4 @@
 - 拆 rule：`runtime.mdc`（agent loop 与 tool 契约）、`evaluator.mdc`、`api.mdc`（路由与错误格式）在对应模块稳定后再抽出。
 - skill：`record-model-transcript`（录制真实模型响应为测试 fixture）、`dgx-deploy`（DGX Spark 部署与探测）在 C3.11 / C10.0 之后补。
 - 前端组件库约定（shadcn 组件使用清单）在 C9.1 之后补。
+- skill：`add-retrieval-backend`（按 `docs/retrieval-layer.md` 实现新后端 → 加入契约测试 parametrize → 跑召回评测 → 注册 factory）在 Phase 12 开始前补。

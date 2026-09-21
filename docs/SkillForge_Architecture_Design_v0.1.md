@@ -1,7 +1,7 @@
 # SkillForge — Self-Evolving Agent Skill Factory
 ## NVIDIA DGX Spark Hackathon 完整设计文档
 
-> 版本：v0.1  
+> 版本：v0.1.1（v0.1 + §8.3.1 检索层演进修订，2026-09-21）  
 > 日期：2026-09-20  
 > 定位：将企业 SOP / Runbook / API 文档 / 操作手册自动编译为**可执行、可评测、可迭代、可治理**的 Agent Skill。  
 > 首个 Demo 场景：**运维故障恢复（Service Recovery）**
@@ -488,6 +488,28 @@ Compiler Context
 Step 3.7 Flash 的大尺寸本地部署会占据 DGX Spark 大量统一内存，因此 MVP 应避免同时常驻另一个大型 GPU Retrieval 模型。
 
 NeMo Retriever 可以作为增强项接入，不应成为核心路径的单点依赖。
+
+## 8.3.1 检索层演进：FTS5 → LanceDB（v0.1.1 修订）
+
+MVP 之后的优化阶段，检索后端切换为 LanceDB（关键词 + 向量 + hybrid）。为了让这次切换不构成重构，v0.1.1 明确以下约束，详细设计见 `docs/retrieval-layer.md`：
+
+```text
+SQLite（system of record）
+   chunks / knowledge_units 普通表，含全文与 page/line
+        │
+        │ Indexer：投影，可随时 rebuild
+        ▼
+RetrievalIndex 端口
+   ensure_schema / upsert / delete / search
+        ├── SqliteFtsIndex   ← MVP（Hackathon）
+        └── LanceDbIndex     ← 优化阶段
+```
+
+- **索引是投影，不是数据。** 关系数据（项目、版本、状态机、trace、evals、chunks、knowledge units）永久留在 SQLite；LanceDB 只承担检索，绝不成为主库。`schema.sql` 不包含 FTS 虚拟表，后端自建 `idx_*` 表或 `data/index/<backend>/` 目录。
+- **调用方只依赖 `Retriever` 门面。** Compiler pass 2、Failure Analyzer 证据检索、Knowledge Lab 都不知道后端是谁；`RetrievalHit.score` 归一化到 [0, 1]，`mode` 请求 `keyword | vector | hybrid`，后端不支持时降级并回报 `mode_used`。
+- **`Embedder` 是独立端口。** MVP 为 `NullEmbedder`，不加载任何 embedding 模型（受 §13 内存预算约束）；优化阶段通过 OpenAI-compatible `/v1/embeddings` 或 NeMo Retriever 端点接入，embedding 模型必须极小、纯 CPU 或外部部署。
+- **契约测试是切换的验收标准。** 同一套测试 parametrize 所有后端；新后端必须全绿且召回评测不低于 FTS5 才能成为默认。
+- 切换过程不改 schema、不迁移数据、不改任何调用方代码，只是 `Settings.retrieval_backend` 一行 + `skillforge index rebuild`。
 
 ---
 
@@ -1801,7 +1823,8 @@ skillforge/
 | Backend | Python + FastAPI |
 | Schema | Pydantic |
 | Database | SQLite |
-| Search | SQLite FTS5 / BM25 |
+| Search (MVP) | SQLite FTS5 / BM25，经 `RetrievalIndex` 端口 |
+| Search (优化阶段) | LanceDB（keyword + vector + hybrid），同一端口，见 §8.3.1 |
 | Model Serving | llama.cpp |
 | Primary Model | Step 3.7 Flash |
 | Sandbox | Docker |
