@@ -8,4 +8,10 @@ Without Skill vs With Skill 的确定性评测证明 Skill 让 Agent 变得更�
 
 ## 状态
 
-Phase 0 — Bootstrap。包骨架、前端脚手架与开发命令将在后续 commit 落地。
+Phase 0 — Bootstrap。Python 包骨架已落地；前端脚手架与开发命令在后续 commit。
+
+```bash
+uv sync
+uv run pytest
+uv run ruff check . && uv run ruff format --check .
+```
