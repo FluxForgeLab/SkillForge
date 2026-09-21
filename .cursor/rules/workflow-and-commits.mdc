@@ -1,0 +1,47 @@
+---
+description: 按执行方案逐 commit 开发的工作流、验证与提交约定
+alwaysApply: true
+---
+
+# Workflow & Commits
+
+## 工作单位 = 执行方案中的一个 commit
+
+1. 开始前读 `docs/execution-plan.md` §3 中对应条目（如 `C3.5`），明确"内容"和"完成标准"。
+2. 只做该条目范围内的事。发现范围外问题：记到回复末尾的"建议"，不顺手改。
+3. 实现 + 该功能点的测试 + 必要的文档更新放在同一个 commit。
+4. 完成标准未满足不提交；无法满足时说明原因，不降级标准。
+
+## 提交前必须通过
+
+```bash
+uv run ruff check . && uv run ruff format --check . && uv run pytest -m "not integration"
+# 改了 apps/web 时追加
+pnpm -C apps/web lint && pnpm -C apps/web build
+# 改了 demo/ops-lab、sandbox、runtime tools、evaluator 时追加（需要 Docker）
+uv run pytest -m integration
+```
+
+## Commit message
+
+```text
+<type>(<scope>): <summary>
+
+Plan: C3.5
+<可选：取舍、调参结论、已知限制>
+```
+
+- type ∈ `feat|fix|test|docs|chore|refactor|spike`；scope 用模块名（`ops-lab`、`runtime`、`evaluator`、`web`…）。
+- 一个 commit 一个功能点。不要把两个 C 编号塞进一个 commit，也不要把一个 C 编号拆成半成品提交。
+- `spike` 类 commit 必须在 body 写结论（数字、决策），它的价值就是结论。
+
+## 测试约定
+
+- `tests/unit/`：不依赖 Docker 和真实模型，用 `FakeModelAdapter`。
+- `tests/integration/`：标记 `@pytest.mark.integration`，依赖 ops-lab 容器。
+- 真实模型的响应录制到 `tests/fixtures/transcripts/`，测试回放，保证可复现。
+- 修 bug 先写复现测试。
+
+## 不确定时
+
+先查设计文档与执行方案；两者都没答案且不同选择导致明显不同的工作量时才提问，否则按"最简单且不违反安全边界"的方案做并在回复中说明假设。

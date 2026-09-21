@@ -1,0 +1,25 @@
+---
+description: 前端（apps/web）技术栈与 Judge Mode 优先原则
+globs: apps/web/**
+alwaysApply: false
+---
+
+# Web Frontend
+
+栈：React 18 + TypeScript + Vite + Tailwind + shadcn/ui；数据 TanStack Query；路由 react-router；
+图表 Recharts；编辑器 Monaco（只读为主）；流程图 React Flow（仅 Pipeline/Timeline 需要时）。包管理 pnpm。
+
+## 优先级
+
+1. `/demo` Judge Mode 是唯一必须完美的页面：评委只看这一页也要看懂整个项目。
+2. 其余页面做 lite 版，复用 Judge Mode 中的组件（LiveTrace、Benchmark、PipelineStepper、SkillDiff）。
+3. 不做 Dashboard 细节、不做多主题、不做动画炫技。
+
+## 约定
+
+- 组件放 `src/components/<Name>/<Name>.tsx`，页面放 `src/pages/`，API 客户端与类型放 `src/api/`（类型与后端 pydantic 模型同名同字段，snake_case 原样保留，不做转换层）。
+- 事件流用单一 `useEvents(runId?)` hook 消费 `WS /api/events`，组件只订阅不各自建连接。
+- Benchmark 必须以"Without Skill / With Skill / Uplift (pp)"三行呈现，不要只显示一个分数。
+- LiveTrace 每行只显示 Action、Tool、Input、Output、Evidence、Verification；禁止渲染模型推理文本。
+- 每个组件先用 `src/mocks/` 中的静态数据能渲染，再接真实 API。mock 数据字段必须与后端一致。
+- 严格 TS（`strict: true`），不用 `any`；ESLint 通过。

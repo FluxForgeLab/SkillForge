@@ -1,0 +1,32 @@
+---
+description: 安全边界与 Self-Evolution 治理红线（设计文档 §5.4、§21、§22）
+alwaysApply: true
+---
+
+# Safety Boundaries
+
+这些是不可协商的红线。实现任何功能时若与之冲突，停下来在回复中说明，不要绕过。
+
+## 沙箱与执行
+
+- 任何生成的脚本、shell、文件写入只能在 `Sandbox` 内执行；`DockerSandbox` **不得**挂载 `docker.sock`、宿主根目录、SSH key、`.env`。
+- 对 ops-lab 的 docker / nginx 操作只能通过 `OpsLabToolAdapter` 白名单暴露，且限定 compose project `skillforge-lab`。
+- 永久 deny：删除 volume、重启/停止 `mock-db`、`rm -rf`、`sudo`、`mount`、`shutdown`。触发即记录 `policy_violation` 事件并拒绝。
+- 网络默认 restricted，只放行 `localhost` 与 ops-lab 内部服务。
+
+## Self-Evolving ≠ Self-Publishing
+
+- 系统自动流程的终点最多是 `CANDIDATE`。`approve` / `publish` 只能由带 approver 的 API 调用触发，代码里不允许出现自动路径。
+- `evals/evals.json`（fixture + expected + forbidden）对 Patcher **只读**：CANDIDATE 时记录 sha256，评测前校验，Patch 若触碰 `evals/` 直接 reject。防 reward hacking。
+- Patcher 不得放宽 permissions、修改 Sandbox policy、删除失败测试。
+- 新增的每条 SKILL.md 指令必须有 `source_ref`（Evidence First）；没有证据的指令不能进入 CANDIDATE。
+
+## 凭据与敏感文件
+
+- 不提交 `.env`、`data/`、`docs/*.xlsx`、`docs/*.docx`（含 DGX 登录信息与硬件手册）。
+- 不在代码、日志、trace 中输出 API key、主机密码、SSH 信息。
+- 前端 Live Trace 只展示 Action / Tool / Input / Output / Evidence / Verification，不展示模型 Chain-of-Thought。
+
+## 对操作真实环境的命令
+
+在本机执行 `docker`、`git push`、删除文件等改变状态的命令前，确认证据支持该动作；对 DGX 远程主机只做只读探测，除非执行方案条目明确要求部署。

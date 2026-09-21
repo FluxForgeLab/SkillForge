@@ -1,0 +1,36 @@
+---
+description: Skill 产物（SKILL.md、scripts、evals、source-map）与 ops-lab 的结构约定
+globs: skills/**,demo/**
+alwaysApply: false
+---
+
+# Skill Artifacts & Ops Lab
+
+## Skill 目录（设计文档 §8.5，兼容 NVIDIA Agent Skills）
+
+```text
+<skill-name>/
+├── SKILL.md              # frontmatter: name, description, version, triggers, tools, permissions
+├── skill-card.md         # 一页摘要：用途、输入输出、边界、benchmark 摘要
+├── scripts/              # diagnose.py / recover.py / verify.py，只调用 tool adapter 暴露的函数
+├── references/source-map.json   # ins_xx → knowledge_unit_id → {document, sha256, page/line}
+├── evals/evals.json      # 对 Patcher 只读
+└── BENCHMARK.md          # 评测后生成
+```
+
+- SKILL.md 正文每条可执行指令前缀 `ins_NN`（两位递增），source-map 中必须有对应项。
+- `permissions` 只能是默认 sandbox policy 的子集；`tools` 必须是 runtime tool registry 中已注册的名字。
+- `skills/golden/service-recovery/` 是手写参照，改它等于改契约：需在 commit body 说明影响 Runtime/Compiler 的哪一侧。
+- `skills/generated/`、`skills/published/` 是产物目录，不进 git，不手工编辑。
+
+## evals.json 每个 case
+
+`id`、`name`、`task`、`fixture`（必须存在于 `demo/ops-lab/faults/catalog.yaml`）、`expected`（只能是 verifier 输出的字段）、`forbidden`（工具名或动作枚举）、`timeout_sec`。
+
+## Ops Lab（demo/ops-lab）
+
+- compose project 名固定 `skillforge-lab`；服务名固定 `nginx`、`backend`、`mock-db`；nginx 对外端口 8088。
+- 只用 multi-arch 官方镜像（`nginx:alpine`、`python:3.12-slim`），目标机是 aarch64。
+- 故障通过 `faults/inject.py <fault_id>` / `faults/reset.py` 注入与复位，所有故障登记在 `faults/catalog.yaml`。
+- `verifier/verify.py` 是唯一的成功判定来源，输出稳定 JSON 字段，字段增删要同步更新 evals 与 evaluator 断言。
+- Demo runbook 在 `demo/docs/`，F3 的知识只放 Appendix B，见 `docs/execution-plan.md` §0.3，改动前先读它。

@@ -1,0 +1,36 @@
+---
+description: SkillForge 项目北极星、范围边界与关键架构决策（每次会话必读）
+alwaysApply: true
+---
+
+# SkillForge Core
+
+SkillForge 是运行在 DGX Spark 上的 Agent Skill 工厂：把企业 Runbook 编译为可执行 Skill，并通过
+沙箱执行 → 确定性评测 → 失败分析 → Patch → 回归 → 人工 Gate 的闭环证明 Skill 让 Agent 变得更好。
+
+权威文档（有冲突时以后者为准）：
+- 设计：`docs/SkillForge_Architecture_Design_v0.1.md`
+- 执行：`docs/execution-plan.md`（含对设计文档的审阅调整 §0，以及 commit 级清单 §3）
+
+## 北极星：DoD 15 步（架构文档 §30）
+
+上传 Runbook → 抽取 KU → 生成 Skill → 生成 Evals → 注入真实 Docker 故障 → Agent 用 Skill 恢复 →
+Verifier 判定 → 新 Case 让 v0.1 失败 → Failure Analyzer → v0.2 Patch → 回归 → v0.2 优于 v0.1 →
+前端展示 Diff/Trace/Benchmark → 人工 Approve → Publish。
+**这 15 步跑通之前不扩展任何功能。**
+
+## 已拍板的架构决策（不要重新讨论）
+
+- 单一 Python 包 `skillforge/`，单一 `pyproject.toml`（uv）；FastAPI 在 `skillforge/api/`。
+- SQLite + FTS5，不引入向量库；纯 SQL + pydantic，不引入 ORM。
+- 所有模型调用经 `skillforge/models/gateway.py`，业务层不得直接调模型 SDK。
+- 两个执行面：`Sandbox`（跑生成脚本）与 `OpsLabToolAdapter`（控制面白名单 docker/nginx 操作）。
+- 两个状态机：`PipelineState`（流程）与 `SkillVersionStatus`（版本），不要混用。
+- 先手写 golden skill `skills/golden/service-recovery/`，Runtime/Evaluator 以它为契约，Compiler 以它为验收参照。
+- 能确定性完成的事情不交给 LLM：schema 校验、权限校验、断言、Gate 全是规则代码。
+- 自研最小 ReAct loop，不引入 agent framework；Control 与 Treatment 只差 system prompt 中的 SKILL.md。
+
+## 非目标
+
+不做通用 Chatbot、工作流平台、IAM、K8s、多 Agent 互聊、向量库、3D UI。目标机器 DGX Spark 是 **aarch64**，
+只用 multi-arch 镜像。
