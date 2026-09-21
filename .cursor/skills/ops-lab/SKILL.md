@@ -14,10 +14,11 @@ docker compose -f demo/ops-lab/docker-compose.yml -p skillforge-lab up -d --buil
 python demo/ops-lab/verifier/verify.py                                              # 健康检查，exit 0 = 健康
 python demo/ops-lab/faults/inject.py <fault_id>                                     # 注入故障
 python demo/ops-lab/faults/reset.py                                                 # 复位到健康态
-docker compose -f demo/ops-lab/docker-compose.yml -p skillforge-lab down -v         # 销毁
+docker compose -f demo/ops-lab/docker-compose.yml -p skillforge-lab down             # 停止（just lab-down）
+docker compose -f demo/ops-lab/docker-compose.yml -p skillforge-lab down -v         # 销毁栈和匿名 volume，默认不要用
 ```
 
-`just lab-up | lab-verify | lab-inject F1 | lab-reset | lab-down` 是同义快捷方式（C0.5 之后可用）。
+`just lab-up | lab-verify | lab-inject backend_stopped | lab-reset | lab-down` 是同义快捷方式。Windows 无 just 时用 `.\scripts\dev.ps1 lab-up`。`lab-down` 不带 `-v`。
 
 ## 故障目录（demo/ops-lab/faults/catalog.yaml）
 

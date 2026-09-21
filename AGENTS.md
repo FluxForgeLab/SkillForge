@@ -41,6 +41,8 @@ docs/                设计文档、执行方案、部署与演示脚本
 
 端口不是同一个服务：`5173` Vite 网页；`8000` SkillForge API；`8080` 模型 `/v1` 或 ops-lab backend **容器内**（不是网页）；`8088` ops-lab nginx 宿主机入口。
 
+快捷方式（C0.5）：`just api|web|lint|test|lab-up|lab-down|lab-reset|lab-verify`，`just lab-inject backend_stopped`。Windows 无 just 时：`.\scripts\dev.ps1 lint`。
+
 尚未存在的命令在对应执行方案条目中创建，不要临时发明替代方案。
 
 ```bash
