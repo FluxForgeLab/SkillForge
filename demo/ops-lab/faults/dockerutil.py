@@ -91,3 +91,25 @@ def wait_until_healthy(
             return
         time.sleep(HEALTHY_POLL_INTERVAL)
     raise TimeoutError(f"service {service!r} did not become healthy within {timeout}s")
+
+
+def nginx_exec(client: docker.DockerClient, project: str, cmd: list[str]) -> int:
+    container = require_container(client, project, "nginx")
+    if not is_running(container):
+        raise RuntimeError("nginx is not running")
+    try:
+        result = container.exec_run(cmd)
+    except DockerException as exc:
+        logger.exception("nginx exec failed: %s", cmd)
+        raise RuntimeError(f"nginx exec failed: {cmd!r}") from exc
+    return int(result.exit_code)
+
+
+def nginx_test(client: docker.DockerClient, project: str) -> None:
+    if nginx_exec(client, project, ["nginx", "-t"]) != 0:
+        raise RuntimeError("nginx -t failed")
+
+
+def nginx_reload(client: docker.DockerClient, project: str) -> None:
+    if nginx_exec(client, project, ["nginx", "-s", "reload"]) != 0:
+        raise RuntimeError("nginx reload failed")

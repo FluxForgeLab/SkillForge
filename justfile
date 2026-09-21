@@ -39,6 +39,6 @@ lab-reset:
 lab-verify:
     uv run python demo/ops-lab/verifier/verify.py
 
-# 注入故障：just lab-inject backend_stopped
+# 注入故障：just lab-inject backend_stopped | nginx_wrong_upstream
 lab-inject FAULT:
     uv run python demo/ops-lab/faults/inject.py {{FAULT}}

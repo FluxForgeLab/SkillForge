@@ -4,9 +4,11 @@ import logging
 import sys
 
 from dockerutil import docker_client, project_name, stop_service
+from nginxfault import F2_WRONG_UPSTREAM_PORT, apply_upstream_port
 
 FAULT_BACKEND_STOPPED = "backend_stopped"
-KNOWN_FAULTS = frozenset({FAULT_BACKEND_STOPPED})
+FAULT_NGINX_WRONG_UPSTREAM = "nginx_wrong_upstream"
+KNOWN_FAULTS = frozenset({FAULT_BACKEND_STOPPED, FAULT_NGINX_WRONG_UPSTREAM})
 
 
 def inject(fault_id: str, *, client=None) -> None:
@@ -17,6 +19,8 @@ def inject(fault_id: str, *, client=None) -> None:
     project = project_name()
     if fault_id == FAULT_BACKEND_STOPPED:
         stop_service(docker, project, "backend")
+    elif fault_id == FAULT_NGINX_WRONG_UPSTREAM:
+        apply_upstream_port(F2_WRONG_UPSTREAM_PORT, docker, project)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -28,6 +32,9 @@ def main(argv: list[str] | None = None) -> int:
     try:
         inject(args[0].strip())
     except ValueError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
+    except RuntimeError as exc:
         print(str(exc), file=sys.stderr)
         return 1
     return 0
