@@ -1,0 +1,42 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+dist/
+build/
+
+# Node
+node_modules/
+apps/web/dist/
+apps/web/dist-ssr/
+
+# Env and secrets
+.env
+.env.*
+!.env.example
+
+# Local runtime data (sqlite, uploaded sources, indexes)
+/data/*
+!/data/.gitkeep
+
+# Compiled / published skill artifacts (not golden)
+/skills/generated/
+/skills/published/
+
+# Credential tables and hardware manuals (R11)
+*.xlsx
+*.docx
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
