@@ -13,6 +13,13 @@ from skillforge.models.gateway import (
     get_model_gateway,
     load_fake_script,
 )
+from skillforge.models.structured import (
+    StructuredOutputError,
+    build_schema_instruction,
+    extract_json,
+    generate_structured,
+    parse_structured_content,
+)
 from skillforge.models.types import (
     ChatMessage,
     ModelRequest,
@@ -32,10 +39,15 @@ __all__ = [
     "ModelResponse",
     "ModelScriptExhaustedError",
     "OpenAICompatibleAdapter",
+    "StructuredOutputError",
     "TokenUsage",
     "ToolCall",
     "ToolDefinition",
+    "build_schema_instruction",
     "build_adapter",
+    "extract_json",
+    "generate_structured",
+    "parse_structured_content",
     "fake_adapter_from_script",
     "get_model_gateway",
     "load_fake_script",

@@ -36,6 +36,7 @@ class Settings(BaseSettings):
     max_seconds: int = 120
     temperature: float = 0.0
     seed: int | None = None
+    structured_output_max_retries: int = 3
 
     demo_mode: DemoMode = "replay"
     opslab_project: str = "skillforge-lab"
