@@ -15,6 +15,7 @@ SkillForge 把企业 Runbook 编译为可执行、可评测、可迭代、可治
 | 为什么这么设计 | `docs/SkillForge_Architecture_Design_v0.1.md` |
 | 现在做什么、做到什么程度算完成 | `docs/execution-plan.md`（§0 是对设计文档的审阅调整，§3 是 commit 清单） |
 | 环境操作、评测、写 Skill 的具体步骤 | `.cursor/skills/*/SKILL.md` |
+| 连通性 / 打不开 / connection refused | `.cursor/skills/diagnose-listen/SKILL.md`；约束见 `measure-before-story` |
 | 持久约束 | `.cursor/rules/*.mdc`（自动加载） |
 
 设计文档与执行方案冲突时以执行方案为准；执行方案不合理时先提出，不要静默偏离。
@@ -37,6 +38,8 @@ docs/                设计文档、执行方案、部署与演示脚本
 ```
 
 ## 常用命令
+
+端口不是同一个服务：`5173` Vite 网页；`8000` SkillForge API；`8080` 模型 `/v1` 或 ops-lab backend **容器内**（不是网页）；`8088` ops-lab nginx 宿主机入口。
 
 尚未存在的命令在对应执行方案条目中创建，不要临时发明替代方案。
 
@@ -71,6 +74,7 @@ uv run skillforge demo
 3. Commit message：`<type>(<scope>): <summary>`，body 首行 `Plan: C3.5`。
 4. 范围外的发现写在回复末尾作为建议，不顺手改。
 5. 真实模型的响应录制到 `tests/fixtures/transcripts/`，测试用回放；本地开发默认用 `FakeModelAdapter` 或 OpenAI-compatible 云端端点，不假设本机有 GPU。
+6. 排障先测量 LISTEN 元组（尝试的地址族/IP/端口 vs 实际在听的），再解释原因。Cursor 内置浏览器失败不构成本机失败。
 
 ## 已拍板的决策（不重新讨论）
 
@@ -91,6 +95,7 @@ uv run skillforge demo
 - 每条 SKILL.md 指令必须有 `source_ref`。
 - 不提交 `.env`、`data/`、`docs/*.xlsx`、`docs/*.docx`；trace 与日志不含凭据；前端不展示模型 CoT。
 - 对 DGX 远程主机只做只读探测，除非条目明确要求部署。
+- 排障未量出 LISTEN 元组不得宣布根因（详见 `.cursor/rules/measure-before-story.mdc`）。
 
 ## 目标平台注意
 

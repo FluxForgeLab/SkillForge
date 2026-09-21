@@ -1,0 +1,17 @@
+---
+description: 诊断连通性、端口、服务「已启动但打不开」时的推理约束。未测量 LISTEN 元组不得宣布根因。
+alwaysApply: true
+---
+
+# Measure Before Story
+
+诊断连通性、端口、页面/API「服务已启动但打不开」时，这些是不可协商的。做不到第 6 条就不要宣布根因。
+
+1. **错误信息 ≠ 架构。** `CONNECTION_REFUSED` / `ECONNREFUSED` 只表示：这次握手的目标 `(地址族, IP, 端口)` 上没有 LISTEN。在量出该元组之前，禁止给出原因。
+2. **名字 ≠ 端点。** `localhost`、`127.0.0.1`、`::1`、容器名、compose 服务名必须先变成元组再解释。日志里的 `Local: http://localhost:5173/` 不是 `getsockname()`。
+3. **软件自称 ≠ 测量。** `ready`、健康检查文案、进程还在跑，都不能替代 LISTEN 表。
+4. **下层够用则禁止第二种因果。** 同一组观测能被「绑错地址族 / 连错端口」覆盖时，不要叠加沙箱、CORS、防火墙、MCP 隔离。
+5. **内置浏览器 ≠ 本机。** Cursor 内置浏览器打不开，不能当作本机不可达。本机可达性用系统浏览器或本机 `curl` / `netstat` / `ss`。
+6. **先陈述元组再讲故事。** 排障结论必须出现：尝试的元组、LISTEN 上的元组、二者是否同一。缺这三项就是还没诊断完。
+
+步骤与端口表见 `.cursor/skills/diagnose-listen/SKILL.md`。

@@ -23,3 +23,4 @@ alwaysApply: false
 - LiveTrace 每行只显示 Action、Tool、Input、Output、Evidence、Verification；禁止渲染模型推理文本。
 - 每个组件先用 `src/mocks/` 中的静态数据能渲染，再接真实 API。mock 数据字段必须与后端一致。
 - 严格 TS（`strict: true`），不用 `any`；ESLint 通过。
+- 开发服务器必须 `server.host = '127.0.0.1'`、`port = 5173`、`strictPort = true`。禁止只绑 `::1`。
