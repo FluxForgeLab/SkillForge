@@ -19,9 +19,19 @@ http {
     server {
         listen 80;
         server_name _;
+        error_page 504 =502 @upstream_down;
+
+        location @upstream_down {
+            default_type application/json;
+            return 502 '{"status":"bad_gateway"}';
+        }
 
         location / {
             proxy_pass http://skillforge_backend;
+            proxy_connect_timeout 1s;
+            proxy_send_timeout 2s;
+            proxy_read_timeout 2s;
+            proxy_intercept_errors on;
             proxy_set_header Host $host;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto $scheme;
