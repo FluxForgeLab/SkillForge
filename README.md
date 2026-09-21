@@ -8,7 +8,9 @@ Without Skill vs With Skill 的确定性评测证明 Skill 让 Agent 变得更�
 
 ## 状态
 
-Phase 0 — Bootstrap。Python 包、前端脚手架与开发入口已落地。
+Phase 0 — Bootstrap。Python 包、前端脚手架、开发入口与 PR CI 已落地。
+
+GitHub Actions（`.github/workflows/ci.yml`）在 PR 上跑 ruff、单测（不含 integration）以及 `apps/web` 的 lint/build。
 
 ```bash
 just lint
