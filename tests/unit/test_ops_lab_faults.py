@@ -25,12 +25,21 @@ def _load_faults():
 
 
 class FakeContainer:
-    def __init__(self, service: str, *, running: bool = True, health: str = "healthy") -> None:
+    def __init__(
+        self,
+        service: str,
+        *,
+        running: bool = True,
+        health: str = "healthy",
+        exec_exit_codes: list[int] | None = None,
+    ) -> None:
         self.service = service
         self.stop_calls = 0
         self.start_calls = 0
         self.exec_calls: list[list[str]] = []
         self.exec_exit_code = 0
+        self._exec_exit_codes = list(exec_exit_codes) if exec_exit_codes is not None else None
+        self._exec_index = 0
         self.attrs = {"State": {"Running": running, "Health": {"Status": health}}}
 
     def reload(self) -> None:
@@ -51,7 +60,13 @@ class FakeContainer:
 
     def exec_run(self, cmd: list[str]):
         self.exec_calls.append(list(cmd))
-        return SimpleNamespace(exit_code=self.exec_exit_code)
+        if self._exec_exit_codes is not None:
+            index = min(self._exec_index, len(self._exec_exit_codes) - 1)
+            code = self._exec_exit_codes[index]
+            self._exec_index += 1
+        else:
+            code = self.exec_exit_code
+        return SimpleNamespace(exit_code=code)
 
 
 class FakeClient:
@@ -179,3 +194,59 @@ def test_reset_restore_reloads_when_nginx_running(monkeypatch: pytest.MonkeyPatc
     nginxfault.restore_nginx_upstream(client, "skillforge-lab")
     assert ports == [8080]
     assert nginx.exec_calls == [["nginx", "-t"], ["nginx", "-s", "reload"]]
+
+
+def test_write_f3_invalid_conf_keeps_upstream_port() -> None:
+    _dockerutil, nginxfault, _inject, _reset = _load_faults()
+    render = nginxfault._render_module()
+    original = render.CONF_PATH.read_text(encoding="utf-8")
+    try:
+        nginxfault.write_f3_invalid_conf()
+        text = render.CONF_PATH.read_text(encoding="utf-8")
+        assert "server backend:8081;" in text
+        assert nginxfault.F3_INVALID_DIRECTIVE in text
+    finally:
+        render.CONF_PATH.write_text(original, encoding="utf-8")
+
+
+def test_inject_f3_applies_upstream_then_invalid_conf_without_second_reload(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    dockerutil, _nginxfault, inject, _reset = _load_faults()
+    backend = FakeContainer("backend")
+    nginx = FakeContainer("nginx", exec_exit_codes=[1])
+    client = FakeClient({"backend": backend, "nginx": nginx})
+    phases: list[str] = []
+
+    def fake_f3(client, project: str) -> None:
+        phases.append("apply")
+        phases.append("invalid")
+        try:
+            dockerutil.nginx_test(client, project)
+        except RuntimeError:
+            return
+
+    monkeypatch.setattr(inject, "project_name", lambda: "skillforge-lab")
+    monkeypatch.setattr(inject, "inject_f3_bad_config_reload", fake_f3)
+    inject.inject("nginx_bad_config_reload", client=client)
+    assert phases == ["apply", "invalid"]
+    assert backend.stop_calls == 0
+    assert nginx.exec_calls == [["nginx", "-t"]]
+    assert "nginx -s reload" not in str(nginx.exec_calls)
+
+
+def test_inject_main_f3_exits_zero_when_nginx_test_fails(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _dockerutil, _nginxfault, inject, _reset = _load_faults()
+
+    def fake_f3(_client, _project: str) -> None:
+        return
+
+    monkeypatch.setattr(inject, "inject_f3_bad_config_reload", fake_f3)
+    assert inject.main(["nginx_bad_config_reload"]) == 0
+
+
+def test_reset_all_is_reset() -> None:
+    _dockerutil, _nginxfault, _inject, reset = _load_faults()
+    assert reset.reset_all is reset.reset

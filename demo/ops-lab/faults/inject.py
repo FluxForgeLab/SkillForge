@@ -4,11 +4,18 @@ import logging
 import sys
 
 from dockerutil import docker_client, project_name, stop_service
-from nginxfault import F2_WRONG_UPSTREAM_PORT, apply_upstream_port
+from nginxfault import (
+    F2_WRONG_UPSTREAM_PORT,
+    apply_upstream_port,
+    inject_f3_bad_config_reload,
+)
 
 FAULT_BACKEND_STOPPED = "backend_stopped"
 FAULT_NGINX_WRONG_UPSTREAM = "nginx_wrong_upstream"
-KNOWN_FAULTS = frozenset({FAULT_BACKEND_STOPPED, FAULT_NGINX_WRONG_UPSTREAM})
+FAULT_NGINX_BAD_CONFIG_RELOAD = "nginx_bad_config_reload"
+KNOWN_FAULTS = frozenset(
+    {FAULT_BACKEND_STOPPED, FAULT_NGINX_WRONG_UPSTREAM, FAULT_NGINX_BAD_CONFIG_RELOAD}
+)
 
 
 def inject(fault_id: str, *, client=None) -> None:
@@ -21,6 +28,8 @@ def inject(fault_id: str, *, client=None) -> None:
         stop_service(docker, project, "backend")
     elif fault_id == FAULT_NGINX_WRONG_UPSTREAM:
         apply_upstream_port(F2_WRONG_UPSTREAM_PORT, docker, project)
+    elif fault_id == FAULT_NGINX_BAD_CONFIG_RELOAD:
+        inject_f3_bad_config_reload(docker, project)
 
 
 def main(argv: list[str] | None = None) -> int:

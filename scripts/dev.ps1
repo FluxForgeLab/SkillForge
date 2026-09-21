@@ -58,6 +58,9 @@ switch ($Command) {
     "lab-reset" {
         Invoke-Checked { uv run python demo/ops-lab/faults/reset.py }
     }
+    "lab-reset-all" {
+        Invoke-Checked { uv run python demo/ops-lab/faults/reset_all.py }
+    }
     "lab-verify" {
         Invoke-Checked { uv run python demo/ops-lab/verifier/verify.py }
     }
@@ -79,6 +82,7 @@ usage: .\scripts\dev.ps1 <command> [args]
   lab-up       ops-lab compose up (C1.2+)
   lab-down     ops-lab compose down (no -v)
   lab-reset    faults/reset.py (C1.4+)
+  lab-reset-all faults/reset_all.py (C1.6+, same as lab-reset)
   lab-verify   verifier/verify.py (C1.3+)
   lab-inject   faults/inject.py <fault_id>
 "@

@@ -35,10 +35,14 @@ lab-down:
 lab-reset:
     uv run python demo/ops-lab/faults/reset.py
 
+# 与 lab-reset 相同（C1.6 reset-all）
+lab-reset-all:
+    uv run python demo/ops-lab/faults/reset_all.py
+
 # verifier 健康检查（C1.3 之后）
 lab-verify:
     uv run python demo/ops-lab/verifier/verify.py
 
-# 注入故障：just lab-inject backend_stopped | nginx_wrong_upstream
+# 注入故障：just lab-inject backend_stopped | nginx_wrong_upstream | nginx_bad_config_reload
 lab-inject FAULT:
     uv run python demo/ops-lab/faults/inject.py {{FAULT}}

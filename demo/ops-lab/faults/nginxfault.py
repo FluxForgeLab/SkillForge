@@ -9,6 +9,7 @@ from dockerutil import is_running, nginx_reload, nginx_test, require_container
 
 DEFAULT_UPSTREAM_PORT = 8080
 F2_WRONG_UPSTREAM_PORT = 8081
+F3_INVALID_DIRECTIVE = "this_is_not_valid_nginx;"
 
 _NGINX_RENDER_PATH = Path(__file__).resolve().parent.parent / "nginx" / "render.py"
 
@@ -41,3 +42,22 @@ def restore_nginx_upstream(client, project: str, *, port: int = DEFAULT_UPSTREAM
     if is_running(container):
         nginx_test(client, project)
         nginx_reload(client, project)
+
+
+def write_f3_invalid_conf() -> None:
+    render = _render_module()
+    text = render.render(F2_WRONG_UPSTREAM_PORT) + f"\n{F3_INVALID_DIRECTIVE}\n"
+    render.CONF_PATH.write_text(text, encoding="utf-8")
+
+
+def inject_f3_bad_config_reload(client, project: str) -> None:
+    apply_upstream_port(F2_WRONG_UPSTREAM_PORT, client, project)
+    write_f3_invalid_conf()
+    container = require_container(client, project, "nginx")
+    if not is_running(container):
+        return
+    try:
+        nginx_test(client, project)
+    except RuntimeError:
+        return
+    raise RuntimeError("expected nginx -t to fail after F3 invalid config")

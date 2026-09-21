@@ -18,6 +18,9 @@ def reset(*, client=None) -> None:
     wait_until_healthy(docker, project, "nginx")
 
 
+reset_all = reset
+
+
 def main() -> int:
     logging.basicConfig(level=logging.INFO, stream=sys.stderr)
     try:
