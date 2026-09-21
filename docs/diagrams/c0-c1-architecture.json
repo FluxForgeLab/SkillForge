@@ -1,0 +1,242 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "SkillForge 当前：C0 脚手架 + C1 Ops Lab",
+    "subtitle": "箭头：发起方 → 接收方。灰实线=已接通。红实线=C1.2 宿主入口（未通）。虚线=尚未实现。",
+    "output": "c0-c1-architecture.html",
+    "quality_profile": "showcase",
+    "visual_preset": "editorial",
+    "repository": {
+      "url": "https://github.com/FluxForgeLab/SkillForge.git",
+      "revision": "dc389248e4c953e0e917b40ea43582416d1ac1af"
+    },
+    "views": [
+      {
+        "id": "now",
+        "label": "现在：C0 + C1.1",
+        "focus": ["operator", "web", "skillforge", "just", "backend"],
+        "note": "Hello 页、Settings 包、命令目录、受害镜像。尚无 compose，宿主没有 :8088。"
+      },
+      {
+        "id": "topology",
+        "label": "C1.2 拓扑",
+        "focus": ["operator", "just", "nginx", "backend", "mockdb"],
+        "note": "lab-up 启动 skillforge-lab。宿主 :8088 → nginx → backend :8080 → mock-db。"
+      },
+      {
+        "id": "verify",
+        "label": "C1.3 判定器",
+        "focus": ["verifier", "nginx", "backend", "mockdb"],
+        "note": "JSON：http_status、backend_running、nginx_config_valid、upstream_port_matches、db_running。"
+      },
+      {
+        "id": "faults",
+        "label": "C1.4–C1.8 故障",
+        "focus": ["faults", "nginx", "backend", "verifier"],
+        "note": "F1 停 backend。F2 错误 upstream。F3 错误 reload。随后 catalog 与 inject→verify→reset。"
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "operator",
+      "type": "external",
+      "label": "操作者",
+      "sublabel": "浏览器 / curl",
+      "pos": [40, 300],
+      "size": [128, 62]
+    },
+    {
+      "id": "web",
+      "type": "frontend",
+      "label": "Web Hello",
+      "sublabel": "Vite 127.0.0.1:5173",
+      "tag": "C0.4",
+      "pos": [230, 180],
+      "size": [148, 64],
+      "sources": [{ "path": "apps/web/vite.config.ts", "line": 13, "end_line": 17, "label": "IPv4 绑定" }]
+    },
+    {
+      "id": "skillforge",
+      "type": "backend",
+      "label": "skillforge 包",
+      "sublabel": "仅 Settings，尚无 API",
+      "tag": "C0.3",
+      "pos": [300, 420],
+      "size": [148, 64],
+      "sources": [{ "path": "skillforge/config.py", "line": 26, "end_line": 41, "label": "端口与 lab 名" }]
+    },
+    {
+      "id": "just",
+      "type": "external",
+      "label": "just / dev.ps1",
+      "sublabel": "api · web · lab-* · test",
+      "tag": "C0.5",
+      "pos": [40, 420],
+      "size": [128, 64],
+      "sources": [{ "path": "scripts/dev.ps1", "line": 48, "end_line": 51, "label": "lab-up" }]
+    },
+    {
+      "id": "nginx",
+      "type": "cloud",
+      "label": "nginx 反代",
+      "sublabel": "宿主 :8088 → :80",
+      "tag": "C1.2",
+      "pos": [470, 300],
+      "size": [140, 64]
+    },
+    {
+      "id": "backend",
+      "type": "backend",
+      "label": "受害 backend",
+      "sublabel": "容器内 :8080 /health",
+      "tag": "C1.1",
+      "pos": [680, 300],
+      "size": [148, 64],
+      "sources": [{ "path": "demo/ops-lab/backend/app.py", "line": 31, "end_line": 41, "label": "health + items" }]
+    },
+    {
+      "id": "mockdb",
+      "type": "database",
+      "label": "mock-db",
+      "sublabel": "禁止停止 / 删除",
+      "tag": "C1.2",
+      "pos": [890, 300],
+      "size": [140, 64]
+    },
+    {
+      "id": "verifier",
+      "type": "security",
+      "label": "判定器",
+      "sublabel": "JSON + exit 0/1",
+      "tag": "C1.3",
+      "pos": [470, 120],
+      "size": [140, 64]
+    },
+    {
+      "id": "faults",
+      "type": "security",
+      "label": "注入 / 复位",
+      "sublabel": "F1 F2 F3 + catalog",
+      "tag": "C1.4–C1.7",
+      "pos": [680, 120],
+      "size": [148, 64]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "宿主机 — C0 脚手架（已落地）",
+      "wraps": ["operator", "web", "skillforge", "just", "verifier", "faults"]
+    },
+    {
+      "kind": "region",
+      "label": "Docker compose skillforge-lab — C1",
+      "wraps": ["nginx", "backend", "mockdb"]
+    }
+  ],
+  "connections": [
+    {
+      "id": "op-web",
+      "from": "operator",
+      "to": "web",
+      "label": ":5173",
+      "fromSide": "top",
+      "toSide": "left"
+    },
+    {
+      "id": "just-pkg",
+      "from": "just",
+      "to": "skillforge",
+      "route": "straight"
+    },
+    {
+      "id": "op-nginx",
+      "from": "operator",
+      "to": "nginx",
+      "label": ":8088",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left",
+      "labelDy": 46
+    },
+    {
+      "id": "just-lab",
+      "from": "just",
+      "to": "nginx",
+      "label": "lab-up",
+      "variant": "dashed",
+      "fromSide": "right",
+      "toSide": "bottom"
+    },
+    {
+      "id": "ngx-be",
+      "from": "nginx",
+      "to": "backend",
+      "label": "反代 :8080",
+      "variant": "dashed"
+    },
+    {
+      "id": "be-db",
+      "from": "backend",
+      "to": "mockdb",
+      "label": "items",
+      "variant": "dashed"
+    },
+    {
+      "id": "ver-ngx",
+      "from": "verifier",
+      "to": "nginx",
+      "label": "探测",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "f-be",
+      "from": "faults",
+      "to": "backend",
+      "label": "F1 停止",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 24
+    },
+    {
+      "id": "f-ngx",
+      "from": "faults",
+      "to": "nginx",
+      "label": "F2 / F3",
+      "variant": "dashed",
+      "fromSide": "left",
+      "toSide": "top"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "slate",
+      "title": "箭头：指向接收方",
+      "items": [
+        "箭头从发起方指向被作用的一方。操作者 → 方框：发 HTTP。just → 方框：用那条命令启动它。",
+        "nginx → backend → mock-db：转发请求。判定器 → nginx：只读探测。注入 → 方框：改配置或停进程。"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "灰实线 / 红实线 / 虚线",
+      "items": [
+        "灰实线：本机已接通（打开 :5173；just lint/test 打到包）。红实线：演示入口 curl :8088，要等 C1.2 才通。",
+        "虚线：代码里还没有这条边（compose、反代、mock-db、判定器、F1–F3）。"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "边上的字",
+      "items": [
+        ":5173 Hello 页（已通）。:8088 经 nginx 探 /health（C1.2）。lab-up 启动 skillforge-lab。反代 :8080，再 items 到 mock-db。",
+        "探测=判定器 JSON。F1 停 backend。F2/F3 改 nginx。just → 包那条灰线未标字，是 lint/test（C0.5，已通）。"
+      ]
+    }
+  ]
+}
