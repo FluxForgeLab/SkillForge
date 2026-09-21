@@ -15,6 +15,7 @@ def test_settings_defaults() -> None:
     assert settings.model_adapter == "fake"
     assert settings.temperature == 0.0
     assert settings.opslab_project == "skillforge-lab"
+    assert settings.opslab_base_url == "http://127.0.0.1:8088"
     assert settings.demo_mode == "replay"
     assert settings.sqlite_path == Path("data/skillforge.db")
     assert settings.model_api_key.get_secret_value() == ""

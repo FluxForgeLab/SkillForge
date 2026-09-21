@@ -39,6 +39,7 @@ class Settings(BaseSettings):
 
     demo_mode: DemoMode = "replay"
     opslab_project: str = "skillforge-lab"
+    opslab_base_url: str = "http://127.0.0.1:8088"
 
 
 @lru_cache(maxsize=1)
