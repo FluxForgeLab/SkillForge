@@ -9,9 +9,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from skillforge.api.errors import register_exception_handlers
+from skillforge.api.routers.projects import router as projects_router
 from skillforge.api.ws import ConnectionManager
 from skillforge.api.ws import router as ws_router
 from skillforge.config import Settings, get_settings
+from skillforge.db.init import initialize_database
 from skillforge.domain.entities import TraceEvent
 from skillforge.tracing.bus import EventBus
 from skillforge.tracing.emitter import get_bus
@@ -34,6 +36,7 @@ def create_app(
             await ws_manager.broadcast(event)
 
         unsubscribe = resolved_bus.subscribe(forward)
+        initialize_database(resolved_settings.sqlite_path)
         try:
             yield
         finally:
@@ -58,6 +61,7 @@ def create_app(
         return {"status": "ok", "service": "skillforge"}
 
     app.include_router(ws_router, prefix="/api")
+    app.include_router(projects_router, prefix="/api")
 
     return app
 

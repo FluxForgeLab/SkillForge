@@ -23,6 +23,21 @@ def insert_project(conn: sqlite3.Connection, project: Project) -> None:
     )
 
 
+def list_projects(conn: sqlite3.Connection) -> list[Project]:
+    rows = conn.execute(
+        "SELECT id, name, description, created_at FROM projects ORDER BY created_at ASC",
+    ).fetchall()
+    return [
+        Project(
+            id=str(_id),
+            name=str(name),
+            description=str(description) if description is not None else None,
+            created_at=datetime.fromisoformat(str(created_at)),
+        )
+        for _id, name, description, created_at in rows
+    ]
+
+
 def get_project(conn: sqlite3.Connection, project_id: str) -> Project | None:
     row = conn.execute(
         "SELECT id, name, description, created_at FROM projects WHERE id = ?",
