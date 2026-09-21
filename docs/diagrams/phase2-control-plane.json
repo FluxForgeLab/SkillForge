@@ -1,0 +1,191 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "SkillForge Phase 2 控制面（C2.1–C2.8 规划）",
+    "subtitle": "skillforge/ 包内模块与依赖（虚线=规划）。WS / emit 见图例说明。",
+    "output": "phase2-control-plane.html",
+    "quality_profile": "showcase",
+    "visual_preset": "editorial",
+    "repository": {
+      "url": "https://github.com/FluxForgeLab/SkillForge.git",
+      "revision": "d7a10e9d4341b82e4bbd2144fa7a42ce5d09131e"
+    },
+    "views": [
+      {
+        "id": "api-surface",
+        "label": "API 层",
+        "focus": ["web", "api", "registry", "models"],
+        "note": "C2.4 FastAPI + WS · C2.8 projects · C2.5 gateway。"
+      },
+      {
+        "id": "persistence",
+        "label": "持久化",
+        "focus": ["domain", "db", "sqlite", "registry", "artifacts"],
+        "note": "C2.1 schema/repos · C2.7 产物目录。"
+      },
+      {
+        "id": "observe",
+        "label": "追踪",
+        "focus": ["tracing", "sqlite"],
+        "note": "C2.3 bus + sink；api WS 与 models emit 均汇入 tracing。"
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "config",
+      "type": "security",
+      "label": "config.py",
+      "sublabel": "Settings（已有）",
+      "tag": "C0.3",
+      "pos": [40, 80],
+      "size": [118, 52]
+    },
+    {
+      "id": "web",
+      "type": "frontend",
+      "label": "Web",
+      "sublabel": ":5173 → :8000",
+      "tag": "C0.4",
+      "pos": [40, 240],
+      "size": [118, 52]
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "api/",
+      "sublabel": "FastAPI · WS /events",
+      "tag": "C2.4",
+      "pos": [240, 240],
+      "size": [132, 52],
+      "sources": [{ "path": "docs/execution-plan.md", "line": 149, "end_line": 149, "label": "C2.4" }]
+    },
+    {
+      "id": "domain",
+      "type": "backend",
+      "label": "domain/",
+      "sublabel": "双状态机 · 实体",
+      "tag": "C2.2",
+      "pos": [240, 400],
+      "size": [132, 52]
+    },
+    {
+      "id": "models",
+      "type": "cloud",
+      "label": "models/",
+      "sublabel": "gateway · structured",
+      "tag": "C2.5",
+      "pos": [440, 80],
+      "size": [132, 52]
+    },
+    {
+      "id": "llm",
+      "type": "external",
+      "label": "LLM HTTP",
+      "sublabel": "OpenAI-compatible",
+      "tag": "C2.5",
+      "pos": [640, 80],
+      "size": [118, 52]
+    },
+    {
+      "id": "registry",
+      "type": "backend",
+      "label": "registry/",
+      "sublabel": "manifest · 版本链",
+      "tag": "C2.7",
+      "pos": [440, 240],
+      "size": [132, 52]
+    },
+    {
+      "id": "artifacts",
+      "type": "external",
+      "label": "skills/generated/",
+      "sublabel": "产物树",
+      "tag": "C2.7",
+      "pos": [640, 240],
+      "size": [118, 52]
+    },
+    {
+      "id": "db",
+      "type": "backend",
+      "label": "db/",
+      "sublabel": "schema · repos",
+      "tag": "C2.1",
+      "pos": [440, 400],
+      "size": [132, 52],
+      "sources": [{ "path": "docs/execution-plan.md", "line": 146, "end_line": 146, "label": "C2.1" }]
+    },
+    {
+      "id": "sqlite",
+      "type": "database",
+      "label": "SQLite",
+      "sublabel": "system of record",
+      "tag": "C2.1",
+      "pos": [440, 560],
+      "size": [132, 52]
+    },
+    {
+      "id": "tracing",
+      "type": "messagebus",
+      "label": "tracing/",
+      "sublabel": "bus · sqlite sink",
+      "tag": "C2.3",
+      "pos": [640, 560],
+      "size": [118, 52]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "skillforge/ 包（Phase 2 规划）",
+      "wraps": ["config", "api", "domain", "models", "registry", "db", "tracing"]
+    }
+  ],
+  "connections": [
+    { "id": "web-api", "from": "web", "to": "api", "variant": "dashed" },
+    { "id": "api-models", "from": "api", "to": "models", "variant": "dashed" },
+    { "id": "api-registry", "from": "api", "to": "registry", "variant": "dashed" },
+    { "id": "api-domain", "from": "api", "to": "domain", "variant": "dashed" },
+    { "id": "models-llm", "from": "models", "to": "llm", "variant": "dashed" },
+    { "id": "domain-db", "from": "domain", "to": "db", "variant": "dashed" },
+    { "id": "registry-db", "from": "registry", "to": "db", "variant": "dashed" },
+    { "id": "registry-artifacts", "from": "registry", "to": "artifacts", "variant": "dashed" },
+    { "id": "db-sqlite", "from": "db", "to": "sqlite", "variant": "dashed" },
+    { "id": "trace-sqlite", "from": "tracing", "to": "sqlite", "variant": "dashed" }
+  ],
+  "cards": [
+    {
+      "dot": "slate",
+      "title": "目录 ↔ Commit",
+      "items": [
+        "db/ C2.1 · domain/ C2.2 · tracing/ C2.3 · api/ C2.4",
+        "models/ C2.5–2.6 · registry/ C2.7 · POST/GET /api/projects C2.8"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "tracing 订阅与 emit",
+      "items": [
+        "api/ WS /api/events 订阅 in-process bus（C2.4 + C2.3）。",
+        "models/ 每次 gateway 调用 emit model_request/response（C2.5）。"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "config.py",
+      "items": [
+        "C0.3 已有：data_dir、sqlite_path、model_base_url、opslab_*。",
+        "api/deps 注入 Settings；不在此图画边以免交叉。"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "R12 · Ops Lab",
+      "items": [
+        "schema 无 FTS；检索投影在 knowledge/retrieval。",
+        "demo/ops-lab 仍由 C1 脚本驱动；C3 OpsLabToolAdapter 再接 lab。"
+      ]
+    }
+  ]
+}

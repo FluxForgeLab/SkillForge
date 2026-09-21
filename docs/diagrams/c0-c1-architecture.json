@@ -2,39 +2,33 @@
   "schema_version": 1,
   "diagram_type": "architecture",
   "meta": {
-    "title": "SkillForge 当前：C0 脚手架 + C1 Ops Lab",
-    "subtitle": "箭头：发起方 → 接收方。灰实线=已接通。红实线=C1.2 宿主入口（未通）。虚线=尚未实现。",
+    "title": "SkillForge：C0–C1 已落地 + Phase 2 控制面",
+    "subtitle": "实线=C0/C1。Phase 2 虚线框为 C2.x 模块；模块间连线见 phase2-control-plane.html。",
     "output": "c0-c1-architecture.html",
     "quality_profile": "showcase",
     "visual_preset": "editorial",
     "repository": {
       "url": "https://github.com/FluxForgeLab/SkillForge.git",
-      "revision": "dc389248e4c953e0e917b40ea43582416d1ac1af"
+      "revision": "d7a10e9d4341b82e4bbd2144fa7a42ce5d09131e"
     },
     "views": [
       {
-        "id": "now",
-        "label": "现在：C0 + C1.1",
-        "focus": ["operator", "web", "skillforge", "just", "backend"],
-        "note": "Hello 页、Settings 包、命令目录、受害镜像。尚无 compose，宿主没有 :8088。"
+        "id": "ops-lab",
+        "label": "C1 Ops Lab（已落地）",
+        "focus": ["operator", "just", "nginx", "backend", "mockdb", "verifier", "faults"],
+        "note": ":8088 演示入口；F1–F3；catalog；C1.8 集成测。"
       },
       {
-        "id": "topology",
-        "label": "C1.2 拓扑",
-        "focus": ["operator", "just", "nginx", "backend", "mockdb"],
-        "note": "lab-up 启动 skillforge-lab。宿主 :8088 → nginx → backend :8080 → mock-db。"
+        "id": "phase2",
+        "label": "Phase 2 模块",
+        "focus": ["api", "domain", "sqlite", "tracing", "models", "registry"],
+        "note": "C2.1–C2.8 规划；内部依赖见 phase2-control-plane 详图。"
       },
       {
-        "id": "verify",
-        "label": "C1.3 判定器",
-        "focus": ["verifier", "nginx", "backend", "mockdb"],
-        "note": "JSON：http_status、backend_running、nginx_config_valid、upstream_port_matches、db_running。"
-      },
-      {
-        "id": "faults",
-        "label": "C1.4–C1.8 故障",
-        "focus": ["faults", "nginx", "backend", "verifier"],
-        "note": "F1 停 backend。F2 错误 upstream。F3 错误 reload。随后 catalog 与 inject→verify→reset。"
+        "id": "dev-entry",
+        "label": "C0 开发入口",
+        "focus": ["web", "just"],
+        "note": "Vite :5173；just/dev.ps1。"
       }
     ]
   },
@@ -44,112 +38,160 @@
       "type": "external",
       "label": "操作者",
       "sublabel": "浏览器 / curl",
-      "pos": [40, 300],
-      "size": [128, 62]
+      "pos": [40, 360],
+      "size": [118, 56]
     },
     {
       "id": "web",
       "type": "frontend",
-      "label": "Web Hello",
-      "sublabel": "Vite 127.0.0.1:5173",
+      "label": "Web",
+      "sublabel": "Vite :5173",
       "tag": "C0.4",
-      "pos": [230, 180],
-      "size": [148, 64],
-      "sources": [{ "path": "apps/web/vite.config.ts", "line": 13, "end_line": 17, "label": "IPv4 绑定" }]
-    },
-    {
-      "id": "skillforge",
-      "type": "backend",
-      "label": "skillforge 包",
-      "sublabel": "仅 Settings，尚无 API",
-      "tag": "C0.3",
-      "pos": [300, 420],
-      "size": [148, 64],
-      "sources": [{ "path": "skillforge/config.py", "line": 26, "end_line": 41, "label": "端口与 lab 名" }]
+      "pos": [40, 80],
+      "size": [118, 56]
     },
     {
       "id": "just",
       "type": "external",
       "label": "just / dev.ps1",
-      "sublabel": "api · web · lab-* · test",
+      "sublabel": "lab-* · test-integration",
       "tag": "C0.5",
-      "pos": [40, 420],
-      "size": [128, 64],
-      "sources": [{ "path": "scripts/dev.ps1", "line": 48, "end_line": 51, "label": "lab-up" }]
+      "pos": [40, 520],
+      "size": [118, 56]
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "api/",
+      "sublabel": "FastAPI C2.4",
+      "tag": "C2.4",
+      "pos": [240, 80],
+      "size": [120, 52]
+    },
+    {
+      "id": "models",
+      "type": "cloud",
+      "label": "models/",
+      "sublabel": "C2.5–2.6",
+      "tag": "C2.5",
+      "pos": [400, 80],
+      "size": [120, 52]
+    },
+    {
+      "id": "registry",
+      "type": "backend",
+      "label": "registry/",
+      "sublabel": "C2.7 · C2.8",
+      "tag": "C2.7",
+      "pos": [400, 180],
+      "size": [120, 52]
+    },
+    {
+      "id": "domain",
+      "type": "backend",
+      "label": "domain/",
+      "sublabel": "C2.2",
+      "tag": "C2.2",
+      "pos": [240, 180],
+      "size": [120, 52]
+    },
+    {
+      "id": "sqlite",
+      "type": "database",
+      "label": "db/ + SQLite",
+      "sublabel": "C2.1",
+      "tag": "C2.1",
+      "pos": [240, 280],
+      "size": [120, 52],
+      "sources": [{ "path": "docs/execution-plan.md", "line": 146, "end_line": 146, "label": "C2.1" }]
+    },
+    {
+      "id": "tracing",
+      "type": "messagebus",
+      "label": "tracing/",
+      "sublabel": "C2.3",
+      "tag": "C2.3",
+      "pos": [400, 280],
+      "size": [120, 52]
     },
     {
       "id": "nginx",
       "type": "cloud",
-      "label": "nginx 反代",
-      "sublabel": "宿主 :8088 → :80",
+      "label": "nginx",
+      "sublabel": "宿主 :8088",
       "tag": "C1.2",
-      "pos": [470, 300],
-      "size": [140, 64]
+      "pos": [680, 360],
+      "size": [120, 56]
     },
     {
       "id": "backend",
       "type": "backend",
-      "label": "受害 backend",
-      "sublabel": "容器内 :8080 /health",
+      "label": "backend",
+      "sublabel": "C1.1",
       "tag": "C1.1",
-      "pos": [680, 300],
-      "size": [148, 64],
-      "sources": [{ "path": "demo/ops-lab/backend/app.py", "line": 31, "end_line": 41, "label": "health + items" }]
+      "pos": [860, 360],
+      "size": [120, 56]
     },
     {
       "id": "mockdb",
       "type": "database",
       "label": "mock-db",
-      "sublabel": "禁止停止 / 删除",
+      "sublabel": "C1.2",
       "tag": "C1.2",
-      "pos": [890, 300],
-      "size": [140, 64]
+      "pos": [1040, 360],
+      "size": [118, 56]
     },
     {
       "id": "verifier",
       "type": "security",
-      "label": "判定器",
-      "sublabel": "JSON + exit 0/1",
+      "label": "verifier",
+      "sublabel": "C1.3",
       "tag": "C1.3",
-      "pos": [470, 120],
-      "size": [140, 64]
+      "pos": [680, 220],
+      "size": [120, 54]
     },
     {
       "id": "faults",
       "type": "security",
-      "label": "注入 / 复位",
-      "sublabel": "F1 F2 F3 + catalog",
-      "tag": "C1.4–C1.7",
-      "pos": [680, 120],
-      "size": [148, 64]
+      "label": "faults",
+      "sublabel": "C1.7",
+      "tag": "C1.7",
+      "pos": [860, 220],
+      "size": [120, 54]
     }
   ],
   "boundaries": [
     {
       "kind": "region",
-      "label": "宿主机 — C0 脚手架（已落地）",
-      "wraps": ["operator", "web", "skillforge", "just", "verifier", "faults"]
+      "label": "宿主机",
+      "wraps": [
+        "operator",
+        "web",
+        "just",
+        "api",
+        "models",
+        "registry",
+        "domain",
+        "sqlite",
+        "tracing",
+        "verifier",
+        "faults"
+      ]
     },
     {
       "kind": "region",
-      "label": "Docker compose skillforge-lab — C1",
+      "label": "Docker skillforge-lab",
       "wraps": ["nginx", "backend", "mockdb"]
     }
   ],
   "connections": [
     {
-      "id": "op-web",
-      "from": "operator",
-      "to": "web",
-      "label": ":5173",
-      "fromSide": "top",
+      "id": "web-api",
+      "from": "web",
+      "to": "api",
+      "variant": "dashed",
+      "fromSide": "right",
       "toSide": "left"
-    },
-    {
-      "id": "just-pkg",
-      "from": "just",
-      "to": "skillforge",
-      "route": "straight"
     },
     {
       "id": "op-nginx",
@@ -159,37 +201,35 @@
       "variant": "emphasis",
       "fromSide": "right",
       "toSide": "left",
-      "labelDy": 46
+      "labelAt": [420, 340]
     },
     {
       "id": "just-lab",
       "from": "just",
       "to": "nginx",
       "label": "lab-up",
-      "variant": "dashed",
       "fromSide": "right",
-      "toSide": "bottom"
+      "toSide": "left",
+      "via": [[580, 548], [580, 388]]
     },
     {
       "id": "ngx-be",
       "from": "nginx",
       "to": "backend",
-      "label": "反代 :8080",
-      "variant": "dashed"
+      "fromSide": "right",
+      "toSide": "left"
     },
     {
       "id": "be-db",
       "from": "backend",
       "to": "mockdb",
-      "label": "items",
-      "variant": "dashed"
+      "fromSide": "right",
+      "toSide": "left"
     },
     {
       "id": "ver-ngx",
       "from": "verifier",
       "to": "nginx",
-      "label": "探测",
-      "variant": "dashed",
       "fromSide": "bottom",
       "toSide": "top"
     },
@@ -197,18 +237,14 @@
       "id": "f-be",
       "from": "faults",
       "to": "backend",
-      "label": "F1 停止",
-      "variant": "dashed",
       "fromSide": "bottom",
       "toSide": "top",
-      "labelDy": 24
+      "labelAt": [920, 300]
     },
     {
       "id": "f-ngx",
       "from": "faults",
       "to": "nginx",
-      "label": "F2 / F3",
-      "variant": "dashed",
       "fromSide": "left",
       "toSide": "top"
     }
@@ -216,26 +252,34 @@
   "cards": [
     {
       "dot": "slate",
-      "title": "箭头：指向接收方",
+      "title": "Phase 2 详图",
       "items": [
-        "箭头从发起方指向被作用的一方。操作者 → 方框：发 HTTP。just → 方框：用那条命令启动它。",
-        "nginx → backend → mock-db：转发请求。判定器 → nginx：只读探测。注入 → 方框：改配置或停进程。"
+        "模块间 repos / WS / emit / sink 见 docs/diagrams/phase2-control-plane.html。",
+        "总览只画 Web→api；避免与 C1 边交叉。"
       ]
     },
     {
       "dot": "emerald",
-      "title": "灰实线 / 红实线 / 虚线",
+      "title": "实线 vs 虚线",
       "items": [
-        "灰实线：本机已接通（打开 :5173；just lint/test 打到包）。红实线：演示入口 curl :8088，要等 C1.2 才通。",
-        "虚线：代码里还没有这条边（compose、反代、mock-db、判定器、F1–F3）。"
+        "实线：C0–C1（:5173、:8088、Ops Lab、verifier、faults）。",
+        "虚线：Web→api 与 Phase 2 六个框（C2 落地后改实线）。"
       ]
     },
     {
       "dot": "amber",
-      "title": "边上的字",
+      "title": "Phase 2 六块",
       "items": [
-        ":5173 Hello 页（已通）。:8088 经 nginx 探 /health（C1.2）。lab-up 启动 skillforge-lab。反代 :8080，再 items 到 mock-db。",
-        "探测=判定器 JSON。F1 停 backend。F2/F3 改 nginx。just → 包那条灰线未标字，是 lint/test（C0.5，已通）。"
+        "api C2.4 · domain C2.2 · db/SQLite C2.1 · tracing C2.3",
+        "models C2.5–2.6 · registry C2.7（含 C2.8 projects API）"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Phase 3",
+      "items": [
+        "C3：golden Skill、Sandbox、Runtime、OpsLabToolAdapter。",
+        "检索 R12：FTS 投影不在 schema.sql。"
       ]
     }
   ]
