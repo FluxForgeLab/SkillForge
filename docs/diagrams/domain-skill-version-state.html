@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="generator" content="archify 2.12.0">
-  <title>SkillForge：C0–C1 已落地 + Phase 2 控制面 Diagram</title>
+  <title>SkillVersionStatus（C2.2 已实现） Diagram</title>
   <script>
     // Resolve the theme before first paint so light-preference users don't
     // see a dark flash. The toolbar script below re-applies with UI state.
@@ -4496,13 +4496,13 @@
     <div class="header">
       <div class="header-row">
         <div class="pulse-dot"></div>
-        <h1>SkillForge：C0–C1 已落地 + Phase 2 控制面</h1>
+        <h1>SkillVersionStatus（C2.2 已实现）</h1>
       </div>
-      <p class="subtitle">实线=C0/C1。C2.1–C2.2 已落地；Phase 2 详图 + 状态机见 phase2-control-plane.html 与 domain-*-state.html。</p>
+      <p class="subtitle">ensure_skill_version_transition · skill_versions.status · 自动流程 ≤ CANDIDATE</p>
     </div>
 
-    <script id="archify-guided-views-data" type="application/json">[{"id":"ops-lab","label":"C1 Ops Lab（已落地）","focus":["operator","just","nginx","backend","mockdb","verifier","faults"],"note":":8088 演示入口；F1–F3；catalog；C1.8 集成测。"},{"id":"phase2","label":"Phase 2 模块","focus":["api","domain","sqlite","tracing","models","registry"],"note":"C2.1 db · C2.2 domain 状态机；详图 phase2-control-plane + domain-*-state.html。"},{"id":"dev-entry","label":"C0 开发入口","focus":["web","just"],"note":"Vite :5173；just/dev.ps1。"}]</script>
-    <script id="archify-source-evidence-data" type="application/json">{"schemaVersion":1,"verified":true,"repository":{"url":"https://github.com/FluxForgeLab/SkillForge","revision":"96dcafe9bb2a7c1ce417e4036961db32fd2e7729","shortRevision":"96dcafe"},"referenceCount":1,"nodes":{"sqlite":[{"path":"docs/execution-plan.md","line":146,"endLine":146,"label":"C2.1","href":"https://github.com/FluxForgeLab/SkillForge/blob/96dcafe9bb2a7c1ce417e4036961db32fd2e7729/docs/execution-plan.md#L146"}]}}</script>
+    <script id="archify-guided-views-data" type="application/json">[{"id":"happy-path","label":"主路径","focus":["sv_draft","sv_candidate","sv_validated","sv_approved","sv_published"],"note":"DRAFT→CANDIDATE（C6.7）→ VALIDATED → APPROVED → PUBLISHED。"},{"id":"reject","label":"REJECTED","focus":["sv_draft","sv_candidate","sv_validated","sv_rejected"],"note":"DRAFT / CANDIDATE / VALIDATED 均可 → REJECTED。"},{"id":"governance","label":"治理","focus":["sv_candidate","sv_approved","sv_published"],"note":"APPROVED / PUBLISHED 仅人工 API（C7.6）；禁止 DRAFT→PUBLISHED。"}]</script>
+
     <div class="guided-views no-print" id="guided-views" hidden aria-label="Guided diagram views">
       <button id="guided-view-prev" type="button" aria-label="Previous guided view" title="Previous guided view ([)">&#8592;</button>
       <div class="guided-view-copy">
@@ -4544,9 +4544,9 @@
 
     <!-- Main Diagram -->
     <div class="diagram-container" data-detail-level="read">
-      <svg viewBox="0 0 1228 664" role="img" aria-labelledby="archify-diagram-title archify-diagram-description" data-preset="editorial" data-quality-profile="showcase">
-        <title id="archify-diagram-title">SkillForge：C0–C1 已落地 + Phase 2 控制面</title>
-        <desc id="archify-diagram-description">实线=C0/C1。C2.1–C2.2 已落地；Phase 2 详图 + 状态机见 phase2-control-plane.html 与 domain-*-state.html。</desc>
+      <svg viewBox="0 0 980 780" role="img" aria-labelledby="archify-diagram-title archify-diagram-description" data-preset="editorial" data-quality-profile="showcase">
+        <title id="archify-diagram-title">SkillVersionStatus（C2.2 已实现）</title>
+        <desc id="archify-diagram-description">ensure_skill_version_transition · skill_versions.status · 自动流程 ≤ CANDIDATE</desc>
         <!-- Definitions -->
         <defs>
           <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
@@ -4569,250 +4569,125 @@
         <!-- Background Grid -->
         <rect width="100%" height="100%" fill="url(#grid)" />
 
-        <!-- Boundaries (behind everything) -->
-        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="0" x="10" y="50" width="1000" height="546" rx="12" class="c-region" stroke-width="1"/>
-        <text x="18" y="68" class="t-cloud" font-size="9" font-weight="600">宿主机</text>
+        <!-- Lifecycle bands -->
+        <path d="M 72 112 L 908 112" class="a-default" stroke-width="0.8" stroke-dasharray="3,8"/>
+        <text x="72" y="100" class="t-dim" font-size="10" font-weight="600">01 / Skill 版本（§9）</text>
+        <path d="M 72 264 L 908 264" class="a-default" stroke-width="0.8" stroke-dasharray="3,8"/>
+        <text x="72" y="252" class="t-dim" font-size="10" font-weight="600">02 / 拒绝分支</text>
+        <path d="M 72 436 L 908 436" class="a-default" stroke-width="0.8" stroke-dasharray="3,8"/>
+        <text x="72" y="424" class="t-dim" font-size="10" font-weight="600">03 / 终态</text>
 
-        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="1" x="650" y="330" width="538" height="106" rx="12" class="c-region" stroke-width="1"/>
-        <text x="658" y="348" class="t-cloud" font-size="9" font-weight="600">Docker skillforge-lab</text>
+        <!-- Primary lifecycle rail -->
+        <path d="M 154 157 L 748 157" class="a-emphasis" stroke-width="2.2" marker-end="url(#arrowhead-emphasis)"/>
 
-        <!-- Connection paths (before components for correct z-order) -->
-        <path data-edge-from="web" data-edge-to="api" data-edge-key="0" data-edge-id="web-api" data-composition-points="158,108;182,108;182,124;216,124;216,106;240,106" d="M 158 108 L 174 108 Q 182 108 182 116 L 182 116 Q 182 124 190 124 L 208 124 Q 216 124 216 116 L 216 114 Q 216 106 224 106 L 240 106" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
-        <path data-edge-from="operator" data-edge-to="nginx" data-edge-label=":8088" data-edge-key="1" data-edge-id="op-nginx" data-composition-points="158,388;680,388" d="M 158 388 L 680 388" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
-        <path data-edge-from="just" data-edge-to="nginx" data-edge-label="lab-up" data-edge-key="2" data-edge-id="just-lab" data-composition-points="158,548;580,548;580,388;680,388" d="M 158 548 L 572 548 Q 580 548 580 540 L 580 396 Q 580 388 588 388 L 680 388" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="nginx" data-edge-to="backend" data-edge-key="3" data-edge-id="ngx-be" data-composition-points="800,388;860,388" d="M 800 388 L 860 388" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="backend" data-edge-to="mockdb" data-edge-key="4" data-edge-id="be-db" data-composition-points="980,388;1040,388" d="M 980 388 L 1040 388" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="verifier" data-edge-to="nginx" data-edge-key="5" data-edge-id="ver-ngx" data-composition-points="740,274;740,298;756,298;756,336;733,336;733,360" d="M 740 274 L 740 290 Q 740 298 748 298 L 748 298 Q 756 298 756 306 L 756 328 Q 756 336 748 336 L 741 336 Q 733 336 733 344 L 733 360" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="faults" data-edge-to="backend" data-edge-key="6" data-edge-id="f-be" data-composition-points="920,274;920,360" d="M 920 274 L 920 360" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="faults" data-edge-to="nginx" data-edge-key="7" data-edge-id="f-ngx" data-composition-points="860,247;836,247;836,336;747,336;747,360" d="M 860 247 L 844 247 Q 836 247 836 255 L 836 328 Q 836 336 828 336 L 755 336 Q 747 336 747 344 L 747 360" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <!-- Transition paths -->
+        <path data-edge-from="sv_draft" data-edge-to="sv_rejected" data-edge-key="0" data-edge-id="sv_draft_rejected" data-composition-points="94,188;94,542;402,542;402,450" d="M 94 188 L 94 532 Q 94 542 104 542 L 392 542 Q 402 542 402 532 L 402 450" class="a-security" stroke-width="1.1" marker-end="url(#arrowhead-security)"/>
+        <path data-edge-from="sv_candidate" data-edge-to="sv_rejected" data-edge-key="1" data-edge-id="sv_candidate_rejected" data-composition-points="248,188;248,542;402,542;402,450" d="M 248 188 L 248 532 Q 248 542 258 542 L 392 542 Q 402 542 402 532 L 402 450" class="a-security" stroke-width="1.1" marker-end="url(#arrowhead-security)"/>
+        <path data-edge-from="sv_validated" data-edge-to="sv_rejected" data-edge-key="2" data-edge-id="sv_validated_rejected" data-composition-points="402,188;402,542;402,542;402,450" d="M 402 188 L 402 542 L 402 542 L 402 450" class="a-security" stroke-width="1.1" marker-end="url(#arrowhead-security)"/>
 
-        <!-- Components -->
-        <g id="node-operator" data-node-id="operator" data-node-label="操作者" tabindex="0" role="button" aria-label="Focus 操作者, 浏览器 / curl, 宿主机" aria-pressed="false" data-node-kind="external" data-node-sublabel="浏览器 / curl" data-node-context="宿主机">
-          <title>操作者 · 浏览器 / curl · 宿主机</title>
-          <rect x="40" y="360" width="118" height="56" rx="6" class="c-mask"/>
-          <rect x="40" y="360" width="118" height="56" rx="6" class="c-external" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(46 366) scale(0.6875)">
-            <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
-            <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
+        <!-- States -->
+        <g id="node-sv_draft" data-node-id="sv_draft" data-node-label="DRAFT" tabindex="0" role="button" aria-label="Focus DRAFT, 编译落盘, Skill 版本（§9）" aria-pressed="false" data-node-kind="start" data-node-sublabel="编译落盘" data-node-context="Skill 版本（§9）">
+          <title>DRAFT · 编译落盘 · Skill 版本（§9）</title>
+          <rect x="35" y="126" width="118" height="62" rx="7" class="c-mask"/>
+          <rect x="35" y="126" width="118" height="62" rx="7" class="c-frontend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="start" class="semantic-sigil s-frontend" transform="translate(136 132) scale(0.6875)">
+            <circle cx="8" cy="8" r="5"/>
+            <path d="m7 5.4 3.6 2.6L7 10.6Z" class="sigil-fill"/>
           </g>
-          <text data-detail-anchor x="99" y="386" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">操作者</text>
-        <text data-detail="context" x="99" y="402" class="t-muted" font-size="9" text-anchor="middle">浏览器 / curl</text>
+        <text data-detail="fine" x="45" y="140" class="t-frontend" font-size="7" font-weight="700">01</text>
+          <text data-detail-anchor x="94" y="147" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">DRAFT</text>
+          <text data-detail="context" x="94" y="163" class="t-muted" font-size="7" text-anchor="middle">编译落盘</text>
         </g>
 
-        <g id="node-web" data-node-id="web" data-node-label="Web" tabindex="0" role="button" aria-label="Focus Web, Vite :5173, 宿主机" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="Vite :5173" data-node-tag="C0.4" data-node-context="宿主机">
-          <title>Web · Vite :5173 · 宿主机 · C0.4</title>
-          <rect x="40" y="80" width="118" height="56" rx="6" class="c-mask"/>
-          <rect x="40" y="80" width="118" height="56" rx="6" class="c-frontend" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(46 86) scale(0.6875)">
-            <rect x="2" y="3" width="12" height="10" rx="2"/>
-            <path d="M2 6.5h12"/>
-            <circle cx="4.1" cy="4.8" r=".7" class="sigil-fill"/>
-            <circle cx="6.3" cy="4.8" r=".7" class="sigil-fill"/>
+        <g id="node-sv_candidate" data-node-id="sv_candidate" data-node-label="CANDIDATE" tabindex="0" role="button" aria-label="Focus CANDIDATE, 校验通过, Skill 版本（§9）" aria-pressed="false" data-node-kind="active" data-node-sublabel="校验通过" data-node-tag="auto max" data-node-context="Skill 版本（§9）">
+          <title>CANDIDATE · 校验通过 · Skill 版本（§9） · auto max</title>
+          <rect x="189" y="126" width="118" height="62" rx="7" class="c-mask"/>
+          <rect x="189" y="126" width="118" height="62" rx="7" class="c-backend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="active" class="semantic-sigil s-backend" transform="translate(290 132) scale(0.6875)">
+            <path d="M2 8h3l1.5-3.5L9 12l1.6-4H14"/>
           </g>
-          <text data-detail-anchor x="99" y="106" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Web</text>
-        <text data-detail="context" x="99" y="122" class="t-muted" font-size="9" text-anchor="middle">Vite :5173</text>
-        <text data-detail="fine" x="99" y="128" class="t-frontend" font-size="7" text-anchor="middle">C0.4</text>
+        <text data-detail="fine" x="199" y="140" class="t-backend" font-size="7" font-weight="700">02</text>
+          <text data-detail-anchor x="248" y="147" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">CANDIDATE</text>
+          <text data-detail="context" x="248" y="163" class="t-muted" font-size="7" text-anchor="middle">校验通过</text>
+        <text data-detail="fine" x="248" y="177" class="t-backend" font-size="7" text-anchor="middle">auto max</text>
         </g>
 
-        <g id="node-just" data-node-id="just" data-node-label="just / dev.ps1" tabindex="0" role="button" aria-label="Focus just / dev.ps1, lab-* · test-integration, 宿主机" aria-pressed="false" data-node-kind="external" data-node-sublabel="lab-* · test-integration" data-node-tag="C0.5" data-node-context="宿主机">
-          <title>just / dev.ps1 · lab-* · test-integration · 宿主机 · C0.5</title>
-          <rect x="40" y="520" width="118" height="56" rx="6" class="c-mask"/>
-          <rect x="40" y="520" width="118" height="56" rx="6" class="c-external" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(46 526) scale(0.6875)">
-            <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
-            <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
+        <g id="node-sv_validated" data-node-id="sv_validated" data-node-label="VALIDATED" tabindex="0" role="button" aria-label="Focus VALIDATED, 评测/门禁, Skill 版本（§9）" aria-pressed="false" data-node-kind="decision" data-node-sublabel="评测/门禁" data-node-context="Skill 版本（§9）">
+          <title>VALIDATED · 评测/门禁 · Skill 版本（§9）</title>
+          <rect x="343" y="126" width="118" height="62" rx="7" class="c-mask"/>
+          <rect x="343" y="126" width="118" height="62" rx="7" class="c-security" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="neutral" class="semantic-sigil s-external" transform="translate(444 132) scale(0.6875)">
+            <rect x="3" y="3" width="10" height="10" rx="2"/>
+            <circle cx="8" cy="8" r="1.2" class="sigil-fill"/>
           </g>
-          <text data-detail-anchor x="99" y="546" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">just / dev.ps1</text>
-        <text data-detail="context" x="99" y="562" class="t-muted" font-size="9" text-anchor="middle">lab-* · test-integration</text>
-        <text data-detail="fine" x="99" y="568" class="t-external" font-size="7" text-anchor="middle">C0.5</text>
+        <text data-detail="fine" x="353" y="140" class="t-security" font-size="7" font-weight="700">03</text>
+          <text data-detail-anchor x="402" y="147" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">VALIDATED</text>
+          <text data-detail="context" x="402" y="163" class="t-muted" font-size="7" text-anchor="middle">评测/门禁</text>
         </g>
 
-        <g id="node-api" data-node-id="api" data-node-label="api/" tabindex="0" role="button" aria-label="Focus api/, FastAPI C2.4, 宿主机" aria-pressed="false" data-node-kind="backend" data-node-sublabel="FastAPI C2.4" data-node-tag="C2.4" data-node-context="宿主机">
-          <title>api/ · FastAPI C2.4 · 宿主机 · C2.4</title>
-          <rect x="240" y="80" width="120" height="52" rx="6" class="c-mask"/>
-          <rect x="240" y="80" width="120" height="52" rx="6" class="c-backend" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(246 86) scale(0.6875)">
-            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
+        <g id="node-sv_approved" data-node-id="sv_approved" data-node-label="APPROVED" tabindex="0" role="button" aria-label="Focus APPROVED, approver API, Skill 版本（§9）" aria-pressed="false" data-node-kind="waiting" data-node-sublabel="approver API" data-node-tag="human" data-node-context="Skill 版本（§9）">
+          <title>APPROVED · approver API · Skill 版本（§9） · human</title>
+          <rect x="497" y="126" width="118" height="62" rx="7" class="c-mask"/>
+          <rect x="497" y="126" width="118" height="62" rx="7" class="c-cloud" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="waiting" class="semantic-sigil s-cloud" transform="translate(598 132) scale(0.6875)">
+            <path d="M4 2.5h8M4 13.5h8M5 3c0 2.8 2 3.2 3 5-1 1.8-3 2.2-3 5M11 3c0 2.8-2 3.2-3 5 1 1.8 3 2.2 3 5"/>
           </g>
-          <text data-detail-anchor x="300" y="104" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">api/</text>
-        <text data-detail="context" x="300" y="120" class="t-muted" font-size="9" text-anchor="middle">FastAPI C2.4</text>
-        <text data-detail="fine" x="300" y="124" class="t-backend" font-size="7" text-anchor="middle">C2.4</text>
+        <text data-detail="fine" x="507" y="140" class="t-cloud" font-size="7" font-weight="700">04</text>
+          <text data-detail-anchor x="556" y="147" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">APPROVED</text>
+          <text data-detail="context" x="556" y="163" class="t-muted" font-size="7" text-anchor="middle">approver API</text>
+        <text data-detail="fine" x="556" y="177" class="t-cloud" font-size="7" text-anchor="middle">human</text>
         </g>
 
-        <g id="node-models" data-node-id="models" data-node-label="models/" tabindex="0" role="button" aria-label="Focus models/, C2.5–2.6, 宿主机" aria-pressed="false" data-node-kind="cloud" data-node-sublabel="C2.5–2.6" data-node-tag="C2.5" data-node-context="宿主机">
-          <title>models/ · C2.5–2.6 · 宿主机 · C2.5</title>
-          <rect x="400" y="80" width="120" height="52" rx="6" class="c-mask"/>
-          <rect x="400" y="80" width="120" height="52" rx="6" class="c-cloud" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="cloud" class="semantic-sigil s-cloud" transform="translate(406 86) scale(0.6875)">
-            <path d="M4.3 12.5h7.3a2.4 2.4 0 0 0 .2-4.8 4 4 0 0 0-7.5-1.3A3.1 3.1 0 0 0 4.3 12.5Z"/>
+        <g id="node-sv_published" data-node-id="sv_published" data-node-label="PUBLISHED" tabindex="0" role="button" aria-label="Focus PUBLISHED, skills/published, Skill 版本（§9）" aria-pressed="false" data-node-kind="success" data-node-sublabel="skills/published" data-node-context="Skill 版本（§9）">
+          <title>PUBLISHED · skills/published · Skill 版本（§9）</title>
+          <rect x="651" y="126" width="118" height="62" rx="7" class="c-mask"/>
+          <rect x="651" y="126" width="118" height="62" rx="7" class="c-database" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="success" class="semantic-sigil s-database" transform="translate(752 132) scale(0.6875)">
+            <circle cx="8" cy="8" r="5.3"/>
+            <path d="m5.2 8 1.8 1.8 3.8-4"/>
           </g>
-          <text data-detail-anchor x="460" y="104" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">models/</text>
-        <text data-detail="context" x="460" y="120" class="t-muted" font-size="9" text-anchor="middle">C2.5–2.6</text>
-        <text data-detail="fine" x="460" y="124" class="t-cloud" font-size="7" text-anchor="middle">C2.5</text>
+        <text data-detail="fine" x="661" y="140" class="t-database" font-size="7" font-weight="700">05</text>
+          <text data-detail-anchor x="710" y="147" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">PUBLISHED</text>
+          <text data-detail="context" x="710" y="163" class="t-muted" font-size="7" text-anchor="middle">skills/published</text>
         </g>
 
-        <g id="node-registry" data-node-id="registry" data-node-label="registry/" tabindex="0" role="button" aria-label="Focus registry/, C2.7 · C2.8, 宿主机" aria-pressed="false" data-node-kind="backend" data-node-sublabel="C2.7 · C2.8" data-node-tag="C2.7" data-node-context="宿主机">
-          <title>registry/ · C2.7 · C2.8 · 宿主机 · C2.7</title>
-          <rect x="400" y="180" width="120" height="52" rx="6" class="c-mask"/>
-          <rect x="400" y="180" width="120" height="52" rx="6" class="c-backend" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(406 186) scale(0.6875)">
-            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
+        <g id="node-sv_rejected" data-node-id="sv_rejected" data-node-label="REJECTED" tabindex="0" role="button" aria-label="Focus REJECTED, 校验/门禁/人工, 终态" aria-pressed="false" data-node-kind="failure" data-node-sublabel="校验/门禁/人工" data-node-tag="terminal" data-node-context="终态">
+          <title>REJECTED · 校验/门禁/人工 · 终态 · terminal</title>
+          <rect x="343" y="450" width="118" height="58" rx="7" class="c-mask"/>
+          <rect x="343" y="450" width="118" height="58" rx="7" class="c-security" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="failure" class="semantic-sigil s-security" transform="translate(444 456) scale(0.6875)">
+            <circle cx="8" cy="8" r="5.3"/>
+            <path d="m5.7 5.7 4.6 4.6m0-4.6-4.6 4.6"/>
           </g>
-          <text data-detail-anchor x="460" y="204" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">registry/</text>
-        <text data-detail="context" x="460" y="220" class="t-muted" font-size="9" text-anchor="middle">C2.7 · C2.8</text>
-        <text data-detail="fine" x="460" y="224" class="t-backend" font-size="7" text-anchor="middle">C2.7</text>
+          <text data-detail-anchor x="402" y="471" class="t-primary" font-size="10" font-weight="600" text-anchor="middle">REJECTED</text>
+          <text data-detail="context" x="402" y="487" class="t-muted" font-size="7" text-anchor="middle">校验/门禁/人工</text>
+        <text data-detail="fine" x="402" y="497" class="t-security" font-size="7" text-anchor="middle">terminal</text>
         </g>
 
-        <g id="node-domain" data-node-id="domain" data-node-label="domain/" tabindex="0" role="button" aria-label="Focus domain/, C2.2 已落地, 宿主机" aria-pressed="false" data-node-kind="backend" data-node-sublabel="C2.2 已落地" data-node-tag="C2.2" data-node-context="宿主机">
-          <title>domain/ · C2.2 已落地 · 宿主机 · C2.2</title>
-          <rect x="240" y="180" width="120" height="52" rx="6" class="c-mask"/>
-          <rect x="240" y="180" width="120" height="52" rx="6" class="c-backend" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(246 186) scale(0.6875)">
-            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
-          </g>
-          <text data-detail-anchor x="300" y="204" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">domain/</text>
-        <text data-detail="context" x="300" y="220" class="t-muted" font-size="9" text-anchor="middle">C2.2 已落地</text>
-        <text data-detail="fine" x="300" y="224" class="t-backend" font-size="7" text-anchor="middle">C2.2</text>
-        </g>
-
-        <g id="node-sqlite" data-node-id="sqlite" data-node-label="db/ + SQLite" tabindex="0" role="button" aria-label="Focus db/ + SQLite, C2.1 已落地, 宿主机" aria-pressed="false" data-node-kind="database" data-node-sublabel="C2.1 已落地" data-node-tag="C2.1" data-node-context="宿主机">
-          <title>db/ + SQLite · C2.1 已落地 · 宿主机 · C2.1</title>
-          <rect x="240" y="280" width="120" height="52" rx="6" class="c-mask"/>
-          <rect x="240" y="280" width="120" height="52" rx="6" class="c-database" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(246 286) scale(0.6875)">
-            <ellipse cx="8" cy="4" rx="5" ry="2"/>
-            <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
-          </g>
-          <text data-detail-anchor x="300" y="304" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">db/ + SQLite</text>
-        <text data-detail="context" x="300" y="320" class="t-muted" font-size="9" text-anchor="middle">C2.1 已落地</text>
-        <text data-detail="fine" x="300" y="324" class="t-database" font-size="7" text-anchor="middle">C2.1</text>
-        </g>
-
-        <g id="node-tracing" data-node-id="tracing" data-node-label="tracing/" tabindex="0" role="button" aria-label="Focus tracing/, C2.3, 宿主机" aria-pressed="false" data-node-kind="messagebus" data-node-sublabel="C2.3" data-node-tag="C2.3" data-node-context="宿主机">
-          <title>tracing/ · C2.3 · 宿主机 · C2.3</title>
-          <rect x="400" y="280" width="120" height="52" rx="6" class="c-mask"/>
-          <rect x="400" y="280" width="120" height="52" rx="6" class="c-messagebus" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="messagebus" class="semantic-sigil s-messagebus" transform="translate(406 286) scale(0.6875)">
-            <path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11"/>
-            <circle cx="5" cy="4.5" r="1" class="sigil-fill"/>
-            <circle cx="10.5" cy="8" r="1" class="sigil-fill"/>
-            <circle cx="7" cy="11.5" r="1" class="sigil-fill"/>
-          </g>
-          <text data-detail-anchor x="460" y="304" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">tracing/</text>
-        <text data-detail="context" x="460" y="320" class="t-muted" font-size="9" text-anchor="middle">C2.3</text>
-        <text data-detail="fine" x="460" y="324" class="t-messagebus" font-size="7" text-anchor="middle">C2.3</text>
-        </g>
-
-        <g id="node-nginx" data-node-id="nginx" data-node-label="nginx" tabindex="0" role="button" aria-label="Focus nginx, 宿主 :8088, Docker skillforge-lab" aria-pressed="false" data-node-kind="cloud" data-node-sublabel="宿主 :8088" data-node-tag="C1.2" data-node-context="Docker skillforge-lab">
-          <title>nginx · 宿主 :8088 · Docker skillforge-lab · C1.2</title>
-          <rect x="680" y="360" width="120" height="56" rx="6" class="c-mask"/>
-          <rect x="680" y="360" width="120" height="56" rx="6" class="c-cloud" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="cloud" class="semantic-sigil s-cloud" transform="translate(686 366) scale(0.6875)">
-            <path d="M4.3 12.5h7.3a2.4 2.4 0 0 0 .2-4.8 4 4 0 0 0-7.5-1.3A3.1 3.1 0 0 0 4.3 12.5Z"/>
-          </g>
-          <text data-detail-anchor x="740" y="386" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">nginx</text>
-        <text data-detail="context" x="740" y="402" class="t-muted" font-size="9" text-anchor="middle">宿主 :8088</text>
-        <text data-detail="fine" x="740" y="408" class="t-cloud" font-size="7" text-anchor="middle">C1.2</text>
-        </g>
-
-        <g id="node-backend" data-node-id="backend" data-node-label="backend" tabindex="0" role="button" aria-label="Focus backend, C1.1, Docker skillforge-lab" aria-pressed="false" data-node-kind="backend" data-node-sublabel="C1.1" data-node-tag="C1.1" data-node-context="Docker skillforge-lab">
-          <title>backend · C1.1 · Docker skillforge-lab · C1.1</title>
-          <rect x="860" y="360" width="120" height="56" rx="6" class="c-mask"/>
-          <rect x="860" y="360" width="120" height="56" rx="6" class="c-backend" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(866 366) scale(0.6875)">
-            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
-          </g>
-          <text data-detail-anchor x="920" y="386" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">backend</text>
-        <text data-detail="context" x="920" y="402" class="t-muted" font-size="9" text-anchor="middle">C1.1</text>
-        <text data-detail="fine" x="920" y="408" class="t-backend" font-size="7" text-anchor="middle">C1.1</text>
-        </g>
-
-        <g id="node-mockdb" data-node-id="mockdb" data-node-label="mock-db" tabindex="0" role="button" aria-label="Focus mock-db, C1.2, Docker skillforge-lab" aria-pressed="false" data-node-kind="database" data-node-sublabel="C1.2" data-node-tag="C1.2" data-node-context="Docker skillforge-lab">
-          <title>mock-db · C1.2 · Docker skillforge-lab · C1.2</title>
-          <rect x="1040" y="360" width="118" height="56" rx="6" class="c-mask"/>
-          <rect x="1040" y="360" width="118" height="56" rx="6" class="c-database" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(1046 366) scale(0.6875)">
-            <ellipse cx="8" cy="4" rx="5" ry="2"/>
-            <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
-          </g>
-          <text data-detail-anchor x="1099" y="386" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">mock-db</text>
-        <text data-detail="context" x="1099" y="402" class="t-muted" font-size="9" text-anchor="middle">C1.2</text>
-        <text data-detail="fine" x="1099" y="408" class="t-database" font-size="7" text-anchor="middle">C1.2</text>
-        </g>
-
-        <g id="node-verifier" data-node-id="verifier" data-node-label="verifier" tabindex="0" role="button" aria-label="Focus verifier, C1.3, 宿主机" aria-pressed="false" data-node-kind="security" data-node-sublabel="C1.3" data-node-tag="C1.3" data-node-context="宿主机">
-          <title>verifier · C1.3 · 宿主机 · C1.3</title>
-          <rect x="680" y="220" width="120" height="54" rx="6" class="c-mask"/>
-          <rect x="680" y="220" width="120" height="54" rx="6" class="c-security" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(686 226) scale(0.6875)">
-            <path d="M8 2.2 13 4v3.5c0 3.1-1.8 5.4-5 6.5-3.2-1.1-5-3.4-5-6.5V4Z"/>
-            <path d="m5.8 8 1.5 1.5 3-3"/>
-          </g>
-          <text data-detail-anchor x="740" y="245" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">verifier</text>
-        <text data-detail="context" x="740" y="261" class="t-muted" font-size="9" text-anchor="middle">C1.3</text>
-        <text data-detail="fine" x="740" y="266" class="t-security" font-size="7" text-anchor="middle">C1.3</text>
-        </g>
-
-        <g id="node-faults" data-node-id="faults" data-node-label="faults" tabindex="0" role="button" aria-label="Focus faults, C1.7, 宿主机" aria-pressed="false" data-node-kind="security" data-node-sublabel="C1.7" data-node-tag="C1.7" data-node-context="宿主机">
-          <title>faults · C1.7 · 宿主机 · C1.7</title>
-          <rect x="860" y="220" width="120" height="54" rx="6" class="c-mask"/>
-          <rect x="860" y="220" width="120" height="54" rx="6" class="c-security" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(866 226) scale(0.6875)">
-            <path d="M8 2.2 13 4v3.5c0 3.1-1.8 5.4-5 6.5-3.2-1.1-5-3.4-5-6.5V4Z"/>
-            <path d="m5.8 8 1.5 1.5 3-3"/>
-          </g>
-          <text data-detail-anchor x="920" y="245" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">faults</text>
-        <text data-detail="context" x="920" y="261" class="t-muted" font-size="9" text-anchor="middle">C1.7</text>
-        <text data-detail="fine" x="920" y="266" class="t-security" font-size="7" text-anchor="middle">C1.7</text>
-        </g>
-
-        <!-- Connection labels -->
-
-        <g data-detail="context" data-edge-from="operator" data-edge-to="nginx" data-edge-label=":8088" data-edge-key="1" data-edge-id="op-nginx">
-          <rect x="403" y="330" width="34" height="14" rx="3" class="c-mask"/>
-          <text x="420" y="340" class="t-backend" font-size="8" text-anchor="middle">:8088</text>
-        </g>
-        <g data-detail="context" data-edge-from="just" data-edge-to="nginx" data-edge-label="lab-up" data-edge-key="2" data-edge-id="just-lab">
-          <rect x="560.6" y="448" width="38.8" height="14" rx="3" class="c-mask"/>
-          <text x="580" y="458" class="t-muted" font-size="8" text-anchor="middle">lab-up</text>
-        </g>
-
-
+        <!-- Transition labels -->
 
 
 
 
         <!-- Legend -->
         <g data-legend-bridge>
-          <text x="40" y="635" class="t-primary" font-size="9" font-weight="600">Legend</text>
-          <g data-legend-kind="external">
-            <rect x="40" y="640" width="14" height="9" rx="2" class="c-external" stroke-width="1"/>
-            <text x="60" y="648" class="t-muted" font-size="8">External</text>
-          </g>
-          <g data-legend-kind="frontend">
-            <rect x="144" y="640" width="14" height="9" rx="2" class="c-frontend" stroke-width="1"/>
-            <text x="164" y="648" class="t-muted" font-size="8">Frontend</text>
-          </g>
-          <g data-legend-kind="backend">
-            <rect x="248" y="640" width="14" height="9" rx="2" class="c-backend" stroke-width="1"/>
-            <text x="268" y="648" class="t-muted" font-size="8">Backend</text>
-          </g>
-          <g data-legend-kind="cloud">
-            <rect x="347" y="640" width="14" height="9" rx="2" class="c-cloud" stroke-width="1"/>
-            <text x="367" y="648" class="t-muted" font-size="8">Cloud</text>
-          </g>
-          <g data-legend-kind="database">
-            <rect x="436" y="640" width="14" height="9" rx="2" class="c-database" stroke-width="1"/>
-            <text x="456" y="648" class="t-muted" font-size="8">Database</text>
-          </g>
-          <g data-legend-kind="messagebus">
-            <rect x="540" y="640" width="14" height="9" rx="2" class="c-messagebus" stroke-width="1"/>
-            <text x="560" y="648" class="t-muted" font-size="8">Message bus</text>
-          </g>
-          <g data-legend-kind="security">
-            <rect x="659" y="640" width="14" height="9" rx="2" class="c-security" stroke-width="1"/>
-            <text x="679" y="648" class="t-muted" font-size="8">Security</text>
-          </g>
+          <text x="220" y="662" class="t-primary" font-size="10" font-weight="600">Legend</text>
+        <g data-legend-kind="active">
+          <rect x="220" y="674" width="14" height="9" rx="2" class="c-backend" stroke-width="1"/>
+          <text x="240" y="682" class="t-muted" font-size="7">active state</text>
+        </g>
+        <g data-legend-kind="waiting">
+          <rect x="325" y="674" width="14" height="9" rx="2" class="c-cloud" stroke-width="1"/>
+          <text x="345" y="682" class="t-muted" font-size="7">waiting</text>
+        </g>
+        <g data-legend-kind="success">
+          <rect x="415" y="674" width="14" height="9" rx="2" class="c-database" stroke-width="1"/>
+          <text x="435" y="682" class="t-muted" font-size="7">terminal success</text>
+        </g>
+        <g data-legend-kind="failure">
+          <rect x="560" y="674" width="14" height="9" rx="2" class="c-security" stroke-width="1"/>
+          <text x="580" y="682" class="t-muted" font-size="7">failure / exit</text>
+        </g>
         </g>
       </svg>
       <p class="intent-trace-status no-print" id="intent-trace-status" role="status" aria-live="polite" aria-atomic="true"></p>
@@ -4999,52 +4874,45 @@
     <div class="cards">
       <div class="card">
         <div class="card-header">
-          <div class="card-dot slate"></div>
-          <h3>Phase 2 详图</h3>
-        </div>
-        <ul>
-          <li>&bull; 模块依赖：docs/diagrams/phase2-control-plane.html。</li>
-          <li>&bull; 状态流转：domain-pipeline-state.html · domain-skill-version-state.html。</li>
-        </ul>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
           <div class="card-dot emerald"></div>
-          <h3>实线 vs 虚线</h3>
+          <h3>合法转移（代码）</h3>
         </div>
         <ul>
-          <li>&bull; 实线：C0–C1（:5173、:8088、Ops Lab、verifier、faults）。</li>
-          <li>&bull; 虚线：Web→api 与 Phase 2 六个框（C2 落地后改实线）。</li>
+          <li>&bull; DRAFT → CANDIDATE | REJECTED</li>
+          <li>&bull; CANDIDATE → VALIDATED | REJECTED</li>
+          <li>&bull; VALIDATED → APPROVED | REJECTED</li>
+          <li>&bull; APPROVED → PUBLISHED</li>
         </ul>
       </div>
 
       <div class="card">
         <div class="card-header">
           <div class="card-dot amber"></div>
-          <h3>Phase 2 六块</h3>
+          <h3>治理边界</h3>
         </div>
         <ul>
-          <li>&bull; db C2.1 ✓ · domain C2.2 ✓（双状态机）· tracing C2.3 · api C2.4</li>
-          <li>&bull; models C2.5–2.6 · registry C2.7（含 C2.8 projects API）</li>
+          <li>&bull; Evolution 自动终点 ≤ CANDIDATE（C7.6）</li>
+          <li>&bull; 非法 DRAFT→PUBLISHED 被转移表拒绝</li>
+          <li>&bull; registry C2.7 调用 transition_skill_version</li>
         </ul>
       </div>
 
       <div class="card">
         <div class="card-header">
-          <div class="card-dot cyan"></div>
-          <h3>Phase 3</h3>
+          <div class="card-dot slate"></div>
+          <h3>实现</h3>
         </div>
         <ul>
-          <li>&bull; C3：golden Skill、Sandbox、Runtime、OpsLabToolAdapter。</li>
-          <li>&bull; 检索 R12：FTS 投影不在 schema.sql。</li>
+          <li>&bull; skillforge/domain/state_machines.py</li>
+          <li>&bull; _SKILL_VERSION_TRANSITIONS</li>
+          <li>&bull; entities.transition_skill_version</li>
         </ul>
       </div>
     </div>
 
     <!-- Footer -->
     <p class="footer">
-      Architecture diagram &bull; Built with Archify<span class="no-print"> &bull; <a class="artifact-start-link" href="https://tt-a1i.github.io/archify/start.html?type=architecture&amp;source=artifact" target="_blank" rel="noopener noreferrer">Create yours &nearr;</a> &bull; Hover to trace &bull; <kbd>R</kbd> route &bull; Click to focus &bull; <kbd>+</kbd>/<kbd>&minus;</kbd> zoom &bull; <kbd>M</kbd> radar &bull; <kbd>[</kbd>/<kbd>]</kbd> views &bull; <kbd>P</kbd> play story &bull; <kbd>T</kbd> theme &bull; <kbd>E</kbd> export</span>
+      Lifecycle diagram &bull; Built with Archify<span class="no-print"> &bull; <a class="artifact-start-link" href="https://tt-a1i.github.io/archify/start.html?type=lifecycle&amp;source=artifact" target="_blank" rel="noopener noreferrer">Create yours &nearr;</a> &bull; Hover to trace &bull; <kbd>R</kbd> route &bull; Click to focus &bull; <kbd>+</kbd>/<kbd>&minus;</kbd> zoom &bull; <kbd>M</kbd> radar &bull; <kbd>[</kbd>/<kbd>]</kbd> views &bull; <kbd>P</kbd> play story &bull; <kbd>T</kbd> theme &bull; <kbd>E</kbd> export</span>
     </p>
   </div>
 

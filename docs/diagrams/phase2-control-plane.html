@@ -4498,11 +4498,11 @@
         <div class="pulse-dot"></div>
         <h1>SkillForge Phase 2 控制面（C2.1–C2.8 规划）</h1>
       </div>
-      <p class="subtitle">skillforge/ 包内模块与依赖（虚线=规划）。WS / emit 见图例说明。</p>
+      <p class="subtitle">C2.1–C2.2 已落地；双状态机流转见 domain-pipeline-state.html · domain-skill-version-state.html。</p>
     </div>
 
-    <script id="archify-guided-views-data" type="application/json">[{"id":"api-surface","label":"API 层","focus":["web","api","registry","models"],"note":"C2.4 FastAPI + WS · C2.8 projects · C2.5 gateway。"},{"id":"persistence","label":"持久化","focus":["domain","db","sqlite","registry","artifacts"],"note":"C2.1 schema/repos · C2.7 产物目录。"},{"id":"observe","label":"追踪","focus":["tracing","sqlite"],"note":"C2.3 bus + sink；api WS 与 models emit 均汇入 tracing。"}]</script>
-    <script id="archify-source-evidence-data" type="application/json">{"schemaVersion":1,"verified":true,"repository":{"url":"https://github.com/FluxForgeLab/SkillForge","revision":"d7a10e9d4341b82e4bbd2144fa7a42ce5d09131e","shortRevision":"d7a10e9"},"referenceCount":2,"nodes":{"api":[{"path":"docs/execution-plan.md","line":149,"endLine":149,"label":"C2.4","href":"https://github.com/FluxForgeLab/SkillForge/blob/d7a10e9d4341b82e4bbd2144fa7a42ce5d09131e/docs/execution-plan.md#L149"}],"db":[{"path":"docs/execution-plan.md","line":146,"endLine":146,"label":"C2.1","href":"https://github.com/FluxForgeLab/SkillForge/blob/d7a10e9d4341b82e4bbd2144fa7a42ce5d09131e/docs/execution-plan.md#L146"}]}}</script>
+    <script id="archify-guided-views-data" type="application/json">[{"id":"api-surface","label":"API 层","focus":["web","api","registry","models"],"note":"C2.4 FastAPI + WS · C2.8 projects · C2.5 gateway。"},{"id":"state-machines","label":"双状态机（C2.2）","focus":["domain"],"note":"PipelineState 与 SkillVersionStatus 分离（R4）；详图见 domain-*-state.html。"},{"id":"persistence","label":"持久化","focus":["domain","db","sqlite","registry","artifacts"],"note":"C2.1 schema · C2.7 产物目录 · repos 随 C2.3+。"},{"id":"observe","label":"追踪","focus":["tracing","sqlite"],"note":"C2.3 bus + sink；api WS 与 models emit 均汇入 tracing。"}]</script>
+    <script id="archify-source-evidence-data" type="application/json">{"schemaVersion":1,"verified":true,"repository":{"url":"https://github.com/FluxForgeLab/SkillForge","revision":"96dcafe9bb2a7c1ce417e4036961db32fd2e7729","shortRevision":"96dcafe"},"referenceCount":3,"nodes":{"api":[{"path":"docs/execution-plan.md","line":149,"endLine":149,"label":"C2.4","href":"https://github.com/FluxForgeLab/SkillForge/blob/96dcafe9bb2a7c1ce417e4036961db32fd2e7729/docs/execution-plan.md#L149"}],"domain":[{"path":"skillforge/domain/state_machines.py","line":10,"endLine":58,"label":"转移表","href":"https://github.com/FluxForgeLab/SkillForge/blob/96dcafe9bb2a7c1ce417e4036961db32fd2e7729/skillforge/domain/state_machines.py#L10-L58"}],"db":[{"path":"docs/execution-plan.md","line":146,"endLine":146,"label":"C2.1","href":"https://github.com/FluxForgeLab/SkillForge/blob/96dcafe9bb2a7c1ce417e4036961db32fd2e7729/docs/execution-plan.md#L146"}]}}</script>
     <div class="guided-views no-print" id="guided-views" hidden aria-label="Guided diagram views">
       <button id="guided-view-prev" type="button" aria-label="Previous guided view" title="Previous guided view ([)">&#8592;</button>
       <div class="guided-view-copy">
@@ -4546,7 +4546,7 @@
     <div class="diagram-container" data-detail-level="read">
       <svg viewBox="0 0 828 700" role="img" aria-labelledby="archify-diagram-title archify-diagram-description" data-preset="editorial" data-quality-profile="showcase">
         <title id="archify-diagram-title">SkillForge Phase 2 控制面（C2.1–C2.8 规划）</title>
-        <desc id="archify-diagram-description">skillforge/ 包内模块与依赖（虚线=规划）。WS / emit 见图例说明。</desc>
+        <desc id="archify-diagram-description">C2.1–C2.2 已落地；双状态机流转见 domain-pipeline-state.html · domain-skill-version-state.html。</desc>
         <!-- Definitions -->
         <defs>
           <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
@@ -4626,15 +4626,15 @@
         <text data-detail="fine" x="306" y="284" class="t-backend" font-size="7" text-anchor="middle">C2.4</text>
         </g>
 
-        <g id="node-domain" data-node-id="domain" data-node-label="domain/" tabindex="0" role="button" aria-label="Focus domain/, 双状态机 · 实体, skillforge/ 包（Phase 2 规划）" aria-pressed="false" data-node-kind="backend" data-node-sublabel="双状态机 · 实体" data-node-tag="C2.2" data-node-context="skillforge/ 包（Phase 2 规划）">
-          <title>domain/ · 双状态机 · 实体 · skillforge/ 包（Phase 2 规划） · C2.2</title>
+        <g id="node-domain" data-node-id="domain" data-node-label="domain/" tabindex="0" role="button" aria-label="Focus domain/, state_machines · 实体, skillforge/ 包（Phase 2 规划）" aria-pressed="false" data-node-kind="backend" data-node-sublabel="state_machines · 实体" data-node-tag="C2.2" data-node-context="skillforge/ 包（Phase 2 规划）">
+          <title>domain/ · state_machines · 实体 · skillforge/ 包（Phase 2 规划） · C2.2</title>
           <rect x="240" y="400" width="132" height="52" rx="6" class="c-mask"/>
           <rect x="240" y="400" width="132" height="52" rx="6" class="c-backend" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(246 406) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
           <text data-detail-anchor x="306" y="424" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">domain/</text>
-        <text data-detail="context" x="306" y="440" class="t-muted" font-size="9" text-anchor="middle">双状态机 · 实体</text>
+        <text data-detail="context" x="306" y="440" class="t-muted" font-size="9" text-anchor="middle">state_machines · 实体</text>
         <text data-detail="fine" x="306" y="444" class="t-backend" font-size="7" text-anchor="middle">C2.2</text>
         </g>
 
@@ -4688,15 +4688,15 @@
         <text data-detail="fine" x="699" y="284" class="t-external" font-size="7" text-anchor="middle">C2.7</text>
         </g>
 
-        <g id="node-db" data-node-id="db" data-node-label="db/" tabindex="0" role="button" aria-label="Focus db/, schema · repos, skillforge/ 包（Phase 2 规划）" aria-pressed="false" data-node-kind="backend" data-node-sublabel="schema · repos" data-node-tag="C2.1" data-node-context="skillforge/ 包（Phase 2 规划）">
-          <title>db/ · schema · repos · skillforge/ 包（Phase 2 规划） · C2.1</title>
+        <g id="node-db" data-node-id="db" data-node-label="db/" tabindex="0" role="button" aria-label="Focus db/, schema · init, skillforge/ 包（Phase 2 规划）" aria-pressed="false" data-node-kind="backend" data-node-sublabel="schema · init" data-node-tag="C2.1" data-node-context="skillforge/ 包（Phase 2 规划）">
+          <title>db/ · schema · init · skillforge/ 包（Phase 2 规划） · C2.1</title>
           <rect x="440" y="400" width="132" height="52" rx="6" class="c-mask"/>
           <rect x="440" y="400" width="132" height="52" rx="6" class="c-backend" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(446 406) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
           <text data-detail-anchor x="506" y="424" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">db/</text>
-        <text data-detail="context" x="506" y="440" class="t-muted" font-size="9" text-anchor="middle">schema · repos</text>
+        <text data-detail="context" x="506" y="440" class="t-muted" font-size="9" text-anchor="middle">schema · init</text>
         <text data-detail="fine" x="506" y="444" class="t-backend" font-size="7" text-anchor="middle">C2.1</text>
         </g>
 
@@ -4961,7 +4961,7 @@
           <h3>目录 ↔ Commit</h3>
         </div>
         <ul>
-          <li>&bull; db/ C2.1 · domain/ C2.2 · tracing/ C2.3 · api/ C2.4</li>
+          <li>&bull; db/ C2.1 ✓ · domain/ C2.2 ✓ · tracing/ C2.3 · api/ C2.4</li>
           <li>&bull; models/ C2.5–2.6 · registry/ C2.7 · POST/GET /api/projects C2.8</li>
         </ul>
       </div>
@@ -4991,6 +4991,18 @@
       <div class="card">
         <div class="card-header">
           <div class="card-dot cyan"></div>
+          <h3>R4 · 双状态机（C2.2）</h3>
+        </div>
+        <ul>
+          <li>&bull; Pipeline：INGESTED→…→CANDIDATE→EVALUATING→PASSED|FAILED→APPROVED→PUBLISHED</li>
+          <li>&bull; SkillVersion：DRAFT→CANDIDATE→VALIDATED→APPROVED→PUBLISHED；各阶段可→REJECTED</li>
+          <li>&bull; 详图：domain-pipeline-state.html · domain-skill-version-state.html</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot rose"></div>
           <h3>R12 · Ops Lab</h3>
         </div>
         <ul>

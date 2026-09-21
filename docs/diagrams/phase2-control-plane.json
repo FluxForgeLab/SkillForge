@@ -3,13 +3,13 @@
   "diagram_type": "architecture",
   "meta": {
     "title": "SkillForge Phase 2 控制面（C2.1–C2.8 规划）",
-    "subtitle": "skillforge/ 包内模块与依赖（虚线=规划）。WS / emit 见图例说明。",
+    "subtitle": "C2.1–C2.2 已落地；双状态机流转见 domain-pipeline-state.html · domain-skill-version-state.html。",
     "output": "phase2-control-plane.html",
     "quality_profile": "showcase",
     "visual_preset": "editorial",
     "repository": {
       "url": "https://github.com/FluxForgeLab/SkillForge.git",
-      "revision": "d7a10e9d4341b82e4bbd2144fa7a42ce5d09131e"
+      "revision": "96dcafe9bb2a7c1ce417e4036961db32fd2e7729"
     },
     "views": [
       {
@@ -19,10 +19,16 @@
         "note": "C2.4 FastAPI + WS · C2.8 projects · C2.5 gateway。"
       },
       {
+        "id": "state-machines",
+        "label": "双状态机（C2.2）",
+        "focus": ["domain"],
+        "note": "PipelineState 与 SkillVersionStatus 分离（R4）；详图见 domain-*-state.html。"
+      },
+      {
         "id": "persistence",
         "label": "持久化",
         "focus": ["domain", "db", "sqlite", "registry", "artifacts"],
-        "note": "C2.1 schema/repos · C2.7 产物目录。"
+        "note": "C2.1 schema · C2.7 产物目录 · repos 随 C2.3+。"
       },
       {
         "id": "observe",
@@ -65,10 +71,18 @@
       "id": "domain",
       "type": "backend",
       "label": "domain/",
-      "sublabel": "双状态机 · 实体",
+      "sublabel": "state_machines · 实体",
       "tag": "C2.2",
       "pos": [240, 400],
-      "size": [132, 52]
+      "size": [132, 52],
+      "sources": [
+        {
+          "path": "skillforge/domain/state_machines.py",
+          "line": 10,
+          "end_line": 58,
+          "label": "转移表"
+        }
+      ]
     },
     {
       "id": "models",
@@ -110,7 +124,7 @@
       "id": "db",
       "type": "backend",
       "label": "db/",
-      "sublabel": "schema · repos",
+      "sublabel": "schema · init",
       "tag": "C2.1",
       "pos": [440, 400],
       "size": [132, 52],
@@ -159,7 +173,7 @@
       "dot": "slate",
       "title": "目录 ↔ Commit",
       "items": [
-        "db/ C2.1 · domain/ C2.2 · tracing/ C2.3 · api/ C2.4",
+        "db/ C2.1 ✓ · domain/ C2.2 ✓ · tracing/ C2.3 · api/ C2.4",
         "models/ C2.5–2.6 · registry/ C2.7 · POST/GET /api/projects C2.8"
       ]
     },
@@ -181,6 +195,15 @@
     },
     {
       "dot": "cyan",
+      "title": "R4 · 双状态机（C2.2）",
+      "items": [
+        "Pipeline：INGESTED→…→CANDIDATE→EVALUATING→PASSED|FAILED→APPROVED→PUBLISHED",
+        "SkillVersion：DRAFT→CANDIDATE→VALIDATED→APPROVED→PUBLISHED；各阶段可→REJECTED",
+        "详图：domain-pipeline-state.html · domain-skill-version-state.html"
+      ]
+    },
+    {
+      "dot": "rose",
       "title": "R12 · Ops Lab",
       "items": [
         "schema 无 FTS；检索投影在 knowledge/retrieval。",

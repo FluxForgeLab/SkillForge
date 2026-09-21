@@ -3,13 +3,13 @@
   "diagram_type": "architecture",
   "meta": {
     "title": "SkillForge：C0–C1 已落地 + Phase 2 控制面",
-    "subtitle": "实线=C0/C1。Phase 2 虚线框为 C2.x 模块；模块间连线见 phase2-control-plane.html。",
+    "subtitle": "实线=C0/C1。C2.1–C2.2 已落地；Phase 2 详图 + 状态机见 phase2-control-plane.html 与 domain-*-state.html。",
     "output": "c0-c1-architecture.html",
     "quality_profile": "showcase",
     "visual_preset": "editorial",
     "repository": {
       "url": "https://github.com/FluxForgeLab/SkillForge.git",
-      "revision": "d7a10e9d4341b82e4bbd2144fa7a42ce5d09131e"
+      "revision": "96dcafe9bb2a7c1ce417e4036961db32fd2e7729"
     },
     "views": [
       {
@@ -22,7 +22,7 @@
         "id": "phase2",
         "label": "Phase 2 模块",
         "focus": ["api", "domain", "sqlite", "tracing", "models", "registry"],
-        "note": "C2.1–C2.8 规划；内部依赖见 phase2-control-plane 详图。"
+        "note": "C2.1 db · C2.2 domain 状态机；详图 phase2-control-plane + domain-*-state.html。"
       },
       {
         "id": "dev-entry",
@@ -90,7 +90,7 @@
       "id": "domain",
       "type": "backend",
       "label": "domain/",
-      "sublabel": "C2.2",
+      "sublabel": "C2.2 已落地",
       "tag": "C2.2",
       "pos": [240, 180],
       "size": [120, 52]
@@ -99,7 +99,7 @@
       "id": "sqlite",
       "type": "database",
       "label": "db/ + SQLite",
-      "sublabel": "C2.1",
+      "sublabel": "C2.1 已落地",
       "tag": "C2.1",
       "pos": [240, 280],
       "size": [120, 52],
@@ -254,8 +254,8 @@
       "dot": "slate",
       "title": "Phase 2 详图",
       "items": [
-        "模块间 repos / WS / emit / sink 见 docs/diagrams/phase2-control-plane.html。",
-        "总览只画 Web→api；避免与 C1 边交叉。"
+        "模块依赖：docs/diagrams/phase2-control-plane.html。",
+        "状态流转：domain-pipeline-state.html · domain-skill-version-state.html。"
       ]
     },
     {
@@ -270,7 +270,7 @@
       "dot": "amber",
       "title": "Phase 2 六块",
       "items": [
-        "api C2.4 · domain C2.2 · db/SQLite C2.1 · tracing C2.3",
+        "db C2.1 ✓ · domain C2.2 ✓（双状态机）· tracing C2.3 · api C2.4",
         "models C2.5–2.6 · registry C2.7（含 C2.8 projects API）"
       ]
     },

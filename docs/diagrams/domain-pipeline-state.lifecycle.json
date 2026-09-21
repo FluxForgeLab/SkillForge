@@ -1,0 +1,186 @@
+{
+  "schema_version": 1,
+  "diagram_type": "lifecycle",
+  "meta": {
+    "title": "PipelineState（C2.2 已实现）",
+    "subtitle": "ensure_pipeline_transition · C8.1 PipelineRun.state · FAILED 终态无出边",
+    "output": "domain-pipeline-state.html",
+    "viewBox": [980, 720],
+    "visual_preset": "editorial",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "main-rail",
+        "label": "主轨",
+        "focus": ["p_ingested", "p_extracted", "p_drafted", "p_validating", "p_candidate"],
+        "note": "INGESTED → … → CANDIDATE（与 SkillVersionStatus.CANDIDATE 不同名异义）。"
+      },
+      {
+        "id": "eval-publish",
+        "label": "评测与发布",
+        "focus": ["p_evaluating", "p_passed", "p_approved", "p_published"],
+        "note": "EVALUATING → PASSED | FAILED；仅 PASSED → APPROVED → PUBLISHED。"
+      },
+      {
+        "id": "terminal",
+        "label": "终态",
+        "focus": ["p_failed", "p_published"],
+        "note": "禁止 FAILED → APPROVED（test_domain_state_machines）。"
+      }
+    ]
+  },
+  "lanes": [
+    { "id": "main", "label": "Pipeline 阶段（§5.3）" },
+    { "id": "eval", "label": "评测 · 人工门" },
+    { "id": "terminal", "label": "终态" }
+  ],
+  "states": [
+    {
+      "id": "p_ingested",
+      "type": "start",
+      "label": "INGESTED",
+      "sublabel": "文档入库",
+      "lane": "main",
+      "col": 0,
+      "step": "01"
+    },
+    {
+      "id": "p_extracted",
+      "type": "active",
+      "label": "EXTRACTED",
+      "sublabel": "KU 抽取",
+      "lane": "main",
+      "col": 1,
+      "step": "02"
+    },
+    {
+      "id": "p_drafted",
+      "type": "active",
+      "label": "DRAFTED",
+      "sublabel": "Skill 草稿",
+      "lane": "main",
+      "col": 2,
+      "step": "03"
+    },
+    {
+      "id": "p_validating",
+      "type": "active",
+      "label": "VALIDATING",
+      "sublabel": "静态校验",
+      "lane": "main",
+      "col": 3,
+      "step": "04"
+    },
+    {
+      "id": "p_candidate",
+      "type": "decision",
+      "label": "CANDIDATE",
+      "sublabel": "流水线候选",
+      "lane": "main",
+      "col": 4,
+      "step": "05"
+    },
+    {
+      "id": "p_evaluating",
+      "type": "decision",
+      "label": "EVALUATING",
+      "sublabel": "A/B 评测",
+      "lane": "eval",
+      "col": 0,
+      "step": "06"
+    },
+    {
+      "id": "p_passed",
+      "type": "active",
+      "label": "PASSED",
+      "sublabel": "评测通过",
+      "lane": "eval",
+      "col": 1,
+      "step": "07"
+    },
+    {
+      "id": "p_approved",
+      "type": "waiting",
+      "label": "APPROVED",
+      "sublabel": "人工批准",
+      "lane": "eval",
+      "col": 2,
+      "step": "08",
+      "tag": "human"
+    },
+    {
+      "id": "p_published",
+      "type": "success",
+      "label": "PUBLISHED",
+      "sublabel": "流水线完成",
+      "lane": "terminal",
+      "col": 1,
+      "step": "09"
+    },
+    {
+      "id": "p_failed",
+      "type": "failure",
+      "label": "FAILED",
+      "sublabel": "评测失败",
+      "lane": "terminal",
+      "col": 0,
+      "tag": "terminal"
+    }
+  ],
+  "transitions": [
+    {
+      "id": "p_candidate_evaluating",
+      "from": "p_candidate",
+      "to": "p_evaluating",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "route": "drop"
+    },
+    {
+      "id": "p_evaluating_failed",
+      "from": "p_evaluating",
+      "to": "p_failed",
+      "variant": "security",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "route": "drop"
+    },
+    {
+      "id": "p_approved_published",
+      "from": "p_approved",
+      "to": "p_published",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "route": "bottom-channel"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "合法转移（代码）",
+      "items": [
+        "INGESTED→EXTRACTED→DRAFTED→VALIDATING→CANDIDATE",
+        "CANDIDATE→EVALUATING→PASSED|FAILED",
+        "PASSED→APPROVED→PUBLISHED"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "显式禁止",
+      "items": [
+        "FAILED → APPROVED / PUBLISHED",
+        "PUBLISHED / FAILED 无出边",
+        "current→current 抛 InvalidStateTransition"
+      ]
+    },
+    {
+      "dot": "slate",
+      "title": "实现",
+      "items": [
+        "skillforge/domain/state_machines.py",
+        "_PIPELINE_TRANSITIONS",
+        "tests/unit/test_domain_state_machines.py"
+      ]
+    }
+  ]
+}

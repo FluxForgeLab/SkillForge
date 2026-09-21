@@ -1,0 +1,156 @@
+{
+  "schema_version": 1,
+  "diagram_type": "lifecycle",
+  "meta": {
+    "title": "SkillVersionStatus（C2.2 已实现）",
+    "subtitle": "ensure_skill_version_transition · skill_versions.status · 自动流程 ≤ CANDIDATE",
+    "output": "domain-skill-version-state.html",
+    "viewBox": [980, 780],
+    "visual_preset": "editorial",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "happy-path",
+        "label": "主路径",
+        "focus": ["sv_draft", "sv_candidate", "sv_validated", "sv_approved", "sv_published"],
+        "note": "DRAFT→CANDIDATE（C6.7）→ VALIDATED → APPROVED → PUBLISHED。"
+      },
+      {
+        "id": "reject",
+        "label": "REJECTED",
+        "focus": ["sv_draft", "sv_candidate", "sv_validated", "sv_rejected"],
+        "note": "DRAFT / CANDIDATE / VALIDATED 均可 → REJECTED。"
+      },
+      {
+        "id": "governance",
+        "label": "治理",
+        "focus": ["sv_candidate", "sv_approved", "sv_published"],
+        "note": "APPROVED / PUBLISHED 仅人工 API（C7.6）；禁止 DRAFT→PUBLISHED。"
+      }
+    ]
+  },
+  "lanes": [
+    { "id": "main", "label": "Skill 版本（§9）" },
+    { "id": "gate", "label": "拒绝分支" },
+    { "id": "terminal", "label": "终态" }
+  ],
+  "states": [
+    {
+      "id": "sv_draft",
+      "type": "start",
+      "label": "DRAFT",
+      "sublabel": "编译落盘",
+      "lane": "main",
+      "col": 0,
+      "step": "01"
+    },
+    {
+      "id": "sv_candidate",
+      "type": "active",
+      "label": "CANDIDATE",
+      "sublabel": "校验通过",
+      "lane": "main",
+      "col": 1,
+      "step": "02",
+      "tag": "auto max"
+    },
+    {
+      "id": "sv_validated",
+      "type": "decision",
+      "label": "VALIDATED",
+      "sublabel": "评测/门禁",
+      "lane": "main",
+      "col": 2,
+      "step": "03"
+    },
+    {
+      "id": "sv_approved",
+      "type": "waiting",
+      "label": "APPROVED",
+      "sublabel": "approver API",
+      "lane": "main",
+      "col": 3,
+      "step": "04",
+      "tag": "human"
+    },
+    {
+      "id": "sv_published",
+      "type": "success",
+      "label": "PUBLISHED",
+      "sublabel": "skills/published",
+      "lane": "main",
+      "col": 4,
+      "step": "05"
+    },
+    {
+      "id": "sv_rejected",
+      "type": "failure",
+      "label": "REJECTED",
+      "sublabel": "校验/门禁/人工",
+      "lane": "terminal",
+      "col": 0,
+      "tag": "terminal"
+    }
+  ],
+  "transitions": [
+    {
+      "id": "sv_draft_rejected",
+      "from": "sv_draft",
+      "to": "sv_rejected",
+      "variant": "security",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "route": "bottom-channel"
+    },
+    {
+      "id": "sv_candidate_rejected",
+      "from": "sv_candidate",
+      "to": "sv_rejected",
+      "variant": "security",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "route": "bottom-channel",
+      "channelX": 180
+    },
+    {
+      "id": "sv_validated_rejected",
+      "from": "sv_validated",
+      "to": "sv_rejected",
+      "variant": "security",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "route": "bottom-channel",
+      "channelX": 540
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "合法转移（代码）",
+      "items": [
+        "DRAFT → CANDIDATE | REJECTED",
+        "CANDIDATE → VALIDATED | REJECTED",
+        "VALIDATED → APPROVED | REJECTED",
+        "APPROVED → PUBLISHED"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "治理边界",
+      "items": [
+        "Evolution 自动终点 ≤ CANDIDATE（C7.6）",
+        "非法 DRAFT→PUBLISHED 被转移表拒绝",
+        "registry C2.7 调用 transition_skill_version"
+      ]
+    },
+    {
+      "dot": "slate",
+      "title": "实现",
+      "items": [
+        "skillforge/domain/state_machines.py",
+        "_SKILL_VERSION_TRANSITIONS",
+        "entities.transition_skill_version"
+      ]
+    }
+  ]
+}
