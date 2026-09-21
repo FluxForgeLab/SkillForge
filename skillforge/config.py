@@ -38,6 +38,9 @@ class Settings(BaseSettings):
     seed: int | None = None
     structured_output_max_retries: int = 3
 
+    skills_generated_dir: Path = Path("skills/generated")
+    skills_published_dir: Path = Path("skills/published")
+
     demo_mode: DemoMode = "replay"
     opslab_project: str = "skillforge-lab"
     opslab_base_url: str = "http://127.0.0.1:8088"
