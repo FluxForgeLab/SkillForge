@@ -15,11 +15,16 @@ _SHELL_FORBIDDEN = frozenset(";|&<>$`()\n")
 _LOOPBACK_HOSTS = frozenset({"localhost", "127.0.0.1"})
 _HTTP_BODY_LIMIT = 4096
 _HTTP_SCRIPT = (
-    "import sys,urllib.request\n"
-    "r=urllib.request.urlopen(sys.argv[1], timeout=2)\n"
-    'body=r.read(4096).decode("utf-8","replace")\n'
-    "print(r.status)\n"
-    "sys.stdout.write(body)\n"
+    "import sys,urllib.error,urllib.request\n"
+    "try:\n"
+    "    r=urllib.request.urlopen(sys.argv[1], timeout=2)\n"
+    "    status=r.status\n"
+    "    body=r.read(4096)\n"
+    "except urllib.error.HTTPError as exc:\n"
+    "    status=exc.code\n"
+    "    body=exc.read(4096)\n"
+    "print(status)\n"
+    "sys.stdout.write(body.decode('utf-8','replace'))\n"
 )
 
 _OBJECT = "object"
