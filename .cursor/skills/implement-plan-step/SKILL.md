@@ -14,7 +14,7 @@ description: 按 docs/execution-plan.md 中的一个 commit 编号（如 C3.5）
 - [ ] 4. 实现：只改条目范围内的文件；新模块放规则 python-backend.mdc 的目录归属表指定位置
 - [ ] 5. 测试：为完成标准写测试（unit 优先；需要 Docker 的标 integration）
 - [ ] 6. 验证：跑 workflow-and-commits.mdc 中的提交前命令，全部通过
-- [ ] 7. 输出：变更摘要 + commit message（含 `Plan: C<x>.<y>`）+ 范围外发现的建议
+- [ ] 7. 输出：变更摘要 + 建议的 commit message（含 `Plan: C<x>.<y>`）+ 范围外发现的建议。不要执行 `git commit`，除非用户明确要求提交
 ```
 
 ## 用户没给编号时

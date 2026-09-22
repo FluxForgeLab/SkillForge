@@ -73,7 +73,7 @@ uv run skillforge demo
 ## 工作方式
 
 1. 工作单位是执行方案中的一个 commit 编号（`C3.5`）。先读该条目的"内容"与"完成标准"。
-2. 实现 + 测试 + 文档在同一个 commit；提交前跑上面的 lint 与单测；涉及 Docker/前端时追加对应命令。
+2. 实现 + 测试 + 文档按同一个 commit 准备；提交前跑上面的 lint 与单测；涉及 Docker/前端时追加对应命令。真正执行 `git commit` 以 `workflow-and-commits.mdc` 为准，需要用户明确要求。
 3. Commit message：`<type>(<scope>): <summary>`，body 首行 `Plan: C3.5`。
 4. 范围外的发现写在回复末尾作为建议，不顺手改。
 5. 真实模型的响应录制到 `tests/fixtures/transcripts/`，测试用回放；本地开发默认用 `FakeModelAdapter` 或 OpenAI-compatible 云端端点，不假设本机有 GPU。

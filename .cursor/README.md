@@ -10,7 +10,7 @@
 .cursor/
 ├── rules/
 │   ├── project-core.mdc          [always] 北极星、已拍板决策、非目标
-│   ├── workflow-and-commits.mdc  [always] 一个 commit 一个功能点的工作流、验证命令、message 格式
+│   ├── workflow-and-commits.mdc  [always] 一个 commit 一个功能点的工作流、验证命令、message 格式；未经明确要求不执行 git commit
 │   ├── safety-boundaries.mdc     [always] 沙箱、Self-Evolution 红线、凭据
 │   ├── measure-before-story.mdc  [always] 排障先测量端点，禁止未测量就讲故事
 │   ├── python-backend.mdc        [globs skillforge/**, tests/**, demo/**/*.py]
