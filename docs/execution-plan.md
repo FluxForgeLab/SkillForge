@@ -45,6 +45,28 @@ Control（无 Skill）预期：F1 ✅ / F2 ❌或不稳定 / F3 ❌ → 1/3；v0
 
 Runbook 的写法要保证：Appendix B 在 Knowledge Extractor 中被抽为独立的 `diagnostic_rule` 类型 KU，`trigger` 是 "nginx reload failed / upstream mismatch"；Compiler pass 2 按 SkillSpec triggers 筛 KU 时不会选中它；Failure Analyzer 通过 `Retriever` 门面用 `"502 upstream nginx -t"` 检索时能召回它（这一条同时是检索层契约测试的固定用例，任何后端都必须通过）。这三点各有一个测试锁定（C5.9、C6.9、C7.8）。
 
+### 0.4 Phase 3 已落地契约（C3.1–C3.11，不要改回去）
+
+C3 表格仍是当时的任务说明。下面是代码里已经生效的约定。后续 Compiler / Evaluator / Evolution 与之冲突时，以本节为准。
+
+**Golden skill 是 v0.1，不是完整修复手册。** `skills/golden/service-recovery/` 正文覆盖 F1，以及只把 upstream 改回 `server backend:8080;` 的 F2。F3 在 `evals.json` 里，但指令里没有 `nginx -t`、端口对照、删非法指令。Compiler 不得为了补全把 Appendix B 写进 v0.1；那是 v0.2 patch 的事。
+
+**工具名在仓库里保持带点。** 注册表和 SKILL.md 使用 `docker.inspect`、`http.get` 这种名字。发给拒绝点号的 OpenAI 兼容端点（如 Moonshot）时，只在适配器边界把 `.` 换成 `_`，响应再映射回来。不要把注册表或 SKILL.md 改成下划线。
+
+**两条臂的工具列表相同。** 都来自 `runtime_tools()`。`SKILL.md` 的 `tools` / `permissions` 不裁剪注册表，也不写入 prompt。`skill_path=None` 是裸 prompt。有技能时只在后面追加 `# Skill`（name、description、triggers、正文）和非空的 source-map。`evals/` 与 `skill-card.md` 不进 prompt。
+
+**两个执行面不要并成一个。** `shell.read`、`file.read`、`file.write`、`http.get` 在沙箱里。`docker.*` 与 `nginx.*` 在宿主上，只作用于 compose project `skillforge-lab`。脚本里的 `http_get()` 只给 golden 脚本用，不是第二个 Agent 工具。
+
+**`http.get`。** 只允许 ops-lab 源（`localhost` / `127.0.0.1`，端口等于 `opslab_base_url`）。沙箱内把该地址改写成 `host.docker.internal`。HTTP 4xx/5xx 返回 `status`，不算工具错误；连接失败才算。沙箱网络是 bridge，并设置 `host.docker.internal:host-gateway`。不用 `network_mode=host`，也不用 `none`。
+
+**重启白名单。** `docker.restart` 只允许 `backend` 和 `nginx`。`mock-db` 或 `database` 在调用 Docker 之前拒绝，`policy_violation` 的 `output.name` 是 `restart_database`。`nginx.write_config` 遇到 `rm` 不写文件。没有 `delete_volume` 工具。
+
+**循环。** 一次 `generate` 算一步。`PolicyViolation` 计入 `policy_violations` 并交回模型，循环继续。沙箱在 `finally` 里 `destroy`。`max_steps`、`max_seconds`、`temperature`、`seed` 来自 Settings。
+
+**Run 存在 `agent_runs`。** 不要把 harness 的 `RunResult` 写入 `evaluation_runs`（该表外键指向 `skill_versions`）。`GET /api/runs/{id}` 读 `agent_runs`，`GET /api/runs/{id}/events` 读 `trace_events`。`policy_violation` 已是 `TraceEventType`，尽管架构文档 §19 的原列表没有它。
+
+**Kimi 当前模型只接受 `temperature=1`。** 仓库默认温度仍是 `0`，给 Fake 和本地模型用。对着 `api.moonshot.cn` 把温度改回 0 会 HTTP 400。C3.11 实测：`kimi-k3`，5 步，9089 tokens，44974 ms，工具顺序为三次 `docker.inspect`、`docker.logs`、`docker.restart`、`http.get`，verifier 五字段全真。回放文件：`tests/fixtures/transcripts/f1-golden-openai.json`。
+
 ---
 
 ## 1. 目标仓库结构（对架构文档 §17 的简化）
