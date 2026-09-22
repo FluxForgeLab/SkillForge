@@ -17,11 +17,14 @@ from skillforge.config import get_settings
 from skillforge.db.connection import connection
 from skillforge.db.init import initialize_database
 from skillforge.db.repositories.agent_runs import AgentRunRecord, insert_agent_run
+from skillforge.db.repositories.projects import get_project
 from skillforge.domain.entities import TraceEvent
 from skillforge.domain.enums import TraceEventType
 from skillforge.evaluator.cache import replay_trials
 from skillforge.evaluator.cases import load_eval_cases
 from skillforge.evaluator.errors import CacheMiss
+from skillforge.knowledge.retrieval.factory import build_index
+from skillforge.knowledge.retrieval.indexer import Indexer
 from skillforge.models.adapters.recording import RecordingAdapter
 from skillforge.models.gateway import ModelGateway, build_adapter
 from skillforge.runtime.agent import AgentRuntime, LocalHarness, RunResult
@@ -59,7 +62,20 @@ def main(
         return 2
     if parsed.command == "eval":
         return _eval_replay(parsed)
+    if parsed.command == "index":
+        return _index_rebuild(parsed)
     return _run(parsed, inject=inject, harness=harness, sink=sink)
+
+
+def _index_rebuild(parsed: argparse.Namespace) -> int:
+    settings = get_settings()
+    with connection(settings.sqlite_path) as conn:
+        if get_project(conn, parsed.project) is None:
+            print(f"unknown project {parsed.project!r}", file=sys.stderr)
+            return 2
+    asyncio.run(Indexer(settings.sqlite_path, build_index(settings)).rebuild(parsed.project))
+    print(f"rebuilt\t{parsed.project}")
+    return 0
 
 
 def _eval_replay(parsed: argparse.Namespace) -> int:
@@ -176,6 +192,10 @@ def _parse(argv: list[str]) -> argparse.Namespace:
     eval_cmd.add_argument("--version-hash", required=True)
     eval_cmd.add_argument("--model", required=True)
     eval_cmd.add_argument("--replay", action="store_true", required=True)
+    index_cmd = sub.add_parser("index")
+    index_sub = index_cmd.add_subparsers(dest="index_command", required=True)
+    rebuild = index_sub.add_parser("rebuild")
+    rebuild.add_argument("--project", required=True)
     return parser.parse_args(argv)
 
 

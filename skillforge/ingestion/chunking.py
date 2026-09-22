@@ -7,7 +7,7 @@ import re
 from pathlib import Path
 from uuid import uuid4
 
-from skillforge.config import get_settings
+from skillforge.config import Settings, get_settings
 from skillforge.db.connection import connection
 from skillforge.db.init import initialize_database
 from skillforge.db.repositories.chunks import delete_chunks_by_document, insert_chunks
@@ -24,6 +24,8 @@ def chunk_document(
     db_path: Path,
     document: SourceDocument,
     parsed: ParsedDocument,
+    *,
+    settings: Settings | None = None,
 ) -> list[Chunk]:
     """Replace this document's chunks, then project them into the retrieval index."""
     chunks = _chunks(document, parsed)
@@ -32,7 +34,8 @@ def chunk_document(
         delete_chunks_by_document(conn, document.id)
         if chunks:
             insert_chunks(conn, chunks)
-    index = build_index(get_settings(), db_path=db_path)
+    resolved = settings if settings is not None else get_settings()
+    index = build_index(resolved, db_path=db_path)
     asyncio.run(Indexer(db_path, index).index_document(document.id))
     return chunks
 

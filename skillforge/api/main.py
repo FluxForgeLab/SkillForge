@@ -13,6 +13,7 @@ from skillforge.api.routers.demo import router as demo_router
 from skillforge.api.routers.evaluations import router as evaluations_router
 from skillforge.api.routers.projects import router as projects_router
 from skillforge.api.routers.runs import router as runs_router
+from skillforge.api.routers.sources import router as sources_router
 from skillforge.api.ws import ConnectionManager
 from skillforge.api.ws import router as ws_router
 from skillforge.config import Settings, get_settings
@@ -69,6 +70,7 @@ def create_app(
     app.include_router(demo_router, prefix="/api")
     app.include_router(runs_router, prefix="/api")
     app.include_router(evaluations_router, prefix="/api")
+    app.include_router(sources_router, prefix="/api")
 
     return app
 
