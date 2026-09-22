@@ -17,7 +17,7 @@ alwaysApply: true
 ## Self-Evolving ≠ Self-Publishing
 
 - 系统自动流程的终点最多是 `CANDIDATE`。`approve` / `publish` 只能由带 approver 的 API 调用触发，代码里不允许出现自动路径。
-- `evals/evals.json`（fixture + expected + forbidden）对 Patcher **只读**：CANDIDATE 时记录 sha256，评测前校验，Patch 若触碰 `evals/` 直接 reject。防 reward hacking。
+- `evals/evals.json`（fixture + expected + forbidden）对 Patcher **只读**：调用 `record_candidate_evals` 把 sha256 写入 `eval_seals`（升到 `CANDIDATE` 不会自动写），评测前校验，Patch 若触碰 `evals/` 由 `reject_patched_evals` 拒绝。没有封印时评测仍可跑。防 reward hacking。
 - Patcher 不得放宽 permissions、修改 Sandbox policy、删除失败测试。
 - 新增的每条 SKILL.md 指令必须有 `source_ref`（Evidence First）；没有证据的指令不能进入 CANDIDATE。
 

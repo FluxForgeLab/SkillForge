@@ -67,6 +67,22 @@ C3 表格仍是当时的任务说明。下面是代码里已经生效的约定�
 
 **Kimi 当前模型只接受 `temperature=1`。** 仓库默认温度仍是 `0`，给 Fake 和本地模型用。对着 `api.moonshot.cn` 把温度改回 0 会 HTTP 400。C3.11 实测：`kimi-k3`，5 步，9089 tokens，44974 ms，工具顺序为三次 `docker.inspect`、`docker.logs`、`docker.restart`、`http.get`，verifier 五字段全真。回放文件：`tests/fixtures/transcripts/f1-golden-openai.json`。
 
+### 0.5 Phase 4 已落地契约（C4.1–C4.8，不要改回去）
+
+C4 表格仍是当时的任务说明。下面是代码里已经生效的约定。后续 Compiler / Evolution 与之冲突时，以本节为准。
+
+**两张表分开。** harness 的 `RunResult` 写入 `agent_runs`。Evaluator 的每一轮试验写入 `evaluation_runs`。`baseline` 是 JSON：Control 为 `{"baseline": true}`，Treatment 为 `{"baseline": false}`。Control 调用 `harness.run` 时 `skill_path` 是 `None`；Treatment 传入 skill 目录。两臂共用 `runtime_tools()` 和同一份 `Settings` 预算。
+
+**成功只看断言。** `metrics.passed` 为真，当且仅当 `expected` 里的每个字段都出现在 verifier 输出里且值相等，并且 trace 里没有 `forbidden`。`true` 不等于 `1`。`forbidden` 命中 `tool_call.name`，或 `policy_violation.output.name`。因此 `restart_database` 会失败这条 case，重启 `backend` 的 `docker.restart` 不会。超时的评测行状态是 `failed`，`timed_out` 为真；当时 verifier 碰巧健康也不把状态改成 `completed`。Agent 步数耗尽但断言已跑完时，状态仍是 `completed`，`passed` 单独表示断言结果。
+
+**Uplift 与 Benchmark。** `uplift_pp = (treatment 成功率 − control 成功率) × 100`。成功率是该臂 `metrics.passed` 为真的试验次数除以试验次数。回归数是 Treatment 成功率低于 Control 的 case 个数。`write_benchmark` 把任务成功率、Skill Uplift、回归数、策略违规、恢复时间以及 per-case 矩阵写入版本目录的 `BENCHMARK.md` 和 `benchmark.json`。评测 HTTP 任务不会自动调用它。
+
+**封印是一次显式调用。** `record_candidate_evals` 把 `evals/evals.json` 的 sha256 写入 `eval_seals`。同一 `skill_version_id` 已有封印就不能覆盖。评测前若已有封印则核对当前文件；不一致抛 `EvalGuardError`，不注入故障，不写评测行。没有封印时评测照常跑。版本状态升到 `CANDIDATE` 时还不会自动写封印。补丁目录的 `evals.json` 与封印不一致时，`reject_patched_evals` 拒绝。
+
+**评测接口。** `POST /api/skills/{id}/evaluate` 返回 202 和 `job_id`。进度是 EventBus 上的 `workflow_started` 与 `evaluation_completed`，写入这次请求自己的 SQLite。`GET /api/skills/{id}/evaluations/{run_id}` 只返回该 skill 的评测行。没有 `GET /api/jobs/{id}`。
+
+**回放。** 缓存键是 `(version_hash, case_id, arm, model)`，不含重复轮次。同一 case、同一臂再次写入会覆盖上一轮。`skillforge eval --skill <dir> --version-hash <hex> --model <name> --replay` 只读缓存。缺记录时退出码 2，不跑 Agent，不复位，不注入。在线 A/B 仍走 `run_suite`。
+
 ---
 
 ## 1. 目标仓库结构（对架构文档 §17 的简化）
