@@ -1,0 +1,69 @@
+---
+description: 人类开发者保持系统认知的对齐、实现、审查与提交 Gate
+alwaysApply: true
+---
+
+# Human Control Loop
+
+目标不是降低 AI 产出速度，而是保证代码变化速度不超过人类开发者的架构理解速度。
+
+## 默认闭环
+
+```text
+align-project（按需）
+      ↓
+align-plan-step Cx.y
+      ↓
+HUMAN GATE
+      ↓
+implement-plan-step Cx.y
+      ↓
+review-plan-step Cx.y
+      ↓
+HUMAN COMMIT GATE
+      ↓
+git commit
+```
+
+## Gate 规则
+
+### 1. 实现 Gate
+
+对 `docs/execution-plan.md` 中的 C 编号：
+
+- 当前会话尚未做该编号的 Preflight 时，用户说“做 C6.1 / 实现下一个 commit / 继续执行方案”，默认先执行 `align-plan-step`，**不要写代码**。
+- Preflight 输出后必须停止。用户明确表示“批准 / 开始实现 / 按这个方案做”等，才算通过 HUMAN GATE。
+- 用户可明确说“跳过对齐 / 直接实现 / 不需要 Preflight”旁路 Gate；旁路必须来自用户，不得由 Agent 自行推断。
+- 批准只覆盖被对齐的那个 C 编号。不能把 C6.1 的批准沿用到 C6.2。
+
+### 2. Review Gate
+
+实现与测试完成后：
+
+- 默认先执行 `review-plan-step`，检查真实 diff 与原 Preflight 是否一致。
+- Review 只读，不为了让 review 通过而顺手修代码。
+- Review 发现问题时报告问题和建议修复范围，等待用户决定。
+- 用户明确说“跳过 review / 直接提交”时可以旁路。
+
+### 3. Commit Gate
+
+- 没有用户明确的提交指令，不执行 `git commit`。
+- 对执行方案条目，默认要求 review 已完成后再接受提交指令。
+- “测试通过”“完成标准满足”“代码写完”都不等于提交授权。
+
+## 人类认知优先级
+
+对每次对齐 / review，把涉及代码按以下层级分类：
+
+- **RED**：Domain Contract、状态机、Agent loop、Tool/Sandbox 权限边界、Evaluator、Compiler/Evolution 核心决策。人类需要理解实现与关键分支。
+- **YELLOW**：Adapter、Repository、API glue、Tracing、Ingestion 等。人类至少理解接口、数据流、状态和失败模式。
+- **GREEN**：boilerplate、样式、机械 CRUD / mapping 等。人类理解行为和测试即可。
+
+分类是当前变更的认知优先级，不是永久模块标签。
+
+## 不允许
+
+- 为了“省一次确认”而把 align + implement 合并成同一轮，除非用户明确要求旁路。
+- Preflight 说只改 A/B，实际实现又静默修改 C/D。
+- Review 只汇报“改了哪些文件”；必须解释系统行为和 Contract 如何变化。
+- 用“测试都过了”替代 Architecture Delta。
