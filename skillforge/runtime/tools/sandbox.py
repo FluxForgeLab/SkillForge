@@ -129,7 +129,7 @@ def _ensure_shell_read(command: str, policy: SandboxPolicy) -> None:
             policy.ensure_read(token)
 
 
-def _rewrite_opslab_url(url: str, policy: SandboxPolicy, opslab_base_url: str) -> str:
+def ensure_opslab_http_url(url: str, policy: SandboxPolicy, opslab_base_url: str) -> str:
     parsed = urlsplit(url)
     if parsed.scheme != "http":
         raise PolicyViolation(kind="network", name=url, detail="only http is allowed")
@@ -142,5 +142,11 @@ def _rewrite_opslab_url(url: str, policy: SandboxPolicy, opslab_base_url: str) -
     port = parsed.port or 80
     if port != expected_port:
         raise PolicyViolation(kind="network", name=url, detail="port is not allowed")
-    rewritten = parsed._replace(netloc=f"host.docker.internal:{port}")
-    return urlunsplit(rewritten)
+    return url
+
+
+def _rewrite_opslab_url(url: str, policy: SandboxPolicy, opslab_base_url: str) -> str:
+    ensure_opslab_http_url(url, policy, opslab_base_url)
+    parsed = urlsplit(url)
+    port = parsed.port or 80
+    return urlunsplit(parsed._replace(netloc=f"host.docker.internal:{port}"))
