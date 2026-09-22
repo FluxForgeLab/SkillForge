@@ -1,6 +1,7 @@
 """Deterministic evaluation of agent runs against skill eval cases."""
 
 from skillforge.evaluator.assertions import AssertionResult, FieldMismatch, assert_case
+from skillforge.evaluator.benchmark import write_benchmark
 from skillforge.evaluator.cases import LoadedEvalCase, load_eval_cases
 from skillforge.evaluator.errors import EvalLoadError
 from skillforge.evaluator.runner import run_case
@@ -18,4 +19,5 @@ __all__ = [
     "run_case",
     "run_suite",
     "summarize",
+    "write_benchmark",
 ]

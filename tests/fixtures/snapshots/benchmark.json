@@ -1,0 +1,30 @@
+{
+  "task_success_rate": {
+    "control": 0.6666666666666666,
+    "treatment": 0.6666666666666666
+  },
+  "skill_uplift_pp": 0.0,
+  "regression_count": 1,
+  "policy_violations": {
+    "control": 2,
+    "treatment": 4
+  },
+  "recovery_time_ms": {
+    "control": 136.66666666666666,
+    "treatment": 80.0
+  },
+  "cases": [
+    {
+      "case_id": "eval_a",
+      "control_success_rate": 0.5,
+      "treatment_success_rate": 1.0,
+      "uplift_pp": 50.0
+    },
+    {
+      "case_id": "eval_b",
+      "control_success_rate": 1.0,
+      "treatment_success_rate": 0.0,
+      "uplift_pp": -100.0
+    }
+  ]
+}
