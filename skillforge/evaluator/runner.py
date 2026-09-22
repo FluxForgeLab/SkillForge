@@ -41,7 +41,7 @@ async def run_case(
     loaded: LoadedEvalCase,
     *,
     run_id: str,
-    skill_path: str,
+    skill_path: str | None,
     skill_version_id: str,
     workspace: str,
     harness: AgentRuntime,
@@ -51,11 +51,13 @@ async def run_case(
     inject: InjectFn | None = None,
     verify: VerifyFn | None = None,
     settle_sec: float = _SETTLE_SEC,
+    baseline: bool = False,
 ) -> EvaluationRun:
     """Execute one case and insert its EvaluationRun.
 
     ``sink`` must keep written events on ``sink.events`` so forbidden checks can see tool calls.
     The harness must use the same ``run_id`` and sink. ``skill_version_id`` must already exist.
+    ``skill_path=None`` is the control arm. ``baseline`` is stored on the evaluation row.
     """
     reset_lab = reset if reset is not None else _reset_lab
     inject_lab = inject if inject is not None else _inject_lab
@@ -110,7 +112,7 @@ async def run_case(
     record = EvaluationRun(
         id=run_id,
         skill_version_id=skill_version_id,
-        baseline={"baseline": False},
+        baseline={"baseline": baseline},
         metrics=_metrics(
             loaded,
             passed=passed,
