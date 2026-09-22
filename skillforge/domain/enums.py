@@ -38,6 +38,7 @@ class TraceEventType(StrEnum):
     SANDBOX_CREATED = "sandbox_created"
     TOOL_CALL = "tool_call"
     TOOL_RESULT = "tool_result"
+    POLICY_VIOLATION = "policy_violation"
     ASSERTION = "assertion"
     FAILURE_DETECTED = "failure_detected"
     PATCH_GENERATED = "patch_generated"
