@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from skillforge.api.errors import register_exception_handlers
 from skillforge.api.routers.demo import router as demo_router
+from skillforge.api.routers.evaluations import router as evaluations_router
 from skillforge.api.routers.projects import router as projects_router
 from skillforge.api.routers.runs import router as runs_router
 from skillforge.api.ws import ConnectionManager
@@ -46,6 +47,7 @@ def create_app(
 
     app = FastAPI(title="SkillForge", lifespan=lifespan)
     app.state.settings = resolved_settings
+    app.state.bus = resolved_bus
     app.state.ws_manager = ws_manager
 
     app.add_middleware(
@@ -66,6 +68,7 @@ def create_app(
     app.include_router(projects_router, prefix="/api")
     app.include_router(demo_router, prefix="/api")
     app.include_router(runs_router, prefix="/api")
+    app.include_router(evaluations_router, prefix="/api")
 
     return app
 
