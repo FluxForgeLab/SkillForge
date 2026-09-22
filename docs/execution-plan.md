@@ -83,6 +83,28 @@ C4 表格仍是当时的任务说明。下面是代码里已经生效的约定�
 
 **回放。** 缓存键是 `(version_hash, case_id, arm, model)`，不含重复轮次。同一 case、同一臂再次写入会覆盖上一轮。`skillforge eval --skill <dir> --version-hash <hex> --model <name> --replay` 只读缓存。缺记录时退出码 2，不跑 Agent，不复位，不注入。在线 A/B 仍走 `run_suite`。
 
+### 0.6 Phase 5 已落地契约（C5.1–C5.9，不要改回去）
+
+C5 表格仍是当时的任务说明。下面是代码里已经生效的约定。后续 Compiler / Evolution 与之冲突时，以本节为准。C5.5 表格里的 BM25 公式也以本节为准。
+
+**索引是投影。** `chunks` 与 `knowledge_units` 在 SQLite，是记录本身。`schema.sql` 不含 FTS。`idx_fts_documents` 由 `SqliteFtsIndex.ensure_schema()` 在运行时创建，tokenize 为 `unicode61 remove_diacritics 2`。除设计清单上的列以外，还有 `page` 和 `line_start`，两者都是 `UNINDEXED`，命中要带回位置。默认 `retrieval_backend` 是 `sqlite_fts`。`memory` 只用于测试。请求 `hybrid` 或 `vector` 时降级为 `keyword`，不抛错。关键词检索不调用 `Embedder`，`vector` 保持 `None`。Compiler、Evolution、API 只调用 `Retriever.search`，不写 `MATCH`。
+
+**分数越大越好。** `m = max(0, -bm25)`，`score = m / (1 + m)`，落在 `[0, 1)`。`score` 只用于同一次查询内排序，不跨后端比较绝对值。
+
+**三种写入分开。** `index_document` 只 upsert 切块。`index_knowledge_units` 只 upsert 知识单元。重新抽取会替换该文档在 SQLite 中的知识单元；索引里退役的知识单元 id 要等 `Indexer.rebuild` 才消失。`index.delete(document_id)` 会同时删掉该文档的切块投影。整项目重建用 `Indexer.rebuild`，或 `skillforge index rebuild --project <id>`。未知项目退出码 2，stderr 为 `unknown project`。
+
+**同一次请求用同一份库。** `chunk_document`、`extract_document`、`build_index` 接收这次请求或测试的 `db_path` 与 `Settings`。`get_settings()` 有缓存，会读到 `.env`。`chunk_document` 是同步函数，内部 `asyncio.run`；已有事件循环时不要直接调用。API 上传把它放在工作线程。
+
+**知识单元。** 模型只填类型、标题、触发词、列表字段和置信度。`source_ref` 由代码写入，字段是 `document_id`、`chunk_id`、`page`、`line_start`、`line_end`。非空标题按 `strip` 再 `casefold` 合并：类型留第一条，置信度取最大，触发词留第一条非空，列表按出现顺序去掉完全相同的字符串。`content` 的键是 `title`、`trigger`、`preconditions`、`steps`、`safety_constraints`、`success_criteria`、`source_refs`、`text`。索引用 `content["text"]`：标题、非空触发词、步骤用换行拼接。每次切块和每次抽取都生成新的 id。稳定坐标是文档 `sha256` 加上 Markdown 行号或 PDF 页码。source-map 用这个坐标。
+
+**Appendix B。** 类型 `diagnostic_rule`，触发词是 `nginx reload failed / upstream mismatch`。主章节是 `procedure`：`backend unavailable` 与 `HTTP 502 from reverse proxy`。v0.1 的 scope 触发词（`HTTP 502`、`backend unavailable`、`health check failed`）选不中 Appendix B，正文不包含 `nginx -t`。失败分析的固定查询是 `502 upstream nginx -t`，`k=3` 的结果里要有标题包含 `Appendix B` 的命中。夹具是 `tests/fixtures/retrieval/runbook_index.json`，`memory` 与 `sqlite_fts` 都要通过。改 Runbook 时同时更新这份 fixture。`nginx -t` 与 `this_is_not_valid_nginx` 只出现在 Appendix B。PDF 第 2 页是 Appendix B。正文不使用反引号。
+
+**切块。** Markdown 只认 ATX 标题（行首 0–3 个空格，1–6 个 `#`，后面是空格或行尾）。围栏内的标题不算。块文本是闭区间行用换行连接，因此 `source.splitlines()[start-1:end]` 等于 `chunk.text`。行号从 1 开始，标题行算在块内。PDF 一页一块，`page` 从 1 开始，行号为空。OpenAPI 每个 path 和方法一块。入库时若根对象有 `openapi` 或 `swagger` 且 `paths` 是对象，`.yaml` 文件的 `parser` 记为 `openapi`。
+
+**知识接口。** `POST/GET /api/projects/{id}/sources`、`POST /api/projects/{id}/extract`、`GET /api/projects/{id}/knowledge`、`GET /api/projects/{id}/knowledge/search?q=`、`POST /api/projects/{id}/index/rebuild`。搜索响应在没有命中时也包含 `backend` 和 `mode_used`。空 `q` 返回 422。未知项目返回 404。
+
+**检索 trace。** `retrieval_query` 是对设计文档 §19 的补充，保留这个枚举。payload 是 `backend`、`mode_used`、`k`、`query_len`、`hit_ids`。stage 是 `knowledge`。
+
 ---
 
 ## 1. 目标仓库结构（对架构文档 §17 的简化）

@@ -197,7 +197,7 @@ class Embedder(Protocol):
 ## 7. MVP 阶段的具体约束（写进 C2.1 / C5.4 / C5.5）
 
 1. `db/schema.sql`：`chunks(id, document_id, project_id, ordinal, text, title, page, line_start, line_end)`、`knowledge_units(...)` 普通表 + 普通索引。**不建 FTS**。
-2. `SqliteFtsIndex.ensure_schema()` 建 `idx_fts_documents` 一张 FTS5 表（contentless 或 external content 均可，字段：`id UNINDEXED, kind UNINDEXED, project_id UNINDEXED, document_id UNINDEXED, type UNINDEXED, title, text`），`tokenize='unicode61 remove_diacritics 2'`。BM25 → `score = 1 / (1 + max(0, -bm25))`。
+2. `SqliteFtsIndex.ensure_schema()` 建 `idx_fts_documents` 一张 FTS5 表（contentless 或 external content 均可，字段：`id UNINDEXED, kind UNINDEXED, project_id UNINDEXED, document_id UNINDEXED, type UNINDEXED, title, text`），`tokenize='unicode61 remove_diacritics 2'`。BM25 → `m = max(0, -bm25)`，`score = m / (1 + m)`。
 3. `Retriever` 门面就是执行方案里的 `search()`；C6.2、C7.2、C9.11 只 import 门面。
 4. `Settings` 新增（MVP 默认值）：`retrieval_backend: Literal["sqlite_fts","lancedb","memory"] = "sqlite_fts"`、`retrieval_default_mode: RetrievalMode = "keyword"`、`index_dir: Path = Path("data/index")`、`embedder: Literal["null","openai_compatible"] = "null"`、`embedding_base_url`、`embedding_model`、`embedding_dimension: int | None = None`。
 5. `pyproject.toml`：`lancedb` 放在 optional extra `[project.optional-dependencies] lancedb = ["lancedb>=0.x", "pyarrow"]`，MVP 不安装。

@@ -92,6 +92,7 @@ uv run skillforge demo
 - Demo 故障集 F1/F2/F3 与 Runbook Appendix B 的对应关系见执行方案 §0.3，这是 self-evolution 演示可复现的基础。
 - Phase 3 已落地契约见执行方案 §0.4，不要改回去。要点：golden 是 v0.1（F1 + 只改 upstream 端口的 F2；F3 在 evals 里，正文不含 `nginx -t`）；工具名保持带点，只在 OpenAI 兼容适配器边界把 `.` 换成 `_` 再映射回来；Control / Treatment 共用 `runtime_tools()`，prompt 只差 skill 段；`http.get` 在沙箱内把 ops-lab 回环地址改写成 `host.docker.internal`，HTTP 4xx/5xx 返回 status；`docker.restart` 拒绝 `mock-db`（`policy_violation` 名为 `restart_database`）；harness 的 run 写入 `agent_runs`，不要写入 `evaluation_runs`；Kimi 当前模型只接受 `temperature=1`，仓库默认温度仍是 `0`。
 - Phase 4 已落地契约见执行方案 §0.5，不要改回去。要点：Evaluator 的试验写入 `evaluation_runs`（`baseline` 为 `{"baseline": true|false}`），Control 的 `skill_path` 是 `None`；`passed` 只表示断言，`forbidden` 同时看 `tool_call.name` 和 `policy_violation.output.name`；`uplift_pp` 是两臂成功率之差乘 100；`record_candidate_evals` 把 `evals.json` 的 sha256 写入 `eval_seals`，没有封印时评测仍可跑；`POST /api/skills/{id}/evaluate` 返回 `job_id`，`skillforge eval` 目前只有 `--replay`。
+- Phase 5 已落地契约见执行方案 §0.6，不要改回去。要点：调用方只走 `Retriever`，默认后端 `sqlite_fts`；BM25 分数是 `m/(1+m)`（`m = max(0, -bm25)`），越大越好；切块、抽取和建索引必须用同一次请求的 `db_path`；Appendix B 是 `diagnostic_rule`，触发词 `nginx reload failed / upstream mismatch`，查询 `502 upstream nginx -t` 的前 3 条要召回它；`chunk_id` 与 `ku_id` 每次重抽都变，source-map 用文档 `sha256` 加行号或页码。
 
 ## 红线（详见 `.cursor/rules/safety-boundaries.mdc`）
 
