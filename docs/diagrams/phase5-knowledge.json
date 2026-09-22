@@ -2,21 +2,21 @@
   "schema_version": 1,
   "diagram_type": "architecture",
   "meta": {
-    "title": "Phase 5 设计：Knowledge Plane",
-    "subtitle": "虚线=尚未实现。实线节点是评测阶段已经在用的 SQLite 与 ModelGateway。",
+    "title": "Phase 5 已落地：Knowledge Plane",
+    "subtitle": "实线=已调用。切块写入 SQLite 后投影到索引。FTS 不在 schema.sql 里。",
     "output": "phase5-knowledge.html",
     "quality_profile": "showcase",
     "visual_preset": "editorial",
     "repository": {
       "url": "https://github.com/FluxForgeLab/SkillForge.git",
-      "revision": "7e32019dae2c00e4158249918e3cac230a3417d1"
+      "revision": "8127e5102c6f03bfa80b9b4a62d88d3ba60ea84c"
     },
     "views": [
       {
         "id": "ingest",
         "label": "入库",
         "focus": ["runbook", "api", "ingest", "sqlite"],
-        "note": "上传落在 data/sources。切块只写 SQLite 的 chunks，不建索引。"
+        "note": "上传写入 data/sources。切块记下行号，并投影进同一份 SQLite 的索引。"
       },
       {
         "id": "index",
@@ -37,12 +37,12 @@
       "id": "runbook",
       "type": "external",
       "label": "Runbook",
-      "sublabel": "Appendix B 尚未入库",
+      "sublabel": "Appendix B 单独成页",
       "tag": "C5.8",
       "pos": [40, 220],
       "size": [176, 64],
       "sources": [
-        { "path": "docs/execution-plan.md", "line": 233, "end_line": 234, "label": "runbook then recall" }
+        { "path": "demo/docs/service-recovery-runbook.md", "line": 31, "end_line": 35, "label": "Appendix B" }
       ]
     },
     {
@@ -54,7 +54,7 @@
       "pos": [300, 40],
       "size": [188, 64],
       "sources": [
-        { "path": "docs/execution-plan.md", "line": 232, "end_line": 232, "label": "sources and search" }
+        { "path": "skillforge/api/routers/sources.py", "line": 128, "end_line": 132, "label": "store and chunk" }
       ]
     },
     {
@@ -66,14 +66,14 @@
       "pos": [300, 220],
       "size": [188, 64],
       "sources": [
-        { "path": "docs/execution-plan.md", "line": 226, "end_line": 228, "label": "line numbers" }
+        { "path": "skillforge/ingestion/chunking.py", "line": 23, "end_line": 37, "label": "chunk then index" }
       ]
     },
     {
       "id": "sqlite",
       "type": "database",
       "label": "SQLite",
-      "sublabel": "chunks 表已在 schema",
+      "sublabel": "chunks · knowledge_units",
       "tag": "C2.1",
       "pos": [560, 220],
       "size": [188, 64],
@@ -91,7 +91,7 @@
       "pos": [820, 220],
       "size": [176, 64],
       "sources": [
-        { "path": "docs/execution-plan.md", "line": 229, "end_line": 230, "label": "fts outside schema" }
+        { "path": "skillforge/knowledge/retrieval/indexer.py", "line": 26, "end_line": 32, "label": "upsert chunks" }
       ]
     },
     {
@@ -103,14 +103,14 @@
       "pos": [1040, 220],
       "size": [176, 64],
       "sources": [
-        { "path": "docs/retrieval-layer.md", "line": 3, "end_line": 5, "label": "projection" }
+        { "path": "skillforge/knowledge/retrieval/retriever.py", "line": 38, "end_line": 49, "label": "search" }
       ]
     },
     {
       "id": "gateway",
       "type": "cloud",
       "label": "ModelGateway",
-      "sublabel": "已落地 · 抽取将调用",
+      "sublabel": "抽取已调用",
       "tag": "C2.4",
       "pos": [300, 420],
       "size": [188, 64],
@@ -127,55 +127,50 @@
       "pos": [560, 420],
       "size": [188, 64],
       "sources": [
-        { "path": "docs/execution-plan.md", "line": 231, "end_line": 231, "label": "structured output" }
+        { "path": "skillforge/knowledge/extractor.py", "line": 70, "end_line": 100, "label": "extract then index" }
       ]
     }
   ],
   "boundaries": [
     {
       "kind": "region",
-      "label": "Phase 5 尚未实现",
-      "wraps": ["runbook", "api", "ingest", "indexer", "retriever", "extractor"]
-    },
-    {
-      "kind": "region",
-      "label": "已在用",
-      "wraps": ["sqlite", "gateway"]
+      "label": "已落地",
+      "wraps": ["runbook", "api", "ingest", "sqlite", "indexer", "retriever", "gateway", "extractor"]
     }
   ],
   "connections": [
-    { "id": "runbook-ingest", "from": "runbook", "to": "ingest", "variant": "dashed" },
-    { "id": "api-ingest", "from": "api", "to": "ingest", "variant": "dashed" },
-    { "id": "ingest-sqlite", "from": "ingest", "to": "sqlite", "variant": "dashed" },
-    { "id": "sqlite-indexer", "from": "sqlite", "to": "indexer", "variant": "dashed" },
-    { "id": "indexer-retriever", "from": "indexer", "to": "retriever", "variant": "dashed" },
-    { "id": "extractor-sqlite", "from": "extractor", "to": "sqlite", "variant": "dashed" },
-    { "id": "extractor-gateway", "from": "extractor", "to": "gateway", "variant": "dashed" }
+    { "id": "runbook-ingest", "from": "runbook", "to": "ingest" },
+    { "id": "api-ingest", "from": "api", "to": "ingest" },
+    { "id": "ingest-sqlite", "from": "ingest", "to": "sqlite" },
+    { "id": "sqlite-indexer", "from": "sqlite", "to": "indexer" },
+    { "id": "indexer-retriever", "from": "indexer", "to": "retriever" },
+    { "id": "extractor-sqlite", "from": "extractor", "to": "sqlite" },
+    { "id": "extractor-gateway", "from": "extractor", "to": "gateway" }
   ],
   "cards": [
     {
-      "dot": "amber",
-      "title": "尚未实现",
+      "dot": "emerald",
+      "title": "已接通",
       "items": [
-        "md、txt、pdf、yaml、json、OpenAPI 解析后按标题切块，并记下页码和行号。",
-        "KnowledgeUnit 经 ModelGateway 抽取。Appendix B 的类型是 diagnostic_rule。",
-        "搜索 API 只调用 Retriever 门面，并返回实际使用的后端。"
+        "md、txt、pdf、yaml、json、OpenAPI 解析后切块，并记下页码或行号。",
+        "抽取经 ModelGateway。Appendix B 的类型是 diagnostic_rule。",
+        "搜索 API 只调用 Retriever，响应带 backend 和 mode_used。"
       ]
     },
     {
-      "dot": "emerald",
-      "title": "已经存在",
+      "dot": "cyan",
+      "title": "记录与投影",
       "items": [
-        "chunks 与 knowledge_units 已在 schema.sql，还没有写入路径。",
-        "ModelGateway 已是唯一的模型入口。"
+        "SQLite 是 system of record。索引可重建，旧知识单元 id 要等 rebuild 才消失。",
+        "BM25 分数是 m/(1+m)，越大越好。"
       ]
     },
     {
       "dot": "violet",
-      "title": "索引边界",
+      "title": "稳定坐标",
       "items": [
-        "SQLite 是 system of record。FTS 或以后的向量索引都是可重建的投影。",
-        "MVP 不安装 lancedb，也不加载 embedding 模型。"
+        "每次切块和抽取都生成新 id。",
+        "source-map 用文档 sha256 加 Markdown 行号或 PDF 页码。"
       ]
     }
   ]

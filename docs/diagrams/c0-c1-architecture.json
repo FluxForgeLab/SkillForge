@@ -2,14 +2,14 @@
   "schema_version": 1,
   "diagram_type": "architecture",
   "meta": {
-    "title": "SkillForge：Phase 0–4 已落地 · Phase 5 设计",
-    "subtitle": "实线=已调用。虚线=知识面尚未实现。细图：phase3-runtime.html · phase4-evaluator.html · phase5-knowledge.html。",
+    "title": "SkillForge：Phase 0–5 已落地 · Phase 6 设计",
+    "subtitle": "实线=已调用。虚线=Compiler 尚未实现。细图：phase3-runtime.html · phase4-evaluator.html · phase5-knowledge.html · phase6-compiler.html。",
     "output": "c0-c1-architecture.html",
     "quality_profile": "showcase",
     "visual_preset": "editorial",
     "repository": {
       "url": "https://github.com/FluxForgeLab/SkillForge.git",
-      "revision": "7e32019dae2c00e4158249918e3cac230a3417d1"
+      "revision": "8127e5102c6f03bfa80b9b4a62d88d3ba60ea84c"
     },
     "views": [
       {
@@ -31,10 +31,16 @@
         "note": "试验写入 evaluation_runs。harness 的 RunResult 仍写入 agent_runs。"
       },
       {
-        "id": "phase5",
-        "label": "Phase 5 设计",
-        "focus": ["ingest", "retriever", "sqlite"],
-        "note": "虚线：上传、切块进 SQLite。检索是投影，FTS 不进 schema.sql。"
+        "id": "knowledge",
+        "label": "知识面",
+        "focus": ["knowledge", "sqlite", "api"],
+        "note": "切块和知识单元写入 SQLite。检索是投影，FTS 不进 schema.sql。"
+      },
+      {
+        "id": "phase6",
+        "label": "Phase 6 设计",
+        "focus": ["compiler", "knowledge"],
+        "note": "虚线：Compiler 将经 Retriever 选知识单元。Appendix B 不进入 v0.1。"
       }
     ]
   },
@@ -43,12 +49,12 @@
       "id": "cli",
       "type": "external",
       "label": "skillforge CLI",
-      "sublabel": "run · eval --replay",
-      "tag": "C4.8",
+      "sublabel": "run · eval · index",
+      "tag": "C5.7",
       "pos": [40, 220],
       "size": [176, 64],
       "sources": [
-        { "path": "skillforge/cli.py", "line": 60, "end_line": 62, "label": "eval replay" }
+        { "path": "skillforge/cli.py", "line": 63, "end_line": 67, "label": "eval and index" }
       ]
     },
     {
@@ -84,7 +90,7 @@
       "pos": [540, 220],
       "size": [188, 64],
       "sources": [
-        { "path": "skillforge/models/adapters/openai_compatible.py", "line": 98, "end_line": 102, "label": "dot to underscore" }
+        { "path": "skillforge/models/adapters/openai_compatible.py", "line": 98, "end_line": 99, "label": "dot to underscore" }
       ]
     },
     {
@@ -96,7 +102,7 @@
       "pos": [40, 420],
       "size": [176, 64],
       "sources": [
-        { "path": "skillforge/sandbox/docker.py", "line": 90, "end_line": 95, "label": "create" }
+        { "path": "skillforge/sandbox/docker.py", "line": 90, "end_line": 96, "label": "create" }
       ]
     },
     {
@@ -108,32 +114,33 @@
       "pos": [280, 420],
       "size": [176, 64],
       "sources": [
-        { "path": "skillforge/runtime/tools/opslab.py", "line": 227, "end_line": 232, "label": "restart_database" }
+        { "path": "skillforge/runtime/tools/opslab.py", "line": 227, "end_line": 230, "label": "restart_database" }
       ]
     },
     {
       "id": "sqlite",
       "type": "database",
       "label": "SQLite",
-      "sublabel": "agent_runs · evaluation_runs",
-      "tag": "C4.3",
+      "sublabel": "runs · chunks · units",
+      "tag": "C5.6",
       "pos": [800, 220],
       "size": [188, 64],
       "sources": [
-        { "path": "skillforge/db/schema.sql", "line": 77, "end_line": 86, "label": "evaluation_runs" },
-        { "path": "skillforge/db/schema.sql", "line": 111, "end_line": 120, "label": "agent_runs" }
+        { "path": "skillforge/db/schema.sql", "line": 21, "end_line": 33, "label": "chunks" },
+        { "path": "skillforge/db/schema.sql", "line": 35, "end_line": 44, "label": "knowledge_units" },
+        { "path": "skillforge/db/schema.sql", "line": 77, "end_line": 86, "label": "evaluation_runs" }
       ]
     },
     {
       "id": "api",
       "type": "backend",
       "label": "FastAPI",
-      "sublabel": "evaluate 返回 job_id",
-      "tag": "C4.6",
+      "sublabel": "evaluate · sources",
+      "tag": "C5.7",
       "pos": [800, 40],
       "size": [188, 64],
       "sources": [
-        { "path": "skillforge/api/main.py", "line": 67, "end_line": 71, "label": "routers" }
+        { "path": "skillforge/api/main.py", "line": 68, "end_line": 73, "label": "routers" }
       ]
     },
     {
@@ -157,31 +164,33 @@
       "pos": [800, 420],
       "size": [188, 64],
       "sources": [
-        { "path": "skillforge/evaluator/suite.py", "line": 73, "end_line": 99, "label": "run_suite" }
+        { "path": "skillforge/evaluator/suite.py", "line": 73, "end_line": 81, "label": "run_suite" }
       ]
     },
     {
-      "id": "ingest",
+      "id": "knowledge",
       "type": "backend",
-      "label": "Ingestion",
-      "sublabel": "上传 · 解析 · 切块",
-      "tag": "C5.3",
-      "pos": [1040, 40],
-      "size": [176, 64],
-      "sources": [
-        { "path": "docs/execution-plan.md", "line": 226, "end_line": 228, "label": "chunks in sqlite" }
-      ]
-    },
-    {
-      "id": "retriever",
-      "type": "backend",
-      "label": "Retriever",
-      "sublabel": "索引是投影",
-      "tag": "C5.5",
+      "label": "Knowledge",
+      "sublabel": "切块 · 抽取 · Retriever",
+      "tag": "C5.9",
       "pos": [1040, 220],
-      "size": [176, 64],
+      "size": [188, 64],
       "sources": [
-        { "path": "docs/retrieval-layer.md", "line": 3, "end_line": 5, "label": "index is projection" }
+        { "path": "skillforge/ingestion/chunking.py", "line": 23, "end_line": 30, "label": "chunk then index" },
+        { "path": "skillforge/knowledge/extractor.py", "line": 70, "end_line": 76, "label": "extract" },
+        { "path": "skillforge/knowledge/retrieval/retriever.py", "line": 38, "end_line": 49, "label": "search" }
+      ]
+    },
+    {
+      "id": "compiler",
+      "type": "backend",
+      "label": "Compiler",
+      "sublabel": "SkillSpec 尚未实现",
+      "tag": "C6.2",
+      "pos": [1040, 40],
+      "size": [188, 64],
+      "sources": [
+        { "path": "docs/execution-plan.md", "line": 262, "end_line": 263, "label": "spec then filter" }
       ]
     }
   ],
@@ -189,7 +198,7 @@
     {
       "kind": "region",
       "label": "已落地",
-      "wraps": ["cli", "harness", "golden", "gateway", "sandbox", "tools", "sqlite", "api", "verifier", "evaluator"]
+      "wraps": ["cli", "harness", "golden", "gateway", "sandbox", "tools", "sqlite", "api", "verifier", "evaluator", "knowledge"]
     },
     {
       "kind": "security-group",
@@ -198,8 +207,8 @@
     },
     {
       "kind": "region",
-      "label": "Phase 5 设计",
-      "wraps": ["ingest", "retriever"]
+      "label": "Phase 6 设计",
+      "wraps": ["compiler"]
     }
   ],
   "connections": [
@@ -211,33 +220,33 @@
     { "id": "api-sqlite", "from": "api", "to": "sqlite" },
     { "id": "eval-sqlite", "from": "evaluator", "to": "sqlite" },
     { "id": "eval-verifier", "from": "evaluator", "to": "verifier" },
-    { "id": "ingest-retriever", "from": "ingest", "to": "retriever", "variant": "dashed" },
-    { "id": "retriever-sqlite", "from": "retriever", "to": "sqlite", "variant": "dashed" }
+    { "id": "knowledge-sqlite", "from": "knowledge", "to": "sqlite" },
+    { "id": "compiler-knowledge", "from": "compiler", "to": "knowledge", "variant": "dashed" }
   ],
   "cards": [
     {
       "dot": "emerald",
       "title": "已接通",
       "items": [
-        "CLI 的 run 注入故障后跑 harness。eval --replay 只读缓存。",
+        "CLI 的 run 注入故障后跑 harness。eval --replay 只读缓存。index rebuild 重建投影。",
         "两条臂共用 runtime_tools。Control 的 skill_path 为空。",
-        "harness 写入 agent_runs。评测试验写入 evaluation_runs。"
+        "切块、抽取和检索都落在同一次请求的 SQLite 上。"
       ]
     },
     {
       "dot": "cyan",
-      "title": "评测",
+      "title": "知识面",
       "items": [
-        "passed 只表示断言。forbidden 同时看工具名和 policy_violation.output.name。",
-        "uplift 是两臂成功率之差乘 100。evals 封印要显式调用。"
+        "Appendix B 是 diagnostic_rule，触发词是 nginx reload failed / upstream mismatch。",
+        "查询 502 upstream nginx -t 的前 3 条要召回它。分数越大越好。"
       ]
     },
     {
       "dot": "amber",
-      "title": "Phase 5 虚线",
+      "title": "Phase 6 虚线",
       "items": [
-        "Runbook 上传后解析、切块，写入 SQLite 的 chunks。",
-        "检索索引是投影。FTS 表不进 schema.sql。Appendix B 将抽成独立 KU。"
+        "Compiler 将按触发词筛知识单元，Appendix B 不进入 v0.1。",
+        "产物是 SkillSpec、SKILL.md、scripts 和 evals。自动流程最多到 CANDIDATE。"
       ]
     }
   ]

@@ -1,0 +1,221 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Phase 6 设计：Skill Compiler",
+    "subtitle": "虚线=尚未调用。实线只有已经接通的检索投影。Appendix B 不进入 v0.1。",
+    "output": "phase6-compiler.html",
+    "quality_profile": "showcase",
+    "visual_preset": "editorial",
+    "repository": {
+      "url": "https://github.com/FluxForgeLab/SkillForge.git",
+      "revision": "8127e5102c6f03bfa80b9b4a62d88d3ba60ea84c"
+    },
+    "views": [
+      {
+        "id": "select",
+        "label": "选知识",
+        "focus": ["sqlite", "retriever", "spec"],
+        "note": "先按 type 和 trigger 过滤，再经 Retriever 排序。Appendix B 的触发词不匹配 v0.1。"
+      },
+      {
+        "id": "generate",
+        "label": "生成产物",
+        "focus": ["spec", "skillmd", "scripts", "evals", "gateway"],
+        "note": "SkillSpec 收紧 permissions。SKILL.md 每条指令带 source_ref，坐标是 sha256 加行号或页码。"
+      },
+      {
+        "id": "check",
+        "label": "校验",
+        "focus": ["checker", "golden", "registry"],
+        "note": "静态校验对照 golden。通过后最多到 CANDIDATE。approve 仍要人工调用。"
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "compileapi",
+      "type": "backend",
+      "label": "compile API",
+      "sublabel": "尚未实现",
+      "tag": "C6.8",
+      "pos": [280, 40],
+      "size": [188, 64],
+      "sources": [
+        { "path": "docs/execution-plan.md", "line": 269, "end_line": 269, "label": "compile endpoint" }
+      ]
+    },
+    {
+      "id": "spec",
+      "type": "backend",
+      "label": "SkillSpec",
+      "sublabel": "筛 KU · 收紧权限",
+      "tag": "C6.2",
+      "pos": [280, 240],
+      "size": [188, 64],
+      "sources": [
+        { "path": "docs/execution-plan.md", "line": 262, "end_line": 263, "label": "spec and filter" }
+      ]
+    },
+    {
+      "id": "evals",
+      "type": "external",
+      "label": "evals.json",
+      "sublabel": "从 success_criteria 生成",
+      "tag": "C6.5",
+      "pos": [280, 440],
+      "size": [188, 64],
+      "sources": [
+        { "path": "docs/execution-plan.md", "line": 266, "end_line": 266, "label": "eval cases" }
+      ]
+    },
+    {
+      "id": "retriever",
+      "type": "backend",
+      "label": "Retriever",
+      "sublabel": "已落地 · 只走门面",
+      "tag": "C5.4",
+      "pos": [40, 240],
+      "size": [176, 64],
+      "sources": [
+        { "path": "skillforge/knowledge/retrieval/retriever.py", "line": 38, "end_line": 49, "label": "search" }
+      ]
+    },
+    {
+      "id": "sqlite",
+      "type": "database",
+      "label": "SQLite",
+      "sublabel": "knowledge_units",
+      "tag": "C5.6",
+      "pos": [40, 440],
+      "size": [176, 64],
+      "sources": [
+        { "path": "skillforge/db/schema.sql", "line": 35, "end_line": 44, "label": "knowledge_units" }
+      ]
+    },
+    {
+      "id": "scripts",
+      "type": "external",
+      "label": "scripts",
+      "sublabel": "diagnose · recover · verify",
+      "tag": "C6.4",
+      "pos": [560, 40],
+      "size": [188, 64],
+      "sources": [
+        { "path": "docs/execution-plan.md", "line": 265, "end_line": 265, "label": "script template" }
+      ]
+    },
+    {
+      "id": "skillmd",
+      "type": "external",
+      "label": "SKILL.md",
+      "sublabel": "ins_xx · source-map",
+      "tag": "C6.3",
+      "pos": [560, 240],
+      "size": [188, 64],
+      "sources": [
+        { "path": "docs/execution-plan.md", "line": 264, "end_line": 264, "label": "instructions" }
+      ]
+    },
+    {
+      "id": "gateway",
+      "type": "cloud",
+      "label": "ModelGateway",
+      "sublabel": "已落地 · 编译将调用",
+      "tag": "C2.4",
+      "pos": [560, 440],
+      "size": [188, 64],
+      "sources": [
+        { "path": "skillforge/models/gateway.py", "line": 28, "end_line": 42, "label": "generate" }
+      ]
+    },
+    {
+      "id": "checker",
+      "type": "security",
+      "label": "静态校验",
+      "sublabel": "对照 golden · 坏样本失败",
+      "tag": "C6.6",
+      "pos": [840, 240],
+      "size": [188, 64],
+      "sources": [
+        { "path": "docs/execution-plan.md", "line": 267, "end_line": 270, "label": "validate and accept" }
+      ]
+    },
+    {
+      "id": "golden",
+      "type": "external",
+      "label": "golden skill",
+      "sublabel": "v0.1 验收参照",
+      "tag": "C3.1",
+      "pos": [840, 440],
+      "size": [188, 64],
+      "sources": [
+        { "path": "skills/golden/service-recovery/SKILL.md", "line": 1, "end_line": 6, "label": "triggers" }
+      ]
+    },
+    {
+      "id": "registry",
+      "type": "database",
+      "label": "registry",
+      "sublabel": "最多到 CANDIDATE",
+      "tag": "C6.7",
+      "pos": [1100, 240],
+      "size": [176, 64],
+      "sources": [
+        { "path": "docs/execution-plan.md", "line": 268, "end_line": 268, "label": "package candidate" }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Phase 6 尚未实现",
+      "wraps": ["compileapi", "spec", "evals", "scripts", "skillmd", "checker", "registry"]
+    },
+    {
+      "kind": "region",
+      "label": "已在用",
+      "wraps": ["retriever", "sqlite", "gateway", "golden"]
+    }
+  ],
+  "connections": [
+    { "id": "sqlite-retriever", "from": "sqlite", "to": "retriever" },
+    { "id": "retriever-spec", "from": "retriever", "to": "spec", "variant": "dashed" },
+    { "id": "api-spec", "from": "compileapi", "to": "spec", "variant": "dashed" },
+    { "id": "spec-skill", "from": "spec", "to": "skillmd", "variant": "dashed" },
+    { "id": "spec-evals", "from": "spec", "to": "evals", "variant": "dashed" },
+    { "id": "skill-scripts", "from": "skillmd", "to": "scripts", "variant": "dashed" },
+    { "id": "gateway-skill", "from": "gateway", "to": "skillmd", "variant": "dashed" },
+    { "id": "skill-checker", "from": "skillmd", "to": "checker", "variant": "dashed" },
+    { "id": "checker-golden", "from": "checker", "to": "golden", "variant": "dashed" },
+    { "id": "checker-registry", "from": "checker", "to": "registry", "variant": "dashed" }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "尚未实现",
+      "items": [
+        "八个 pass 还没有代码。权限只会收紧。",
+        "Appendix B 的触发词不匹配 v0.1，不写入 SKILL.md。",
+        "evals 由 success_criteria 生成，fixture 必须在故障目录里。"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "已经存在",
+      "items": [
+        "Retriever 与 knowledge_units 已可查询。",
+        "ModelGateway 是唯一模型入口。",
+        "golden skill 覆盖 F1，以及只改 upstream 端口的 F2。"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "停在候选",
+      "items": [
+        "校验通过后写入 registry，状态最多是 CANDIDATE。",
+        "approve 与 publish 不在本阶段自动发生。"
+      ]
+    }
+  ]
+}

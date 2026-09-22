@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="generator" content="archify 2.12.0">
-  <title>Phase 5 设计：Knowledge Plane Diagram</title>
+  <title>Phase 5 已落地：Knowledge Plane Diagram</title>
   <script>
     // Resolve the theme before first paint so light-preference users don't
     // see a dark flash. The toolbar script below re-applies with UI state.
@@ -4496,13 +4496,13 @@
     <div class="header">
       <div class="header-row">
         <div class="pulse-dot"></div>
-        <h1>Phase 5 设计：Knowledge Plane</h1>
+        <h1>Phase 5 已落地：Knowledge Plane</h1>
       </div>
-      <p class="subtitle">虚线=尚未实现。实线节点是评测阶段已经在用的 SQLite 与 ModelGateway。</p>
+      <p class="subtitle">实线=已调用。切块写入 SQLite 后投影到索引。FTS 不在 schema.sql 里。</p>
     </div>
 
-    <script id="archify-guided-views-data" type="application/json">[{"id":"ingest","label":"入库","focus":["runbook","api","ingest","sqlite"],"note":"上传落在 data/sources。切块只写 SQLite 的 chunks，不建索引。"},{"id":"index","label":"投影","focus":["sqlite","indexer","retriever"],"note":"FTS 由索引后端自建。schema.sql 不含 FTS。换后端不迁数据。"},{"id":"extract","label":"抽取","focus":["extractor","gateway","sqlite"],"note":"每个 chunk 经 ModelGateway 得到 KnowledgeUnit。Appendix B 是独立 diagnostic_rule。"}]</script>
-    <script id="archify-source-evidence-data" type="application/json">{"schemaVersion":1,"verified":true,"repository":{"url":"https://github.com/FluxForgeLab/SkillForge","revision":"7e32019dae2c00e4158249918e3cac230a3417d1","shortRevision":"7e32019"},"referenceCount":9,"nodes":{"runbook":[{"path":"docs/execution-plan.md","line":233,"endLine":234,"label":"runbook then recall","href":"https://github.com/FluxForgeLab/SkillForge/blob/7e32019dae2c00e4158249918e3cac230a3417d1/docs/execution-plan.md#L233-L234"}],"api":[{"path":"docs/execution-plan.md","line":232,"endLine":232,"label":"sources and search","href":"https://github.com/FluxForgeLab/SkillForge/blob/7e32019dae2c00e4158249918e3cac230a3417d1/docs/execution-plan.md#L232"}],"ingest":[{"path":"docs/execution-plan.md","line":226,"endLine":228,"label":"line numbers","href":"https://github.com/FluxForgeLab/SkillForge/blob/7e32019dae2c00e4158249918e3cac230a3417d1/docs/execution-plan.md#L226-L228"}],"sqlite":[{"path":"skillforge/db/schema.sql","line":21,"endLine":33,"label":"chunks","href":"https://github.com/FluxForgeLab/SkillForge/blob/7e32019dae2c00e4158249918e3cac230a3417d1/skillforge/db/schema.sql#L21-L33"},{"path":"skillforge/db/schema.sql","line":35,"endLine":44,"label":"knowledge_units","href":"https://github.com/FluxForgeLab/SkillForge/blob/7e32019dae2c00e4158249918e3cac230a3417d1/skillforge/db/schema.sql#L35-L44"}],"indexer":[{"path":"docs/execution-plan.md","line":229,"endLine":230,"label":"fts outside schema","href":"https://github.com/FluxForgeLab/SkillForge/blob/7e32019dae2c00e4158249918e3cac230a3417d1/docs/execution-plan.md#L229-L230"}],"retriever":[{"path":"docs/retrieval-layer.md","line":3,"endLine":5,"label":"projection","href":"https://github.com/FluxForgeLab/SkillForge/blob/7e32019dae2c00e4158249918e3cac230a3417d1/docs/retrieval-layer.md#L3-L5"}],"gateway":[{"path":"skillforge/models/gateway.py","line":28,"endLine":42,"label":"generate","href":"https://github.com/FluxForgeLab/SkillForge/blob/7e32019dae2c00e4158249918e3cac230a3417d1/skillforge/models/gateway.py#L28-L42"}],"extractor":[{"path":"docs/execution-plan.md","line":231,"endLine":231,"label":"structured output","href":"https://github.com/FluxForgeLab/SkillForge/blob/7e32019dae2c00e4158249918e3cac230a3417d1/docs/execution-plan.md#L231"}]}}</script>
+    <script id="archify-guided-views-data" type="application/json">[{"id":"ingest","label":"入库","focus":["runbook","api","ingest","sqlite"],"note":"上传写入 data/sources。切块记下行号，并投影进同一份 SQLite 的索引。"},{"id":"index","label":"投影","focus":["sqlite","indexer","retriever"],"note":"FTS 由索引后端自建。schema.sql 不含 FTS。换后端不迁数据。"},{"id":"extract","label":"抽取","focus":["extractor","gateway","sqlite"],"note":"每个 chunk 经 ModelGateway 得到 KnowledgeUnit。Appendix B 是独立 diagnostic_rule。"}]</script>
+    <script id="archify-source-evidence-data" type="application/json">{"schemaVersion":1,"verified":true,"repository":{"url":"https://github.com/FluxForgeLab/SkillForge","revision":"8127e5102c6f03bfa80b9b4a62d88d3ba60ea84c","shortRevision":"8127e51"},"referenceCount":9,"nodes":{"runbook":[{"path":"demo/docs/service-recovery-runbook.md","line":31,"endLine":35,"label":"Appendix B","href":"https://github.com/FluxForgeLab/SkillForge/blob/8127e5102c6f03bfa80b9b4a62d88d3ba60ea84c/demo/docs/service-recovery-runbook.md#L31-L35"}],"api":[{"path":"skillforge/api/routers/sources.py","line":128,"endLine":132,"label":"store and chunk","href":"https://github.com/FluxForgeLab/SkillForge/blob/8127e5102c6f03bfa80b9b4a62d88d3ba60ea84c/skillforge/api/routers/sources.py#L128-L132"}],"ingest":[{"path":"skillforge/ingestion/chunking.py","line":23,"endLine":37,"label":"chunk then index","href":"https://github.com/FluxForgeLab/SkillForge/blob/8127e5102c6f03bfa80b9b4a62d88d3ba60ea84c/skillforge/ingestion/chunking.py#L23-L37"}],"sqlite":[{"path":"skillforge/db/schema.sql","line":21,"endLine":33,"label":"chunks","href":"https://github.com/FluxForgeLab/SkillForge/blob/8127e5102c6f03bfa80b9b4a62d88d3ba60ea84c/skillforge/db/schema.sql#L21-L33"},{"path":"skillforge/db/schema.sql","line":35,"endLine":44,"label":"knowledge_units","href":"https://github.com/FluxForgeLab/SkillForge/blob/8127e5102c6f03bfa80b9b4a62d88d3ba60ea84c/skillforge/db/schema.sql#L35-L44"}],"indexer":[{"path":"skillforge/knowledge/retrieval/indexer.py","line":26,"endLine":32,"label":"upsert chunks","href":"https://github.com/FluxForgeLab/SkillForge/blob/8127e5102c6f03bfa80b9b4a62d88d3ba60ea84c/skillforge/knowledge/retrieval/indexer.py#L26-L32"}],"retriever":[{"path":"skillforge/knowledge/retrieval/retriever.py","line":38,"endLine":49,"label":"search","href":"https://github.com/FluxForgeLab/SkillForge/blob/8127e5102c6f03bfa80b9b4a62d88d3ba60ea84c/skillforge/knowledge/retrieval/retriever.py#L38-L49"}],"gateway":[{"path":"skillforge/models/gateway.py","line":28,"endLine":42,"label":"generate","href":"https://github.com/FluxForgeLab/SkillForge/blob/8127e5102c6f03bfa80b9b4a62d88d3ba60ea84c/skillforge/models/gateway.py#L28-L42"}],"extractor":[{"path":"skillforge/knowledge/extractor.py","line":70,"endLine":100,"label":"extract then index","href":"https://github.com/FluxForgeLab/SkillForge/blob/8127e5102c6f03bfa80b9b4a62d88d3ba60ea84c/skillforge/knowledge/extractor.py#L70-L100"}]}}</script>
     <div class="guided-views no-print" id="guided-views" hidden aria-label="Guided diagram views">
       <button id="guided-view-prev" type="button" aria-label="Previous guided view" title="Previous guided view ([)">&#8592;</button>
       <div class="guided-view-copy">
@@ -4545,8 +4545,8 @@
     <!-- Main Diagram -->
     <div class="diagram-container" data-detail-level="read">
       <svg viewBox="0 0 1286 572" role="img" aria-labelledby="archify-diagram-title archify-diagram-description" data-preset="editorial" data-quality-profile="showcase">
-        <title id="archify-diagram-title">Phase 5 设计：Knowledge Plane</title>
-        <desc id="archify-diagram-description">虚线=尚未实现。实线节点是评测阶段已经在用的 SQLite 与 ModelGateway。</desc>
+        <title id="archify-diagram-title">Phase 5 已落地：Knowledge Plane</title>
+        <desc id="archify-diagram-description">实线=已调用。切块写入 SQLite 后投影到索引。FTS 不在 schema.sql 里。</desc>
         <!-- Definitions -->
         <defs>
           <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
@@ -4571,23 +4571,20 @@
 
         <!-- Boundaries (behind everything) -->
         <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="0" x="10" y="10" width="1236" height="494" rx="12" class="c-region" stroke-width="1"/>
-        <text x="18" y="28" class="t-cloud" font-size="9" font-weight="600">Phase 5 尚未实现</text>
-
-        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="1" x="270" y="190" width="508" height="314" rx="12" class="c-region" stroke-width="1"/>
-        <text x="278" y="208" class="t-cloud" font-size="9" font-weight="600">已在用</text>
+        <text x="18" y="28" class="t-cloud" font-size="9" font-weight="600">已落地</text>
 
         <!-- Connection paths (before components for correct z-order) -->
-        <path data-edge-from="runbook" data-edge-to="ingest" data-edge-key="0" data-edge-id="runbook-ingest" data-composition-points="216,252;300,252" d="M 216 252 L 300 252" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
-        <path data-edge-from="api" data-edge-to="ingest" data-edge-key="1" data-edge-id="api-ingest" data-composition-points="394,104;394,220" d="M 394 104 L 394 220" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
-        <path data-edge-from="ingest" data-edge-to="sqlite" data-edge-key="2" data-edge-id="ingest-sqlite" data-composition-points="488,252;560,252" d="M 488 252 L 560 252" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
-        <path data-edge-from="sqlite" data-edge-to="indexer" data-edge-key="3" data-edge-id="sqlite-indexer" data-composition-points="748,252;820,252" d="M 748 252 L 820 252" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
-        <path data-edge-from="indexer" data-edge-to="retriever" data-edge-key="4" data-edge-id="indexer-retriever" data-composition-points="996,252;1040,252" d="M 996 252 L 1040 252" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
-        <path data-edge-from="extractor" data-edge-to="sqlite" data-edge-key="5" data-edge-id="extractor-sqlite" data-composition-points="654,420;654,284" d="M 654 420 L 654 284" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
-        <path data-edge-from="extractor" data-edge-to="gateway" data-edge-key="6" data-edge-id="extractor-gateway" data-composition-points="560,452;488,452" d="M 560 452 L 488 452" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
+        <path data-edge-from="runbook" data-edge-to="ingest" data-edge-key="0" data-edge-id="runbook-ingest" data-composition-points="216,252;300,252" d="M 216 252 L 300 252" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="api" data-edge-to="ingest" data-edge-key="1" data-edge-id="api-ingest" data-composition-points="394,104;394,220" d="M 394 104 L 394 220" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="ingest" data-edge-to="sqlite" data-edge-key="2" data-edge-id="ingest-sqlite" data-composition-points="488,252;560,252" d="M 488 252 L 560 252" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="sqlite" data-edge-to="indexer" data-edge-key="3" data-edge-id="sqlite-indexer" data-composition-points="748,252;820,252" d="M 748 252 L 820 252" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="indexer" data-edge-to="retriever" data-edge-key="4" data-edge-id="indexer-retriever" data-composition-points="996,252;1040,252" d="M 996 252 L 1040 252" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="extractor" data-edge-to="sqlite" data-edge-key="5" data-edge-id="extractor-sqlite" data-composition-points="654,420;654,284" d="M 654 420 L 654 284" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="extractor" data-edge-to="gateway" data-edge-key="6" data-edge-id="extractor-gateway" data-composition-points="560,452;488,452" d="M 560 452 L 488 452" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
 
         <!-- Components -->
-        <g id="node-runbook" data-node-id="runbook" data-node-label="Runbook" tabindex="0" role="button" aria-label="Focus Runbook, Appendix B 尚未入库, Phase 5 尚未实现" aria-pressed="false" data-node-kind="external" data-node-sublabel="Appendix B 尚未入库" data-node-tag="C5.8" data-node-context="Phase 5 尚未实现">
-          <title>Runbook · Appendix B 尚未入库 · Phase 5 尚未实现 · C5.8</title>
+        <g id="node-runbook" data-node-id="runbook" data-node-label="Runbook" tabindex="0" role="button" aria-label="Focus Runbook, Appendix B 单独成页, 已落地" aria-pressed="false" data-node-kind="external" data-node-sublabel="Appendix B 单独成页" data-node-tag="C5.8" data-node-context="已落地">
+          <title>Runbook · Appendix B 单独成页 · 已落地 · C5.8</title>
           <rect x="40" y="220" width="176" height="64" rx="6" class="c-mask"/>
           <rect x="40" y="220" width="176" height="64" rx="6" class="c-external" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(46 226) scale(0.6875)">
@@ -4595,12 +4592,12 @@
             <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
           </g>
           <text data-detail-anchor x="128" y="250" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Runbook</text>
-        <text data-detail="context" x="128" y="266" class="t-muted" font-size="9" text-anchor="middle">Appendix B 尚未入库</text>
+        <text data-detail="context" x="128" y="266" class="t-muted" font-size="9" text-anchor="middle">Appendix B 单独成页</text>
         <text data-detail="fine" x="128" y="276" class="t-external" font-size="7" text-anchor="middle">C5.8</text>
         </g>
 
-        <g id="node-api" data-node-id="api" data-node-label="knowledge API" tabindex="0" role="button" aria-label="Focus knowledge API, upload · extract · search, Phase 5 尚未实现" aria-pressed="false" data-node-kind="backend" data-node-sublabel="upload · extract · search" data-node-tag="C5.7" data-node-context="Phase 5 尚未实现">
-          <title>knowledge API · upload · extract · search · Phase 5 尚未实现 · C5.7</title>
+        <g id="node-api" data-node-id="api" data-node-label="knowledge API" tabindex="0" role="button" aria-label="Focus knowledge API, upload · extract · search, 已落地" aria-pressed="false" data-node-kind="backend" data-node-sublabel="upload · extract · search" data-node-tag="C5.7" data-node-context="已落地">
+          <title>knowledge API · upload · extract · search · 已落地 · C5.7</title>
           <rect x="300" y="40" width="188" height="64" rx="6" class="c-mask"/>
           <rect x="300" y="40" width="188" height="64" rx="6" class="c-backend" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(306 46) scale(0.6875)">
@@ -4611,8 +4608,8 @@
         <text data-detail="fine" x="394" y="96" class="t-backend" font-size="7" text-anchor="middle">C5.7</text>
         </g>
 
-        <g id="node-ingest" data-node-id="ingest" data-node-label="Ingestion" tabindex="0" role="button" aria-label="Focus Ingestion, 解析后按标题切块, Phase 5 尚未实现" aria-pressed="false" data-node-kind="backend" data-node-sublabel="解析后按标题切块" data-node-tag="C5.3" data-node-context="Phase 5 尚未实现">
-          <title>Ingestion · 解析后按标题切块 · Phase 5 尚未实现 · C5.3</title>
+        <g id="node-ingest" data-node-id="ingest" data-node-label="Ingestion" tabindex="0" role="button" aria-label="Focus Ingestion, 解析后按标题切块, 已落地" aria-pressed="false" data-node-kind="backend" data-node-sublabel="解析后按标题切块" data-node-tag="C5.3" data-node-context="已落地">
+          <title>Ingestion · 解析后按标题切块 · 已落地 · C5.3</title>
           <rect x="300" y="220" width="188" height="64" rx="6" class="c-mask"/>
           <rect x="300" y="220" width="188" height="64" rx="6" class="c-backend" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(306 226) scale(0.6875)">
@@ -4623,8 +4620,8 @@
         <text data-detail="fine" x="394" y="276" class="t-backend" font-size="7" text-anchor="middle">C5.3</text>
         </g>
 
-        <g id="node-sqlite" data-node-id="sqlite" data-node-label="SQLite" tabindex="0" role="button" aria-label="Focus SQLite, chunks 表已在 schema, 已在用" aria-pressed="false" data-node-kind="database" data-node-sublabel="chunks 表已在 schema" data-node-tag="C2.1" data-node-context="已在用">
-          <title>SQLite · chunks 表已在 schema · 已在用 · C2.1</title>
+        <g id="node-sqlite" data-node-id="sqlite" data-node-label="SQLite" tabindex="0" role="button" aria-label="Focus SQLite, chunks · knowledge_units, 已落地" aria-pressed="false" data-node-kind="database" data-node-sublabel="chunks · knowledge_units" data-node-tag="C2.1" data-node-context="已落地">
+          <title>SQLite · chunks · knowledge_units · 已落地 · C2.1</title>
           <rect x="560" y="220" width="188" height="64" rx="6" class="c-mask"/>
           <rect x="560" y="220" width="188" height="64" rx="6" class="c-database" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(566 226) scale(0.6875)">
@@ -4632,12 +4629,12 @@
             <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
           </g>
           <text data-detail-anchor x="654" y="250" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">SQLite</text>
-        <text data-detail="context" x="654" y="266" class="t-muted" font-size="9" text-anchor="middle">chunks 表已在 schema</text>
+        <text data-detail="context" x="654" y="266" class="t-muted" font-size="9" text-anchor="middle">chunks · knowledge_units</text>
         <text data-detail="fine" x="654" y="276" class="t-database" font-size="7" text-anchor="middle">C2.1</text>
         </g>
 
-        <g id="node-indexer" data-node-id="indexer" data-node-label="Indexer" tabindex="0" role="button" aria-label="Focus Indexer, 投影 · 可重建, Phase 5 尚未实现" aria-pressed="false" data-node-kind="backend" data-node-sublabel="投影 · 可重建" data-node-tag="C5.5" data-node-context="Phase 5 尚未实现">
-          <title>Indexer · 投影 · 可重建 · Phase 5 尚未实现 · C5.5</title>
+        <g id="node-indexer" data-node-id="indexer" data-node-label="Indexer" tabindex="0" role="button" aria-label="Focus Indexer, 投影 · 可重建, 已落地" aria-pressed="false" data-node-kind="backend" data-node-sublabel="投影 · 可重建" data-node-tag="C5.5" data-node-context="已落地">
+          <title>Indexer · 投影 · 可重建 · 已落地 · C5.5</title>
           <rect x="820" y="220" width="176" height="64" rx="6" class="c-mask"/>
           <rect x="820" y="220" width="176" height="64" rx="6" class="c-backend" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(826 226) scale(0.6875)">
@@ -4648,8 +4645,8 @@
         <text data-detail="fine" x="908" y="276" class="t-backend" font-size="7" text-anchor="middle">C5.5</text>
         </g>
 
-        <g id="node-retriever" data-node-id="retriever" data-node-label="Retriever" tabindex="0" role="button" aria-label="Focus Retriever, 调用方只走门面, Phase 5 尚未实现" aria-pressed="false" data-node-kind="backend" data-node-sublabel="调用方只走门面" data-node-tag="C5.4" data-node-context="Phase 5 尚未实现">
-          <title>Retriever · 调用方只走门面 · Phase 5 尚未实现 · C5.4</title>
+        <g id="node-retriever" data-node-id="retriever" data-node-label="Retriever" tabindex="0" role="button" aria-label="Focus Retriever, 调用方只走门面, 已落地" aria-pressed="false" data-node-kind="backend" data-node-sublabel="调用方只走门面" data-node-tag="C5.4" data-node-context="已落地">
+          <title>Retriever · 调用方只走门面 · 已落地 · C5.4</title>
           <rect x="1040" y="220" width="176" height="64" rx="6" class="c-mask"/>
           <rect x="1040" y="220" width="176" height="64" rx="6" class="c-backend" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(1046 226) scale(0.6875)">
@@ -4660,20 +4657,20 @@
         <text data-detail="fine" x="1128" y="276" class="t-backend" font-size="7" text-anchor="middle">C5.4</text>
         </g>
 
-        <g id="node-gateway" data-node-id="gateway" data-node-label="ModelGateway" tabindex="0" role="button" aria-label="Focus ModelGateway, 已落地 · 抽取将调用, 已在用" aria-pressed="false" data-node-kind="cloud" data-node-sublabel="已落地 · 抽取将调用" data-node-tag="C2.4" data-node-context="已在用">
-          <title>ModelGateway · 已落地 · 抽取将调用 · 已在用 · C2.4</title>
+        <g id="node-gateway" data-node-id="gateway" data-node-label="ModelGateway" tabindex="0" role="button" aria-label="Focus ModelGateway, 抽取已调用, 已落地" aria-pressed="false" data-node-kind="cloud" data-node-sublabel="抽取已调用" data-node-tag="C2.4" data-node-context="已落地">
+          <title>ModelGateway · 抽取已调用 · 已落地 · C2.4</title>
           <rect x="300" y="420" width="188" height="64" rx="6" class="c-mask"/>
           <rect x="300" y="420" width="188" height="64" rx="6" class="c-cloud" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="cloud" class="semantic-sigil s-cloud" transform="translate(306 426) scale(0.6875)">
             <path d="M4.3 12.5h7.3a2.4 2.4 0 0 0 .2-4.8 4 4 0 0 0-7.5-1.3A3.1 3.1 0 0 0 4.3 12.5Z"/>
           </g>
           <text data-detail-anchor x="394" y="450" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">ModelGateway</text>
-        <text data-detail="context" x="394" y="466" class="t-muted" font-size="9" text-anchor="middle">已落地 · 抽取将调用</text>
+        <text data-detail="context" x="394" y="466" class="t-muted" font-size="9" text-anchor="middle">抽取已调用</text>
         <text data-detail="fine" x="394" y="476" class="t-cloud" font-size="7" text-anchor="middle">C2.4</text>
         </g>
 
-        <g id="node-extractor" data-node-id="extractor" data-node-label="Extractor" tabindex="0" role="button" aria-label="Focus Extractor, chunk 到 KnowledgeUnit, Phase 5 尚未实现" aria-pressed="false" data-node-kind="backend" data-node-sublabel="chunk 到 KnowledgeUnit" data-node-tag="C5.6" data-node-context="Phase 5 尚未实现">
-          <title>Extractor · chunk 到 KnowledgeUnit · Phase 5 尚未实现 · C5.6</title>
+        <g id="node-extractor" data-node-id="extractor" data-node-label="Extractor" tabindex="0" role="button" aria-label="Focus Extractor, chunk 到 KnowledgeUnit, 已落地" aria-pressed="false" data-node-kind="backend" data-node-sublabel="chunk 到 KnowledgeUnit" data-node-tag="C5.6" data-node-context="已落地">
+          <title>Extractor · chunk 到 KnowledgeUnit · 已落地 · C5.6</title>
           <rect x="560" y="420" width="188" height="64" rx="6" class="c-mask"/>
           <rect x="560" y="420" width="188" height="64" rx="6" class="c-backend" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(566 426) scale(0.6875)">
@@ -4898,35 +4895,35 @@
     <div class="cards">
       <div class="card">
         <div class="card-header">
-          <div class="card-dot amber"></div>
-          <h3>尚未实现</h3>
+          <div class="card-dot emerald"></div>
+          <h3>已接通</h3>
         </div>
         <ul>
-          <li>&bull; md、txt、pdf、yaml、json、OpenAPI 解析后按标题切块，并记下页码和行号。</li>
-          <li>&bull; KnowledgeUnit 经 ModelGateway 抽取。Appendix B 的类型是 diagnostic_rule。</li>
-          <li>&bull; 搜索 API 只调用 Retriever 门面，并返回实际使用的后端。</li>
+          <li>&bull; md、txt、pdf、yaml、json、OpenAPI 解析后切块，并记下页码或行号。</li>
+          <li>&bull; 抽取经 ModelGateway。Appendix B 的类型是 diagnostic_rule。</li>
+          <li>&bull; 搜索 API 只调用 Retriever，响应带 backend 和 mode_used。</li>
         </ul>
       </div>
 
       <div class="card">
         <div class="card-header">
-          <div class="card-dot emerald"></div>
-          <h3>已经存在</h3>
+          <div class="card-dot cyan"></div>
+          <h3>记录与投影</h3>
         </div>
         <ul>
-          <li>&bull; chunks 与 knowledge_units 已在 schema.sql，还没有写入路径。</li>
-          <li>&bull; ModelGateway 已是唯一的模型入口。</li>
+          <li>&bull; SQLite 是 system of record。索引可重建，旧知识单元 id 要等 rebuild 才消失。</li>
+          <li>&bull; BM25 分数是 m/(1+m)，越大越好。</li>
         </ul>
       </div>
 
       <div class="card">
         <div class="card-header">
           <div class="card-dot violet"></div>
-          <h3>索引边界</h3>
+          <h3>稳定坐标</h3>
         </div>
         <ul>
-          <li>&bull; SQLite 是 system of record。FTS 或以后的向量索引都是可重建的投影。</li>
-          <li>&bull; MVP 不安装 lancedb，也不加载 embedding 模型。</li>
+          <li>&bull; 每次切块和抽取都生成新 id。</li>
+          <li>&bull; source-map 用文档 sha256 加 Markdown 行号或 PDF 页码。</li>
         </ul>
       </div>
     </div>

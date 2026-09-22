@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="generator" content="archify 2.12.0">
-  <title>SkillForge：Phase 0–5 已落地 · Phase 6 设计 Diagram</title>
+  <title>Phase 6 设计：Skill Compiler Diagram</title>
   <script>
     // Resolve the theme before first paint so light-preference users don't
     // see a dark flash. The toolbar script below re-applies with UI state.
@@ -4496,13 +4496,13 @@
     <div class="header">
       <div class="header-row">
         <div class="pulse-dot"></div>
-        <h1>SkillForge：Phase 0–5 已落地 · Phase 6 设计</h1>
+        <h1>Phase 6 设计：Skill Compiler</h1>
       </div>
-      <p class="subtitle">实线=已调用。虚线=Compiler 尚未实现。细图：phase3-runtime.html · phase4-evaluator.html · phase5-knowledge.html · phase6-compiler.html。</p>
+      <p class="subtitle">虚线=尚未调用。实线只有已经接通的检索投影。Appendix B 不进入 v0.1。</p>
     </div>
 
-    <script id="archify-guided-views-data" type="application/json">[{"id":"loop","label":"ReAct 循环","focus":["cli","harness","golden","gateway"],"note":"一次 generate 算一步。skill_path 为空是 Control，否则追加 Skill 段。"},{"id":"planes","label":"两个执行面","focus":["tools","sandbox"],"note":"shell、file、http 进沙箱。docker 与 nginx 留在宿主，只动 skillforge-lab。"},{"id":"eval","label":"评测","focus":["evaluator","verifier","sqlite","api"],"note":"试验写入 evaluation_runs。harness 的 RunResult 仍写入 agent_runs。"},{"id":"knowledge","label":"知识面","focus":["knowledge","sqlite","api"],"note":"切块和知识单元写入 SQLite。检索是投影，FTS 不进 schema.sql。"},{"id":"phase6","label":"Phase 6 设计","focus":["compiler","knowledge"],"note":"虚线：Compiler 将经 Retriever 选知识单元。Appendix B 不进入 v0.1。"}]</script>
-    <script id="archify-source-evidence-data" type="application/json">{"schemaVersion":1,"verified":true,"repository":{"url":"https://github.com/FluxForgeLab/SkillForge","revision":"8127e5102c6f03bfa80b9b4a62d88d3ba60ea84c","shortRevision":"8127e51"},"referenceCount":16,"nodes":{"cli":[{"path":"skillforge/cli.py","line":63,"endLine":67,"label":"eval and index","href":"https://github.com/FluxForgeLab/SkillForge/blob/8127e5102c6f03bfa80b9b4a62d88d3ba60ea84c/skillforge/cli.py#L63-L67"}],"harness":[{"path":"skillforge/runtime/agent.py","line":66,"endLine":75,"label":"run","href":"https://github.com/FluxForgeLab/SkillForge/blob/8127e5102c6f03bfa80b9b4a62d88d3ba60ea84c/skillforge/runtime/agent.py#L66-L75"}],"golden":[{"path":"skillforge/runtime/prompt.py","line":18,"endLine":22,"label":"skill or bare","href":"https://github.com/FluxForgeLab/SkillForge/blob/8127e5102c6f03bfa80b9b4a62d88d3ba60ea84c/skillforge/runtime/prompt.py#L18-L22"}],"gateway":[{"path":"skillforge/models/adapters/openai_compatible.py","line":98,"endLine":99,"label":"dot to underscore","href":"https://github.com/FluxForgeLab/SkillForge/blob/8127e5102c6f03bfa80b9b4a62d88d3ba60ea84c/skillforge/models/adapters/openai_compatible.py#L98-L99"}],"sandbox":[{"path":"skillforge/sandbox/docker.py","line":90,"endLine":96,"label":"create","href":"https://github.com/FluxForgeLab/SkillForge/blob/8127e5102c6f03bfa80b9b4a62d88d3ba60ea84c/skillforge/sandbox/docker.py#L90-L96"}],"tools":[{"path":"skillforge/runtime/tools/opslab.py","line":227,"endLine":230,"label":"restart_database","href":"https://github.com/FluxForgeLab/SkillForge/blob/8127e5102c6f03bfa80b9b4a62d88d3ba60ea84c/skillforge/runtime/tools/opslab.py#L227-L230"}],"sqlite":[{"path":"skillforge/db/schema.sql","line":21,"endLine":33,"label":"chunks","href":"https://github.com/FluxForgeLab/SkillForge/blob/8127e5102c6f03bfa80b9b4a62d88d3ba60ea84c/skillforge/db/schema.sql#L21-L33"},{"path":"skillforge/db/schema.sql","line":35,"endLine":44,"label":"knowledge_units","href":"https://github.com/FluxForgeLab/SkillForge/blob/8127e5102c6f03bfa80b9b4a62d88d3ba60ea84c/skillforge/db/schema.sql#L35-L44"},{"path":"skillforge/db/schema.sql","line":77,"endLine":86,"label":"evaluation_runs","href":"https://github.com/FluxForgeLab/SkillForge/blob/8127e5102c6f03bfa80b9b4a62d88d3ba60ea84c/skillforge/db/schema.sql#L77-L86"}],"api":[{"path":"skillforge/api/main.py","line":68,"endLine":73,"label":"routers","href":"https://github.com/FluxForgeLab/SkillForge/blob/8127e5102c6f03bfa80b9b4a62d88d3ba60ea84c/skillforge/api/main.py#L68-L73"}],"verifier":[{"path":"demo/ops-lab/verifier/verify.py","line":44,"endLine":50,"label":"healthy","href":"https://github.com/FluxForgeLab/SkillForge/blob/8127e5102c6f03bfa80b9b4a62d88d3ba60ea84c/demo/ops-lab/verifier/verify.py#L44-L50"}],"evaluator":[{"path":"skillforge/evaluator/suite.py","line":73,"endLine":81,"label":"run_suite","href":"https://github.com/FluxForgeLab/SkillForge/blob/8127e5102c6f03bfa80b9b4a62d88d3ba60ea84c/skillforge/evaluator/suite.py#L73-L81"}],"knowledge":[{"path":"skillforge/ingestion/chunking.py","line":23,"endLine":30,"label":"chunk then index","href":"https://github.com/FluxForgeLab/SkillForge/blob/8127e5102c6f03bfa80b9b4a62d88d3ba60ea84c/skillforge/ingestion/chunking.py#L23-L30"},{"path":"skillforge/knowledge/extractor.py","line":70,"endLine":76,"label":"extract","href":"https://github.com/FluxForgeLab/SkillForge/blob/8127e5102c6f03bfa80b9b4a62d88d3ba60ea84c/skillforge/knowledge/extractor.py#L70-L76"},{"path":"skillforge/knowledge/retrieval/retriever.py","line":38,"endLine":49,"label":"search","href":"https://github.com/FluxForgeLab/SkillForge/blob/8127e5102c6f03bfa80b9b4a62d88d3ba60ea84c/skillforge/knowledge/retrieval/retriever.py#L38-L49"}],"compiler":[{"path":"docs/execution-plan.md","line":262,"endLine":263,"label":"spec then filter","href":"https://github.com/FluxForgeLab/SkillForge/blob/8127e5102c6f03bfa80b9b4a62d88d3ba60ea84c/docs/execution-plan.md#L262-L263"}]}}</script>
+    <script id="archify-guided-views-data" type="application/json">[{"id":"select","label":"选知识","focus":["sqlite","retriever","spec"],"note":"先按 type 和 trigger 过滤，再经 Retriever 排序。Appendix B 的触发词不匹配 v0.1。"},{"id":"generate","label":"生成产物","focus":["spec","skillmd","scripts","evals","gateway"],"note":"SkillSpec 收紧 permissions。SKILL.md 每条指令带 source_ref，坐标是 sha256 加行号或页码。"},{"id":"check","label":"校验","focus":["checker","golden","registry"],"note":"静态校验对照 golden。通过后最多到 CANDIDATE。approve 仍要人工调用。"}]</script>
+    <script id="archify-source-evidence-data" type="application/json">{"schemaVersion":1,"verified":true,"repository":{"url":"https://github.com/FluxForgeLab/SkillForge","revision":"8127e5102c6f03bfa80b9b4a62d88d3ba60ea84c","shortRevision":"8127e51"},"referenceCount":11,"nodes":{"compileapi":[{"path":"docs/execution-plan.md","line":269,"endLine":269,"label":"compile endpoint","href":"https://github.com/FluxForgeLab/SkillForge/blob/8127e5102c6f03bfa80b9b4a62d88d3ba60ea84c/docs/execution-plan.md#L269"}],"spec":[{"path":"docs/execution-plan.md","line":262,"endLine":263,"label":"spec and filter","href":"https://github.com/FluxForgeLab/SkillForge/blob/8127e5102c6f03bfa80b9b4a62d88d3ba60ea84c/docs/execution-plan.md#L262-L263"}],"evals":[{"path":"docs/execution-plan.md","line":266,"endLine":266,"label":"eval cases","href":"https://github.com/FluxForgeLab/SkillForge/blob/8127e5102c6f03bfa80b9b4a62d88d3ba60ea84c/docs/execution-plan.md#L266"}],"retriever":[{"path":"skillforge/knowledge/retrieval/retriever.py","line":38,"endLine":49,"label":"search","href":"https://github.com/FluxForgeLab/SkillForge/blob/8127e5102c6f03bfa80b9b4a62d88d3ba60ea84c/skillforge/knowledge/retrieval/retriever.py#L38-L49"}],"sqlite":[{"path":"skillforge/db/schema.sql","line":35,"endLine":44,"label":"knowledge_units","href":"https://github.com/FluxForgeLab/SkillForge/blob/8127e5102c6f03bfa80b9b4a62d88d3ba60ea84c/skillforge/db/schema.sql#L35-L44"}],"scripts":[{"path":"docs/execution-plan.md","line":265,"endLine":265,"label":"script template","href":"https://github.com/FluxForgeLab/SkillForge/blob/8127e5102c6f03bfa80b9b4a62d88d3ba60ea84c/docs/execution-plan.md#L265"}],"skillmd":[{"path":"docs/execution-plan.md","line":264,"endLine":264,"label":"instructions","href":"https://github.com/FluxForgeLab/SkillForge/blob/8127e5102c6f03bfa80b9b4a62d88d3ba60ea84c/docs/execution-plan.md#L264"}],"gateway":[{"path":"skillforge/models/gateway.py","line":28,"endLine":42,"label":"generate","href":"https://github.com/FluxForgeLab/SkillForge/blob/8127e5102c6f03bfa80b9b4a62d88d3ba60ea84c/skillforge/models/gateway.py#L28-L42"}],"checker":[{"path":"docs/execution-plan.md","line":267,"endLine":270,"label":"validate and accept","href":"https://github.com/FluxForgeLab/SkillForge/blob/8127e5102c6f03bfa80b9b4a62d88d3ba60ea84c/docs/execution-plan.md#L267-L270"}],"golden":[{"path":"skills/golden/service-recovery/SKILL.md","line":1,"endLine":6,"label":"triggers","href":"https://github.com/FluxForgeLab/SkillForge/blob/8127e5102c6f03bfa80b9b4a62d88d3ba60ea84c/skills/golden/service-recovery/SKILL.md#L1-L6"}],"registry":[{"path":"docs/execution-plan.md","line":268,"endLine":268,"label":"package candidate","href":"https://github.com/FluxForgeLab/SkillForge/blob/8127e5102c6f03bfa80b9b4a62d88d3ba60ea84c/docs/execution-plan.md#L268"}]}}</script>
     <div class="guided-views no-print" id="guided-views" hidden aria-label="Guided diagram views">
       <button id="guided-view-prev" type="button" aria-label="Previous guided view" title="Previous guided view ([)">&#8592;</button>
       <div class="guided-view-copy">
@@ -4544,9 +4544,9 @@
 
     <!-- Main Diagram -->
     <div class="diagram-container" data-detail-level="read">
-      <svg viewBox="0 0 1298 572" role="img" aria-labelledby="archify-diagram-title archify-diagram-description" data-preset="editorial" data-quality-profile="showcase">
-        <title id="archify-diagram-title">SkillForge：Phase 0–5 已落地 · Phase 6 设计</title>
-        <desc id="archify-diagram-description">实线=已调用。虚线=Compiler 尚未实现。细图：phase3-runtime.html · phase4-evaluator.html · phase5-knowledge.html · phase6-compiler.html。</desc>
+      <svg viewBox="0 0 1346 592" role="img" aria-labelledby="archify-diagram-title archify-diagram-description" data-preset="editorial" data-quality-profile="showcase">
+        <title id="archify-diagram-title">Phase 6 设计：Skill Compiler</title>
+        <desc id="archify-diagram-description">虚线=尚未调用。实线只有已经接通的检索投影。Appendix B 不进入 v0.1。</desc>
         <!-- Definitions -->
         <defs>
           <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
@@ -4570,175 +4570,162 @@
         <rect width="100%" height="100%" fill="url(#grid)" />
 
         <!-- Boundaries (behind everything) -->
-        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="0" x="10" y="10" width="1248" height="494" rx="12" class="c-region" stroke-width="1"/>
-        <text x="18" y="28" class="t-cloud" font-size="9" font-weight="600">已落地</text>
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="0" x="250" y="10" width="1056" height="514" rx="12" class="c-region" stroke-width="1"/>
+        <text x="258" y="28" class="t-cloud" font-size="9" font-weight="600">Phase 6 尚未实现</text>
 
-        <rect data-graph-role="structural-frame" data-composition-frame-kind="security-group" data-composition-frame-id="1" x="10" y="390" width="236" height="114" rx="8" class="c-security-group" stroke-width="1"/>
-        <text x="18" y="408" class="t-security" font-size="9" font-weight="600">DockerSandbox 无 docker.sock</text>
-
-        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="2" x="1010" y="10" width="248" height="114" rx="12" class="c-region" stroke-width="1"/>
-        <text x="1018" y="28" class="t-cloud" font-size="9" font-weight="600">Phase 6 设计</text>
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="1" x="10" y="210" width="1048" height="314" rx="12" class="c-region" stroke-width="1"/>
+        <text x="18" y="228" class="t-cloud" font-size="9" font-weight="600">已在用</text>
 
         <!-- Connection paths (before components for correct z-order) -->
-        <path data-edge-from="cli" data-edge-to="harness" data-edge-key="0" data-edge-id="cli-harness" data-composition-points="216,252;280,252" d="M 216 252 L 280 252" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="golden" data-edge-to="harness" data-edge-key="1" data-edge-id="golden-harness" data-composition-points="368,104;368,220" d="M 368 104 L 368 220" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="harness" data-edge-to="gateway" data-edge-key="2" data-edge-id="harness-gateway" data-composition-points="456,252;540,252" d="M 456 252 L 540 252" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="harness" data-edge-to="tools" data-edge-key="3" data-edge-id="harness-tools" data-composition-points="368,284;368,420" d="M 368 284 L 368 420" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="tools" data-edge-to="sandbox" data-edge-key="4" data-edge-id="tools-sandbox" data-composition-points="280,452;216,452" d="M 280 452 L 216 452" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="api" data-edge-to="sqlite" data-edge-key="5" data-edge-id="api-sqlite" data-composition-points="894,104;894,220" d="M 894 104 L 894 220" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="evaluator" data-edge-to="sqlite" data-edge-key="6" data-edge-id="eval-sqlite" data-composition-points="894,420;894,284" d="M 894 420 L 894 284" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="evaluator" data-edge-to="verifier" data-edge-key="7" data-edge-id="eval-verifier" data-composition-points="800,452;728,452" d="M 800 452 L 728 452" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="knowledge" data-edge-to="sqlite" data-edge-key="8" data-edge-id="knowledge-sqlite" data-composition-points="1040,252;988,252" d="M 1040 252 L 988 252" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="compiler" data-edge-to="knowledge" data-edge-key="9" data-edge-id="compiler-knowledge" data-composition-points="1134,104;1134,220" d="M 1134 104 L 1134 220" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
+        <path data-edge-from="sqlite" data-edge-to="retriever" data-edge-key="0" data-edge-id="sqlite-retriever" data-composition-points="128,440;128,304" d="M 128 440 L 128 304" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="retriever" data-edge-to="spec" data-edge-key="1" data-edge-id="retriever-spec" data-composition-points="216,272;280,272" d="M 216 272 L 280 272" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
+        <path data-edge-from="compileapi" data-edge-to="spec" data-edge-key="2" data-edge-id="api-spec" data-composition-points="374,104;374,240" d="M 374 104 L 374 240" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
+        <path data-edge-from="spec" data-edge-to="skillmd" data-edge-key="3" data-edge-id="spec-skill" data-composition-points="468,272;560,272" d="M 468 272 L 560 272" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
+        <path data-edge-from="spec" data-edge-to="evals" data-edge-key="4" data-edge-id="spec-evals" data-composition-points="374,304;374,440" d="M 374 304 L 374 440" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
+        <path data-edge-from="skillmd" data-edge-to="scripts" data-edge-key="5" data-edge-id="skill-scripts" data-composition-points="654,240;654,104" d="M 654 240 L 654 104" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
+        <path data-edge-from="gateway" data-edge-to="skillmd" data-edge-key="6" data-edge-id="gateway-skill" data-composition-points="654,440;654,304" d="M 654 440 L 654 304" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
+        <path data-edge-from="skillmd" data-edge-to="checker" data-edge-key="7" data-edge-id="skill-checker" data-composition-points="748,272;840,272" d="M 748 272 L 840 272" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
+        <path data-edge-from="checker" data-edge-to="golden" data-edge-key="8" data-edge-id="checker-golden" data-composition-points="934,304;934,440" d="M 934 304 L 934 440" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
+        <path data-edge-from="checker" data-edge-to="registry" data-edge-key="9" data-edge-id="checker-registry" data-composition-points="1028,272;1100,272" d="M 1028 272 L 1100 272" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
 
         <!-- Components -->
-        <g id="node-cli" data-node-id="cli" data-node-label="skillforge CLI" tabindex="0" role="button" aria-label="Focus skillforge CLI, run · eval · index, 已落地" aria-pressed="false" data-node-kind="external" data-node-sublabel="run · eval · index" data-node-tag="C5.7" data-node-context="已落地">
-          <title>skillforge CLI · run · eval · index · 已落地 · C5.7</title>
-          <rect x="40" y="220" width="176" height="64" rx="6" class="c-mask"/>
-          <rect x="40" y="220" width="176" height="64" rx="6" class="c-external" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(46 226) scale(0.6875)">
+        <g id="node-compileapi" data-node-id="compileapi" data-node-label="compile API" tabindex="0" role="button" aria-label="Focus compile API, 尚未实现, Phase 6 尚未实现" aria-pressed="false" data-node-kind="backend" data-node-sublabel="尚未实现" data-node-tag="C6.8" data-node-context="Phase 6 尚未实现">
+          <title>compile API · 尚未实现 · Phase 6 尚未实现 · C6.8</title>
+          <rect x="280" y="40" width="188" height="64" rx="6" class="c-mask"/>
+          <rect x="280" y="40" width="188" height="64" rx="6" class="c-backend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(286 46) scale(0.6875)">
+            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
+          </g>
+          <text data-detail-anchor x="374" y="70" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">compile API</text>
+        <text data-detail="context" x="374" y="86" class="t-muted" font-size="9" text-anchor="middle">尚未实现</text>
+        <text data-detail="fine" x="374" y="96" class="t-backend" font-size="7" text-anchor="middle">C6.8</text>
+        </g>
+
+        <g id="node-spec" data-node-id="spec" data-node-label="SkillSpec" tabindex="0" role="button" aria-label="Focus SkillSpec, 筛 KU · 收紧权限, Phase 6 尚未实现" aria-pressed="false" data-node-kind="backend" data-node-sublabel="筛 KU · 收紧权限" data-node-tag="C6.2" data-node-context="Phase 6 尚未实现">
+          <title>SkillSpec · 筛 KU · 收紧权限 · Phase 6 尚未实现 · C6.2</title>
+          <rect x="280" y="240" width="188" height="64" rx="6" class="c-mask"/>
+          <rect x="280" y="240" width="188" height="64" rx="6" class="c-backend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(286 246) scale(0.6875)">
+            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
+          </g>
+          <text data-detail-anchor x="374" y="270" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">SkillSpec</text>
+        <text data-detail="context" x="374" y="286" class="t-muted" font-size="9" text-anchor="middle">筛 KU · 收紧权限</text>
+        <text data-detail="fine" x="374" y="296" class="t-backend" font-size="7" text-anchor="middle">C6.2</text>
+        </g>
+
+        <g id="node-evals" data-node-id="evals" data-node-label="evals.json" tabindex="0" role="button" aria-label="Focus evals.json, 从 success_criteria 生成, Phase 6 尚未实现" aria-pressed="false" data-node-kind="external" data-node-sublabel="从 success_criteria 生成" data-node-tag="C6.5" data-node-context="Phase 6 尚未实现">
+          <title>evals.json · 从 success_criteria 生成 · Phase 6 尚未实现 · C6.5</title>
+          <rect x="280" y="440" width="188" height="64" rx="6" class="c-mask"/>
+          <rect x="280" y="440" width="188" height="64" rx="6" class="c-external" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(286 446) scale(0.6875)">
             <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
             <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
           </g>
-          <text data-detail-anchor x="128" y="250" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">skillforge CLI</text>
-        <text data-detail="context" x="128" y="266" class="t-muted" font-size="9" text-anchor="middle">run · eval · index</text>
-        <text data-detail="fine" x="128" y="276" class="t-external" font-size="7" text-anchor="middle">C5.7</text>
+          <text data-detail-anchor x="374" y="470" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">evals.json</text>
+        <text data-detail="context" x="374" y="486" class="t-muted" font-size="9" text-anchor="middle">从 success_criteria 生成</text>
+        <text data-detail="fine" x="374" y="496" class="t-external" font-size="7" text-anchor="middle">C6.5</text>
         </g>
 
-        <g id="node-harness" data-node-id="harness" data-node-label="LocalHarness" tabindex="0" role="button" aria-label="Focus LocalHarness, 一步一次 generate, 已落地" aria-pressed="false" data-node-kind="backend" data-node-sublabel="一步一次 generate" data-node-tag="C3.6" data-node-context="已落地">
-          <title>LocalHarness · 一步一次 generate · 已落地 · C3.6</title>
-          <rect x="280" y="220" width="176" height="64" rx="6" class="c-mask"/>
-          <rect x="280" y="220" width="176" height="64" rx="6" class="c-backend" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(286 226) scale(0.6875)">
+        <g id="node-retriever" data-node-id="retriever" data-node-label="Retriever" tabindex="0" role="button" aria-label="Focus Retriever, 已落地 · 只走门面, 已在用" aria-pressed="false" data-node-kind="backend" data-node-sublabel="已落地 · 只走门面" data-node-tag="C5.4" data-node-context="已在用">
+          <title>Retriever · 已落地 · 只走门面 · 已在用 · C5.4</title>
+          <rect x="40" y="240" width="176" height="64" rx="6" class="c-mask"/>
+          <rect x="40" y="240" width="176" height="64" rx="6" class="c-backend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(46 246) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
-          <text data-detail-anchor x="368" y="250" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">LocalHarness</text>
-        <text data-detail="context" x="368" y="266" class="t-muted" font-size="9" text-anchor="middle">一步一次 generate</text>
-        <text data-detail="fine" x="368" y="276" class="t-backend" font-size="7" text-anchor="middle">C3.6</text>
+          <text data-detail-anchor x="128" y="270" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Retriever</text>
+        <text data-detail="context" x="128" y="286" class="t-muted" font-size="9" text-anchor="middle">已落地 · 只走门面</text>
+        <text data-detail="fine" x="128" y="296" class="t-backend" font-size="7" text-anchor="middle">C5.4</text>
         </g>
 
-        <g id="node-golden" data-node-id="golden" data-node-label="golden skill" tabindex="0" role="button" aria-label="Focus golden skill, v0.1 · 不含 F3 修法, 已落地" aria-pressed="false" data-node-kind="external" data-node-sublabel="v0.1 · 不含 F3 修法" data-node-tag="C3.1" data-node-context="已落地">
-          <title>golden skill · v0.1 · 不含 F3 修法 · 已落地 · C3.1</title>
-          <rect x="280" y="40" width="176" height="64" rx="6" class="c-mask"/>
-          <rect x="280" y="40" width="176" height="64" rx="6" class="c-external" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(286 46) scale(0.6875)">
-            <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
-            <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
-          </g>
-          <text data-detail-anchor x="368" y="70" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">golden skill</text>
-        <text data-detail="context" x="368" y="86" class="t-muted" font-size="9" text-anchor="middle">v0.1 · 不含 F3 修法</text>
-        <text data-detail="fine" x="368" y="96" class="t-external" font-size="7" text-anchor="middle">C3.1</text>
-        </g>
-
-        <g id="node-gateway" data-node-id="gateway" data-node-label="ModelGateway" tabindex="0" role="button" aria-label="Focus ModelGateway, 点号工具名在边界改写, 已落地" aria-pressed="false" data-node-kind="cloud" data-node-sublabel="点号工具名在边界改写" data-node-tag="C3.11" data-node-context="已落地">
-          <title>ModelGateway · 点号工具名在边界改写 · 已落地 · C3.11</title>
-          <rect x="540" y="220" width="188" height="64" rx="6" class="c-mask"/>
-          <rect x="540" y="220" width="188" height="64" rx="6" class="c-cloud" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="cloud" class="semantic-sigil s-cloud" transform="translate(546 226) scale(0.6875)">
-            <path d="M4.3 12.5h7.3a2.4 2.4 0 0 0 .2-4.8 4 4 0 0 0-7.5-1.3A3.1 3.1 0 0 0 4.3 12.5Z"/>
-          </g>
-          <text data-detail-anchor x="634" y="250" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">ModelGateway</text>
-        <text data-detail="context" x="634" y="266" class="t-muted" font-size="9" text-anchor="middle">点号工具名在边界改写</text>
-        <text data-detail="fine" x="634" y="276" class="t-cloud" font-size="7" text-anchor="middle">C3.11</text>
-        </g>
-
-        <g id="node-sandbox" data-node-id="sandbox" data-node-label="DockerSandbox" tabindex="0" role="button" aria-label="Focus DockerSandbox, 只挂 workspace · bridge, 已落地 › DockerSandbox 无 docker.sock" aria-pressed="false" data-node-kind="security" data-node-sublabel="只挂 workspace · bridge" data-node-tag="C3.3" data-node-context="已落地 › DockerSandbox 无 docker.sock">
-          <title>DockerSandbox · 只挂 workspace · bridge · 已落地 › DockerSandbox 无 docker.sock · C3.3</title>
-          <rect x="40" y="420" width="176" height="64" rx="6" class="c-mask"/>
-          <rect x="40" y="420" width="176" height="64" rx="6" class="c-security" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(46 426) scale(0.6875)">
-            <path d="M8 2.2 13 4v3.5c0 3.1-1.8 5.4-5 6.5-3.2-1.1-5-3.4-5-6.5V4Z"/>
-            <path d="m5.8 8 1.5 1.5 3-3"/>
-          </g>
-          <text data-detail-anchor x="128" y="450" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">DockerSandbox</text>
-        <text data-detail="context" x="128" y="466" class="t-muted" font-size="9" text-anchor="middle">只挂 workspace · bridge</text>
-        <text data-detail="fine" x="128" y="476" class="t-security" font-size="7" text-anchor="middle">C3.3</text>
-        </g>
-
-        <g id="node-tools" data-node-id="tools" data-node-label="runtime_tools" tabindex="0" role="button" aria-label="Focus runtime_tools, 沙箱工具 + 宿主白名单, 已落地" aria-pressed="false" data-node-kind="backend" data-node-sublabel="沙箱工具 + 宿主白名单" data-node-tag="C3.5" data-node-context="已落地">
-          <title>runtime_tools · 沙箱工具 + 宿主白名单 · 已落地 · C3.5</title>
-          <rect x="280" y="420" width="176" height="64" rx="6" class="c-mask"/>
-          <rect x="280" y="420" width="176" height="64" rx="6" class="c-backend" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(286 426) scale(0.6875)">
-            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
-          </g>
-          <text data-detail-anchor x="368" y="450" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">runtime_tools</text>
-        <text data-detail="context" x="368" y="466" class="t-muted" font-size="9" text-anchor="middle">沙箱工具 + 宿主白名单</text>
-        <text data-detail="fine" x="368" y="476" class="t-backend" font-size="7" text-anchor="middle">C3.5</text>
-        </g>
-
-        <g id="node-sqlite" data-node-id="sqlite" data-node-label="SQLite" tabindex="0" role="button" aria-label="Focus SQLite, runs · chunks · units, 已落地" aria-pressed="false" data-node-kind="database" data-node-sublabel="runs · chunks · units" data-node-tag="C5.6" data-node-context="已落地">
-          <title>SQLite · runs · chunks · units · 已落地 · C5.6</title>
-          <rect x="800" y="220" width="188" height="64" rx="6" class="c-mask"/>
-          <rect x="800" y="220" width="188" height="64" rx="6" class="c-database" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(806 226) scale(0.6875)">
+        <g id="node-sqlite" data-node-id="sqlite" data-node-label="SQLite" tabindex="0" role="button" aria-label="Focus SQLite, knowledge_units, 已在用" aria-pressed="false" data-node-kind="database" data-node-sublabel="knowledge_units" data-node-tag="C5.6" data-node-context="已在用">
+          <title>SQLite · knowledge_units · 已在用 · C5.6</title>
+          <rect x="40" y="440" width="176" height="64" rx="6" class="c-mask"/>
+          <rect x="40" y="440" width="176" height="64" rx="6" class="c-database" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(46 446) scale(0.6875)">
             <ellipse cx="8" cy="4" rx="5" ry="2"/>
             <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
           </g>
-          <text data-detail-anchor x="894" y="250" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">SQLite</text>
-        <text data-detail="context" x="894" y="266" class="t-muted" font-size="9" text-anchor="middle">runs · chunks · units</text>
-        <text data-detail="fine" x="894" y="276" class="t-database" font-size="7" text-anchor="middle">C5.6</text>
+          <text data-detail-anchor x="128" y="470" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">SQLite</text>
+        <text data-detail="context" x="128" y="486" class="t-muted" font-size="9" text-anchor="middle">knowledge_units</text>
+        <text data-detail="fine" x="128" y="496" class="t-database" font-size="7" text-anchor="middle">C5.6</text>
         </g>
 
-        <g id="node-api" data-node-id="api" data-node-label="FastAPI" tabindex="0" role="button" aria-label="Focus FastAPI, evaluate · sources, 已落地" aria-pressed="false" data-node-kind="backend" data-node-sublabel="evaluate · sources" data-node-tag="C5.7" data-node-context="已落地">
-          <title>FastAPI · evaluate · sources · 已落地 · C5.7</title>
-          <rect x="800" y="40" width="188" height="64" rx="6" class="c-mask"/>
-          <rect x="800" y="40" width="188" height="64" rx="6" class="c-backend" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(806 46) scale(0.6875)">
-            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
+        <g id="node-scripts" data-node-id="scripts" data-node-label="scripts" tabindex="0" role="button" aria-label="Focus scripts, diagnose · recover · verify, Phase 6 尚未实现" aria-pressed="false" data-node-kind="external" data-node-sublabel="diagnose · recover · verify" data-node-tag="C6.4" data-node-context="Phase 6 尚未实现">
+          <title>scripts · diagnose · recover · verify · Phase 6 尚未实现 · C6.4</title>
+          <rect x="560" y="40" width="188" height="64" rx="6" class="c-mask"/>
+          <rect x="560" y="40" width="188" height="64" rx="6" class="c-external" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(566 46) scale(0.6875)">
+            <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
+            <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
           </g>
-          <text data-detail-anchor x="894" y="70" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">FastAPI</text>
-        <text data-detail="context" x="894" y="86" class="t-muted" font-size="9" text-anchor="middle">evaluate · sources</text>
-        <text data-detail="fine" x="894" y="96" class="t-backend" font-size="7" text-anchor="middle">C5.7</text>
+          <text data-detail-anchor x="654" y="70" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">scripts</text>
+        <text data-detail="context" x="654" y="86" class="t-muted" font-size="9" text-anchor="middle">diagnose · recover · verify</text>
+        <text data-detail="fine" x="654" y="96" class="t-external" font-size="7" text-anchor="middle">C6.4</text>
         </g>
 
-        <g id="node-verifier" data-node-id="verifier" data-node-label="verifier" tabindex="0" role="button" aria-label="Focus verifier, 五字段, 已落地" aria-pressed="false" data-node-kind="security" data-node-sublabel="五字段" data-node-tag="C1.3" data-node-context="已落地">
-          <title>verifier · 五字段 · 已落地 · C1.3</title>
-          <rect x="540" y="420" width="188" height="64" rx="6" class="c-mask"/>
-          <rect x="540" y="420" width="188" height="64" rx="6" class="c-security" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(546 426) scale(0.6875)">
+        <g id="node-skillmd" data-node-id="skillmd" data-node-label="SKILL.md" tabindex="0" role="button" aria-label="Focus SKILL.md, ins_xx · source-map, Phase 6 尚未实现" aria-pressed="false" data-node-kind="external" data-node-sublabel="ins_xx · source-map" data-node-tag="C6.3" data-node-context="Phase 6 尚未实现">
+          <title>SKILL.md · ins_xx · source-map · Phase 6 尚未实现 · C6.3</title>
+          <rect x="560" y="240" width="188" height="64" rx="6" class="c-mask"/>
+          <rect x="560" y="240" width="188" height="64" rx="6" class="c-external" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(566 246) scale(0.6875)">
+            <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
+            <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
+          </g>
+          <text data-detail-anchor x="654" y="270" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">SKILL.md</text>
+        <text data-detail="context" x="654" y="286" class="t-muted" font-size="9" text-anchor="middle">ins_xx · source-map</text>
+        <text data-detail="fine" x="654" y="296" class="t-external" font-size="7" text-anchor="middle">C6.3</text>
+        </g>
+
+        <g id="node-gateway" data-node-id="gateway" data-node-label="ModelGateway" tabindex="0" role="button" aria-label="Focus ModelGateway, 已落地 · 编译将调用, 已在用" aria-pressed="false" data-node-kind="cloud" data-node-sublabel="已落地 · 编译将调用" data-node-tag="C2.4" data-node-context="已在用">
+          <title>ModelGateway · 已落地 · 编译将调用 · 已在用 · C2.4</title>
+          <rect x="560" y="440" width="188" height="64" rx="6" class="c-mask"/>
+          <rect x="560" y="440" width="188" height="64" rx="6" class="c-cloud" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="cloud" class="semantic-sigil s-cloud" transform="translate(566 446) scale(0.6875)">
+            <path d="M4.3 12.5h7.3a2.4 2.4 0 0 0 .2-4.8 4 4 0 0 0-7.5-1.3A3.1 3.1 0 0 0 4.3 12.5Z"/>
+          </g>
+          <text data-detail-anchor x="654" y="470" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">ModelGateway</text>
+        <text data-detail="context" x="654" y="486" class="t-muted" font-size="9" text-anchor="middle">已落地 · 编译将调用</text>
+        <text data-detail="fine" x="654" y="496" class="t-cloud" font-size="7" text-anchor="middle">C2.4</text>
+        </g>
+
+        <g id="node-checker" data-node-id="checker" data-node-label="静态校验" tabindex="0" role="button" aria-label="Focus 静态校验, 对照 golden · 坏样本失败, Phase 6 尚未实现" aria-pressed="false" data-node-kind="security" data-node-sublabel="对照 golden · 坏样本失败" data-node-tag="C6.6" data-node-context="Phase 6 尚未实现">
+          <title>静态校验 · 对照 golden · 坏样本失败 · Phase 6 尚未实现 · C6.6</title>
+          <rect x="840" y="240" width="188" height="64" rx="6" class="c-mask"/>
+          <rect x="840" y="240" width="188" height="64" rx="6" class="c-security" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(846 246) scale(0.6875)">
             <path d="M8 2.2 13 4v3.5c0 3.1-1.8 5.4-5 6.5-3.2-1.1-5-3.4-5-6.5V4Z"/>
             <path d="m5.8 8 1.5 1.5 3-3"/>
           </g>
-          <text data-detail-anchor x="634" y="450" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">verifier</text>
-        <text data-detail="context" x="634" y="466" class="t-muted" font-size="9" text-anchor="middle">五字段</text>
-        <text data-detail="fine" x="634" y="476" class="t-security" font-size="7" text-anchor="middle">C1.3</text>
+          <text data-detail-anchor x="934" y="270" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">静态校验</text>
+        <text data-detail="context" x="934" y="286" class="t-muted" font-size="9" text-anchor="middle">对照 golden · 坏样本失败</text>
+        <text data-detail="fine" x="934" y="296" class="t-security" font-size="7" text-anchor="middle">C6.6</text>
         </g>
 
-        <g id="node-evaluator" data-node-id="evaluator" data-node-label="Evaluator" tabindex="0" role="button" aria-label="Focus Evaluator, 断言 · uplift · 封印, 已落地" aria-pressed="false" data-node-kind="backend" data-node-sublabel="断言 · uplift · 封印" data-node-tag="C4.4" data-node-context="已落地">
-          <title>Evaluator · 断言 · uplift · 封印 · 已落地 · C4.4</title>
-          <rect x="800" y="420" width="188" height="64" rx="6" class="c-mask"/>
-          <rect x="800" y="420" width="188" height="64" rx="6" class="c-backend" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(806 426) scale(0.6875)">
-            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
+        <g id="node-golden" data-node-id="golden" data-node-label="golden skill" tabindex="0" role="button" aria-label="Focus golden skill, v0.1 验收参照, 已在用" aria-pressed="false" data-node-kind="external" data-node-sublabel="v0.1 验收参照" data-node-tag="C3.1" data-node-context="已在用">
+          <title>golden skill · v0.1 验收参照 · 已在用 · C3.1</title>
+          <rect x="840" y="440" width="188" height="64" rx="6" class="c-mask"/>
+          <rect x="840" y="440" width="188" height="64" rx="6" class="c-external" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(846 446) scale(0.6875)">
+            <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
+            <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
           </g>
-          <text data-detail-anchor x="894" y="450" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Evaluator</text>
-        <text data-detail="context" x="894" y="466" class="t-muted" font-size="9" text-anchor="middle">断言 · uplift · 封印</text>
-        <text data-detail="fine" x="894" y="476" class="t-backend" font-size="7" text-anchor="middle">C4.4</text>
+          <text data-detail-anchor x="934" y="470" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">golden skill</text>
+        <text data-detail="context" x="934" y="486" class="t-muted" font-size="9" text-anchor="middle">v0.1 验收参照</text>
+        <text data-detail="fine" x="934" y="496" class="t-external" font-size="7" text-anchor="middle">C3.1</text>
         </g>
 
-        <g id="node-knowledge" data-node-id="knowledge" data-node-label="Knowledge" tabindex="0" role="button" aria-label="Focus Knowledge, 切块 · 抽取 · Retriever, 已落地" aria-pressed="false" data-node-kind="backend" data-node-sublabel="切块 · 抽取 · Retriever" data-node-tag="C5.9" data-node-context="已落地">
-          <title>Knowledge · 切块 · 抽取 · Retriever · 已落地 · C5.9</title>
-          <rect x="1040" y="220" width="188" height="64" rx="6" class="c-mask"/>
-          <rect x="1040" y="220" width="188" height="64" rx="6" class="c-backend" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(1046 226) scale(0.6875)">
-            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
+        <g id="node-registry" data-node-id="registry" data-node-label="registry" tabindex="0" role="button" aria-label="Focus registry, 最多到 CANDIDATE, Phase 6 尚未实现" aria-pressed="false" data-node-kind="database" data-node-sublabel="最多到 CANDIDATE" data-node-tag="C6.7" data-node-context="Phase 6 尚未实现">
+          <title>registry · 最多到 CANDIDATE · Phase 6 尚未实现 · C6.7</title>
+          <rect x="1100" y="240" width="176" height="64" rx="6" class="c-mask"/>
+          <rect x="1100" y="240" width="176" height="64" rx="6" class="c-database" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(1106 246) scale(0.6875)">
+            <ellipse cx="8" cy="4" rx="5" ry="2"/>
+            <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
           </g>
-          <text data-detail-anchor x="1134" y="250" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Knowledge</text>
-        <text data-detail="context" x="1134" y="266" class="t-muted" font-size="9" text-anchor="middle">切块 · 抽取 · Retriever</text>
-        <text data-detail="fine" x="1134" y="276" class="t-backend" font-size="7" text-anchor="middle">C5.9</text>
-        </g>
-
-        <g id="node-compiler" data-node-id="compiler" data-node-label="Compiler" tabindex="0" role="button" aria-label="Focus Compiler, SkillSpec 尚未实现, Phase 6 设计" aria-pressed="false" data-node-kind="backend" data-node-sublabel="SkillSpec 尚未实现" data-node-tag="C6.2" data-node-context="Phase 6 设计">
-          <title>Compiler · SkillSpec 尚未实现 · Phase 6 设计 · C6.2</title>
-          <rect x="1040" y="40" width="188" height="64" rx="6" class="c-mask"/>
-          <rect x="1040" y="40" width="188" height="64" rx="6" class="c-backend" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(1046 46) scale(0.6875)">
-            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
-          </g>
-          <text data-detail-anchor x="1134" y="70" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Compiler</text>
-        <text data-detail="context" x="1134" y="86" class="t-muted" font-size="9" text-anchor="middle">SkillSpec 尚未实现</text>
-        <text data-detail="fine" x="1134" y="96" class="t-backend" font-size="7" text-anchor="middle">C6.2</text>
+          <text data-detail-anchor x="1188" y="270" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">registry</text>
+        <text data-detail="context" x="1188" y="286" class="t-muted" font-size="9" text-anchor="middle">最多到 CANDIDATE</text>
+        <text data-detail="fine" x="1188" y="296" class="t-database" font-size="7" text-anchor="middle">C6.7</text>
         </g>
 
         <!-- Connection labels -->
@@ -4755,26 +4742,26 @@
 
         <!-- Legend -->
         <g data-legend-bridge>
-          <text x="40" y="543" class="t-primary" font-size="9" font-weight="600">Legend</text>
-          <g data-legend-kind="external">
-            <rect x="40" y="548" width="14" height="9" rx="2" class="c-external" stroke-width="1"/>
-            <text x="60" y="556" class="t-muted" font-size="8">External</text>
-          </g>
+          <text x="40" y="563" class="t-primary" font-size="9" font-weight="600">Legend</text>
           <g data-legend-kind="backend">
-            <rect x="144" y="548" width="14" height="9" rx="2" class="c-backend" stroke-width="1"/>
-            <text x="164" y="556" class="t-muted" font-size="8">Backend</text>
+            <rect x="40" y="568" width="14" height="9" rx="2" class="c-backend" stroke-width="1"/>
+            <text x="60" y="576" class="t-muted" font-size="8">Backend</text>
           </g>
-          <g data-legend-kind="cloud">
-            <rect x="243" y="548" width="14" height="9" rx="2" class="c-cloud" stroke-width="1"/>
-            <text x="263" y="556" class="t-muted" font-size="8">Cloud</text>
-          </g>
-          <g data-legend-kind="security">
-            <rect x="332" y="548" width="14" height="9" rx="2" class="c-security" stroke-width="1"/>
-            <text x="352" y="556" class="t-muted" font-size="8">Security</text>
+          <g data-legend-kind="external">
+            <rect x="139" y="568" width="14" height="9" rx="2" class="c-external" stroke-width="1"/>
+            <text x="159" y="576" class="t-muted" font-size="8">External</text>
           </g>
           <g data-legend-kind="database">
-            <rect x="436" y="548" width="14" height="9" rx="2" class="c-database" stroke-width="1"/>
-            <text x="456" y="556" class="t-muted" font-size="8">Database</text>
+            <rect x="243" y="568" width="14" height="9" rx="2" class="c-database" stroke-width="1"/>
+            <text x="263" y="576" class="t-muted" font-size="8">Database</text>
+          </g>
+          <g data-legend-kind="cloud">
+            <rect x="347" y="568" width="14" height="9" rx="2" class="c-cloud" stroke-width="1"/>
+            <text x="367" y="576" class="t-muted" font-size="8">Cloud</text>
+          </g>
+          <g data-legend-kind="security">
+            <rect x="436" y="568" width="14" height="9" rx="2" class="c-security" stroke-width="1"/>
+            <text x="456" y="576" class="t-muted" font-size="8">Security</text>
           </g>
         </g>
       </svg>
@@ -4962,35 +4949,36 @@
     <div class="cards">
       <div class="card">
         <div class="card-header">
-          <div class="card-dot emerald"></div>
-          <h3>已接通</h3>
-        </div>
-        <ul>
-          <li>&bull; CLI 的 run 注入故障后跑 harness。eval --replay 只读缓存。index rebuild 重建投影。</li>
-          <li>&bull; 两条臂共用 runtime_tools。Control 的 skill_path 为空。</li>
-          <li>&bull; 切块、抽取和检索都落在同一次请求的 SQLite 上。</li>
-        </ul>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <div class="card-dot cyan"></div>
-          <h3>知识面</h3>
-        </div>
-        <ul>
-          <li>&bull; Appendix B 是 diagnostic_rule，触发词是 nginx reload failed / upstream mismatch。</li>
-          <li>&bull; 查询 502 upstream nginx -t 的前 3 条要召回它。分数越大越好。</li>
-        </ul>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
           <div class="card-dot amber"></div>
-          <h3>Phase 6 虚线</h3>
+          <h3>尚未实现</h3>
         </div>
         <ul>
-          <li>&bull; Compiler 将按触发词筛知识单元，Appendix B 不进入 v0.1。</li>
-          <li>&bull; 产物是 SkillSpec、SKILL.md、scripts 和 evals。自动流程最多到 CANDIDATE。</li>
+          <li>&bull; 八个 pass 还没有代码。权限只会收紧。</li>
+          <li>&bull; Appendix B 的触发词不匹配 v0.1，不写入 SKILL.md。</li>
+          <li>&bull; evals 由 success_criteria 生成，fixture 必须在故障目录里。</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot emerald"></div>
+          <h3>已经存在</h3>
+        </div>
+        <ul>
+          <li>&bull; Retriever 与 knowledge_units 已可查询。</li>
+          <li>&bull; ModelGateway 是唯一模型入口。</li>
+          <li>&bull; golden skill 覆盖 F1，以及只改 upstream 端口的 F2。</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot violet"></div>
+          <h3>停在候选</h3>
+        </div>
+        <ul>
+          <li>&bull; 校验通过后写入 registry，状态最多是 CANDIDATE。</li>
+          <li>&bull; approve 与 publish 不在本阶段自动发生。</li>
         </ul>
       </div>
     </div>
