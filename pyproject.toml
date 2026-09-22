@@ -48,7 +48,14 @@ target-version = "py312"
 extend-exclude = ["docs"]
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP", "B"]
+select = ["E", "F", "I", "UP", "B", "TID251"]
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"lancedb".msg = "lancedb is only allowed in knowledge/retrieval/backends"
+"pyarrow".msg = "pyarrow is only allowed in knowledge/retrieval/backends"
+
+[tool.ruff.lint.per-file-ignores]
+"skillforge/knowledge/retrieval/backends/**" = ["TID251"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

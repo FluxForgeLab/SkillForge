@@ -44,6 +44,7 @@ class TraceEventType(StrEnum):
     PATCH_GENERATED = "patch_generated"
     EVALUATION_COMPLETED = "evaluation_completed"
     VERSION_PROMOTED = "version_promoted"
+    RETRIEVAL_QUERY = "retrieval_query"
 
 
 class EvaluationRunStatus(StrEnum):

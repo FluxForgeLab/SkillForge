@@ -9,6 +9,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 ModelAdapterName = Literal["fake", "openai_compatible", "stepfun_local", "stepfun_api"]
 DemoMode = Literal["replay", "live"]
+RetrievalBackendName = Literal["sqlite_fts", "lancedb", "memory"]
+RetrievalModeName = Literal["keyword", "vector", "hybrid"]
+EmbedderName = Literal["null", "openai_compatible"]
 
 
 class Settings(BaseSettings):
@@ -47,6 +50,14 @@ class Settings(BaseSettings):
     opslab_base_url: str = "http://127.0.0.1:8088"
     opslab_nginx_conf: Path = Path("demo/ops-lab/nginx/nginx.conf")
     sandbox_image: str = "skillforge-sandbox:local"
+
+    retrieval_backend: RetrievalBackendName = "memory"
+    retrieval_default_mode: RetrievalModeName = "keyword"
+    index_dir: Path = Path("data/index")
+    embedder: EmbedderName = "null"
+    embedding_base_url: str = ""
+    embedding_model: str = ""
+    embedding_dimension: int | None = None
 
 
 @lru_cache(maxsize=1)

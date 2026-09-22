@@ -35,6 +35,19 @@ def delete_chunks_by_document(conn: sqlite3.Connection, document_id: str) -> Non
     conn.execute("DELETE FROM chunks WHERE document_id = ?", (document_id,))
 
 
+def list_chunks_by_project(conn: sqlite3.Connection, project_id: str) -> list[Chunk]:
+    rows = conn.execute(
+        """
+        SELECT id, document_id, project_id, ordinal, text, title, page, line_start, line_end
+        FROM chunks
+        WHERE project_id = ?
+        ORDER BY document_id ASC, ordinal ASC, id ASC
+        """,
+        (project_id,),
+    ).fetchall()
+    return [_row(row) for row in rows]
+
+
 def list_chunks_by_document(conn: sqlite3.Connection, document_id: str) -> list[Chunk]:
     rows = conn.execute(
         """
