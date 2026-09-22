@@ -1,0 +1,58 @@
+[
+  {
+    "id": "chunk_intro",
+    "kind": "chunk",
+    "project_id": "proj_runbook",
+    "document_id": "doc_runbook",
+    "text": "# Service Recovery Runbook\n\nThis runbook recovers the skillforge-lab edge service when GET http://127.0.0.1:8088/health fails.\n",
+    "title": "Service Recovery Runbook",
+    "page": null,
+    "line_start": 1,
+    "line_end": 4
+  },
+  {
+    "id": "chunk_service_down",
+    "kind": "chunk",
+    "project_id": "proj_runbook",
+    "document_id": "doc_runbook",
+    "text": "## Service Down\n\nTrigger: backend unavailable\n\nWhen the backend container is stopped, GET http://127.0.0.1:8088/health returns HTTP 502.\n\n1. docker.inspect backend, nginx, and mock-db in compose project skillforge-lab.\n2. docker.logs the backend container.\n3. If the backend container is not running, docker.restart the service named backend.\n4. GET http://127.0.0.1:8088/health. HTTP 200 means the service recovered.\n\nDo not restart mock-db. Do not delete volumes.\n",
+    "title": "Service Down",
+    "page": null,
+    "line_start": 5,
+    "line_end": 17
+  },
+  {
+    "id": "chunk_502",
+    "kind": "chunk",
+    "project_id": "proj_runbook",
+    "document_id": "doc_runbook",
+    "text": "## 502 from proxy\n\nTrigger: HTTP 502 from reverse proxy\n\nWhen GET /health returns HTTP 502 and the backend container is running, the reverse proxy upstream may be wrong.\n\n1. nginx.read_config.\n2. Check the upstream. The healthy line is server backend:8080;.\n3. If that line differs, replace only that line with server backend:8080;.\n4. nginx.write_config the full file, then nginx.reload.\n5. If reload fails, stop and report the error.\n6. GET http://127.0.0.1:8088/health. HTTP 200 means the service recovered.\n",
+    "title": "502 from proxy",
+    "page": null,
+    "line_start": 18,
+    "line_end": 30
+  },
+  {
+    "id": "chunk_appendix_b",
+    "kind": "chunk",
+    "project_id": "proj_runbook",
+    "document_id": "doc_runbook",
+    "text": "## Appendix B: Reverse Proxy Troubleshooting\n\nThis section is a diagnostic rule. Apply it when nginx reload has already failed.\n\nTrigger: nginx reload failed / upstream mismatch\n\nWhen nginx reload failed because of an upstream mismatch, or the edge still returns HTTP 502 after a config change:\n\n1. Run nginx -t before any nginx reload.\n2. Compare the upstream port in nginx.conf with the port the backend process is listening on. The healthy upstream line is server backend:8080;. A wrong upstream line is server backend:8081;.\n3. Remove invalid directives such as this_is_not_valid_nginx; from nginx.conf.\n4. Write the corrected file, run nginx -t again, and nginx.reload only after the test passes.\n5. GET http://127.0.0.1:8088/health. HTTP 200 means the service recovered.",
+    "title": "Appendix B: Reverse Proxy Troubleshooting",
+    "page": null,
+    "line_start": 31,
+    "line_end": 43
+  },
+  {
+    "id": "ku_appendix_b",
+    "kind": "knowledge_unit",
+    "project_id": "proj_runbook",
+    "document_id": "doc_runbook",
+    "text": "Appendix B: Reverse Proxy Troubleshooting\nnginx reload failed / upstream mismatch\nRun nginx -t before any nginx reload.\nCompare the upstream port with the backend listen port.\nRemove this_is_not_valid_nginx;.",
+    "title": "Appendix B: Reverse Proxy Troubleshooting",
+    "type": "diagnostic_rule",
+    "page": null,
+    "line_start": 31,
+    "line_end": 43
+  }
+]

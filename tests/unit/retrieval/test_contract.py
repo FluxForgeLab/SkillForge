@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -24,6 +25,10 @@ from skillforge.knowledge.retrieval.indexer import Indexer
 from skillforge.knowledge.retrieval.retriever import Retriever
 
 pytestmark = pytest.mark.parametrize("backend", ["memory", "sqlite_fts"], indirect=True)
+
+_RUNBOOK_INDEX = (
+    Path(__file__).resolve().parents[2] / "fixtures" / "retrieval" / "runbook_index.json"
+)
 
 
 @pytest.fixture
@@ -140,6 +145,15 @@ async def test_rebuild_is_idempotent(backend: MemoryIndex, tmp_path: Path) -> No
     assert first[0].id == "chunk_a"
     rules = await backend.search(_query("rebuild-rule", type="diagnostic_rule"))
     assert [hit.id for hit in rules] == ["ku_1"]
+
+
+async def test_appendix_b_is_recalled_in_top_three(backend: MemoryIndex) -> None:
+    rows = json.loads(_RUNBOOK_INDEX.read_text(encoding="utf-8"))
+    await backend.upsert([IndexDocument.model_validate(row) for row in rows])
+    hits = await backend.search(
+        RetrievalQuery(text="502 upstream nginx -t", project_id="proj_runbook", k=3)
+    )
+    assert any(hit.title is not None and "Appendix B" in hit.title for hit in hits)
 
 
 async def test_retriever_emits_retrieval_query(backend: MemoryIndex) -> None:
