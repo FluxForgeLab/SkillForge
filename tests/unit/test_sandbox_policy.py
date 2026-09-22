@@ -77,8 +77,10 @@ def test_sandbox_is_abstract() -> None:
         Sandbox()
 
 
-def test_sandbox_package_does_not_import_docker() -> None:
+def test_docker_sdk_import_is_limited_to_docker_module() -> None:
     for path in _SANDBOX_ROOT.rglob("*.py"):
+        if path.name == "docker.py":
+            continue
         text = path.read_text(encoding="utf-8")
         assert "import docker" not in text
         assert "from docker" not in text
