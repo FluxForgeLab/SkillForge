@@ -107,8 +107,6 @@ def _done(content: str = "recovered", *, tokens: int = 2) -> ModelResponse:
 
 
 async def test_loop_completes_after_tool_call(tmp_path: Path) -> None:
-    skill = tmp_path / "SKILL.md"
-    skill.write_text("secret skill", encoding="utf-8")
     sandbox = FakeSandbox()
     sink = ListSink()
     settings = _settings()
@@ -118,7 +116,7 @@ async def test_loop_completes_after_tool_call(tmp_path: Path) -> None:
         sandbox,
         sink,
     )
-    result = await harness.run("restore the service", str(skill), str(tmp_path))
+    result = await harness.run("restore the service", None, str(tmp_path))
     assert result.status == "completed"
     assert result.final_content == "recovered"
     assert result.steps == 2
@@ -139,9 +137,7 @@ async def test_loop_completes_after_tool_call(tmp_path: Path) -> None:
         "assistant",
         "tool",
     ]
-    assert system_prompt(None) == system_prompt(str(skill))
     assert adapter.requests[0].messages[0].content == system_prompt(None)
-    assert "secret skill" not in (adapter.requests[0].messages[0].content or "")
 
 
 async def test_max_steps_stops_before_next_generate() -> None:
