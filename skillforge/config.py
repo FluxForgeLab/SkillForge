@@ -31,6 +31,7 @@ class Settings(BaseSettings):
     model_base_url: str = "http://127.0.0.1:8080/v1"
     model_api_key: SecretStr = SecretStr("")
     model_name: str = "step-3.7-flash"
+    transcript_path: str = ""
 
     max_steps: int = 20
     max_seconds: int = 120

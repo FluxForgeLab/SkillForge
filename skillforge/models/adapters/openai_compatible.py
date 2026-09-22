@@ -49,7 +49,6 @@ class OpenAICompatibleAdapter:
 
         body: dict[str, Any] = {
             "model": request.model or self._default_model,
-            "messages": [_message_to_api(message) for message in request.messages],
             "temperature": (
                 request.temperature
                 if request.temperature is not None
@@ -61,18 +60,21 @@ class OpenAICompatibleAdapter:
             body["seed"] = seed
         if request.max_tokens is not None:
             body["max_tokens"] = request.max_tokens
+        local_names = [tool.name for tool in request.tools]
+        api_to_local = {_api_tool_name(name): name for name in local_names}
         if request.tools:
             body["tools"] = [
                 {
                     "type": "function",
                     "function": {
-                        "name": tool.name,
+                        "name": _api_tool_name(tool.name),
                         "description": tool.description,
                         "parameters": tool.parameters,
                     },
                 }
                 for tool in request.tools
             ]
+        body["messages"] = [_message_to_api(message, local_names) for message in request.messages]
 
         try:
             response = await self._client.post(
@@ -82,26 +84,32 @@ class OpenAICompatibleAdapter:
             )
             response.raise_for_status()
         except httpx.HTTPStatusError as exc:
+            detail = exc.response.text[:500]
             raise ModelInvocationError(
-                f"model HTTP {exc.response.status_code}",
+                f"model HTTP {exc.response.status_code}: {detail}",
                 status_code=exc.response.status_code,
             ) from exc
         except httpx.HTTPError as exc:
             raise ModelInvocationError(str(exc)) from exc
 
-        return _parse_chat_response(response.json())
+        return _parse_chat_response(response.json(), api_to_local)
 
 
-def _message_to_api(message: ChatMessage) -> dict[str, Any]:
+def _api_tool_name(name: str) -> str:
+    return name.replace(".", "_")
+
+
+def _message_to_api(message: ChatMessage, local_names: list[str]) -> dict[str, Any]:
     payload: dict[str, Any] = {"role": message.role}
+    content = _rewrite_tool_names(message.content, local_names)
     if message.role == "tool":
-        payload["content"] = message.content or ""
+        payload["content"] = content or ""
         if message.tool_call_id:
             payload["tool_call_id"] = message.tool_call_id
         return payload
 
-    if message.content is not None:
-        payload["content"] = message.content
+    if content is not None:
+        payload["content"] = content
     elif message.role == "assistant" and message.tool_calls:
         payload["content"] = None
 
@@ -110,28 +118,43 @@ def _message_to_api(message: ChatMessage) -> dict[str, Any]:
             {
                 "id": call.id,
                 "type": "function",
-                "function": {"name": call.name, "arguments": call.arguments},
+                "function": {
+                    "name": _api_tool_name(call.name),
+                    "arguments": call.arguments,
+                },
             }
             for call in message.tool_calls
         ]
     return payload
 
 
-def _parse_chat_response(data: dict[str, Any]) -> ModelResponse:
+def _rewrite_tool_names(content: str | None, local_names: list[str]) -> str | None:
+    if content is None:
+        return None
+    rewritten = content
+    for name in sorted(local_names, key=len, reverse=True):
+        rewritten = rewritten.replace(name, _api_tool_name(name))
+    return rewritten
+
+
+def _tool_call_from_api(item: dict[str, Any], api_to_local: dict[str, str]) -> ToolCall:
+    function = item.get("function") or {}
+    api_name = function.get("name") or ""
+    return ToolCall(
+        id=item.get("id") or "",
+        name=api_to_local.get(api_name) or api_name,
+        arguments=function.get("arguments") or "{}",
+    )
+
+
+def _parse_chat_response(data: dict[str, Any], api_to_local: dict[str, str]) -> ModelResponse:
     choices = data.get("choices") or []
     if not choices:
         raise ModelInvocationError("model response missing choices")
 
     message = choices[0].get("message") or {}
     tool_calls_raw = message.get("tool_calls") or []
-    tool_calls = [
-        ToolCall(
-            id=item.get("id") or "",
-            name=(item.get("function") or {}).get("name") or "",
-            arguments=(item.get("function") or {}).get("arguments") or "{}",
-        )
-        for item in tool_calls_raw
-    ]
+    tool_calls = [_tool_call_from_api(item, api_to_local) for item in tool_calls_raw]
 
     usage_raw = data.get("usage") or {}
     usage = TokenUsage(

@@ -19,6 +19,7 @@ from skillforge.db.init import initialize_database
 from skillforge.db.repositories.agent_runs import AgentRunRecord, insert_agent_run
 from skillforge.domain.entities import TraceEvent
 from skillforge.domain.enums import TraceEventType
+from skillforge.models.adapters.recording import RecordingAdapter
 from skillforge.models.gateway import ModelGateway, build_adapter
 from skillforge.runtime.agent import AgentRuntime, LocalHarness, RunResult
 from skillforge.tracing.bus import EventBus
@@ -133,7 +134,11 @@ def _parse(argv: list[str]) -> argparse.Namespace:
 
 def _default_harness(sink: TraceSink) -> LocalHarness:
     settings = get_settings()
-    gateway = ModelGateway(build_adapter(settings), settings=settings, sink=sink, bus=EventBus())
+    adapter = build_adapter(settings)
+    transcript = settings.transcript_path.strip()
+    if transcript:
+        adapter = RecordingAdapter(adapter, Path(transcript))
+    gateway = ModelGateway(adapter, settings=settings, sink=sink, bus=EventBus())
     return LocalHarness(gateway=gateway, settings=settings, sink=sink, bus=EventBus())
 
 

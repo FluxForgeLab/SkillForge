@@ -109,7 +109,7 @@ async def test_openai_compatible_maps_request_response() -> None:
                                     "id": "call_abc",
                                     "type": "function",
                                     "function": {
-                                        "name": "docker.inspect",
+                                        "name": "docker_inspect",
                                         "arguments": '{"container":"backend"}',
                                     },
                                 },
@@ -157,7 +157,7 @@ async def test_openai_compatible_maps_request_response() -> None:
     assert isinstance(body, dict)
     assert body["model"] == "step-3.7-flash"
     assert body["temperature"] == 0.1
-    assert body["tools"][0]["function"]["name"] == "docker.inspect"
+    assert body["tools"][0]["function"]["name"] == "docker_inspect"
 
     assert response.model == "test-model"
     assert response.finish_reason == "tool_calls"
