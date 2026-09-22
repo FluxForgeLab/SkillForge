@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="generator" content="archify 2.12.0">
-  <title>SkillForge：C0–C2 已落地 Diagram</title>
+  <title>SkillForge：Phase 0–2 已落地 · Phase 3 设计 Diagram</title>
   <script>
     // Resolve the theme before first paint so light-preference users don't
     // see a dark flash. The toolbar script below re-applies with UI state.
@@ -4496,13 +4496,13 @@
     <div class="header">
       <div class="header-row">
         <div class="pulse-dot"></div>
-        <h1>SkillForge：C0–C2 已落地</h1>
+        <h1>SkillForge：Phase 0–2 已落地 · Phase 3 设计</h1>
       </div>
-      <p class="subtitle">实线=已接线。Web 仍是 Vite 脚手架（CORS 已放行）。详图：phase2-control-plane.html · domain-*-state.html。</p>
+      <p class="subtitle">实线=已调用。虚线=未实现或未消费。Phase 3 细图：phase3-runtime.html。</p>
     </div>
 
-    <script id="archify-guided-views-data" type="application/json">[{"id":"ops-lab","label":"C1 Ops Lab","focus":["operator","nginx","backend","mockdb","verifier","faults"],"note":"宿主 :8088；F1–F3 inject/reset；verifier 五字段 JSON。"},{"id":"control-plane","label":"Phase 2 控制面","focus":["web","api","sqlite","tracing","registry","models"],"note":"C2.1–C2.8 已提交。HTTP 已接 SQLite；Gateway/Registry 是库，尚未挂路由。"},{"id":"api-surface","label":"API 表面","focus":["web","api","sqlite"],"note":"GET /health · WS /api/events · POST/GET /api/projects。Vite 尚未调用。"}]</script>
-    <script id="archify-source-evidence-data" type="application/json">{"schemaVersion":1,"verified":true,"repository":{"url":"https://github.com/FluxForgeLab/SkillForge","revision":"8dae42729b90a25f3ca1139ddcc5838f3bbfb4ad","shortRevision":"8dae427"},"referenceCount":9,"nodes":{"web":[{"path":"apps/web/src/App.tsx","line":3,"endLine":10,"label":"scaffold","href":"https://github.com/FluxForgeLab/SkillForge/blob/8dae42729b90a25f3ca1139ddcc5838f3bbfb4ad/apps/web/src/App.tsx#L3-L10"},{"path":"apps/web/vite.config.ts","line":13,"endLine":17,"label":"host 5173","href":"https://github.com/FluxForgeLab/SkillForge/blob/8dae42729b90a25f3ca1139ddcc5838f3bbfb4ad/apps/web/vite.config.ts#L13-L17"}],"api":[{"path":"skillforge/api/main.py","line":59,"endLine":64,"label":"routes","href":"https://github.com/FluxForgeLab/SkillForge/blob/8dae42729b90a25f3ca1139ddcc5838f3bbfb4ad/skillforge/api/main.py#L59-L64"},{"path":"skillforge/api/routers/projects.py","line":58,"endLine":85,"label":"projects","href":"https://github.com/FluxForgeLab/SkillForge/blob/8dae42729b90a25f3ca1139ddcc5838f3bbfb4ad/skillforge/api/routers/projects.py#L58-L85"}],"models":[{"path":"skillforge/models/gateway.py","line":42,"endLine":70,"label":"generate","href":"https://github.com/FluxForgeLab/SkillForge/blob/8dae42729b90a25f3ca1139ddcc5838f3bbfb4ad/skillforge/models/gateway.py#L42-L70"}],"sqlite":[{"path":"skillforge/db/schema.sql","line":1,"endLine":8,"label":"projects","href":"https://github.com/FluxForgeLab/SkillForge/blob/8dae42729b90a25f3ca1139ddcc5838f3bbfb4ad/skillforge/db/schema.sql#L1-L8"},{"path":"skillforge/db/repositories/projects.py","line":11,"endLine":22,"label":"insert","href":"https://github.com/FluxForgeLab/SkillForge/blob/8dae42729b90a25f3ca1139ddcc5838f3bbfb4ad/skillforge/db/repositories/projects.py#L11-L22"}],"registry":[{"path":"skillforge/registry/service.py","line":70,"endLine":117,"label":"create_version","href":"https://github.com/FluxForgeLab/SkillForge/blob/8dae42729b90a25f3ca1139ddcc5838f3bbfb4ad/skillforge/registry/service.py#L70-L117"}],"tracing":[{"path":"skillforge/tracing/emitter.py","line":59,"endLine":62,"label":"sink then bus","href":"https://github.com/FluxForgeLab/SkillForge/blob/8dae42729b90a25f3ca1139ddcc5838f3bbfb4ad/skillforge/tracing/emitter.py#L59-L62"}]}}</script>
+    <script id="archify-guided-views-data" type="application/json">[{"id":"http","label":"唯一 HTTP 写路径","focus":["web","api","sqlite"],"note":"POST/GET /api/projects 写 projects 表。创建项目不 emit trace。"},{"id":"libraries","label":"已实现、无路由","focus":["models","registry","sqlite","tracing"],"note":"Gateway 与 SkillRegistry 是库。前者 emit；后者写版本表与 generated/。"},{"id":"ops-lab","label":"Ops Lab 入口","focus":["nginx","backend","mockdb","verifier","faults"],"note":"宿主 :8088→容器 :80→backend:8080。mock-db 无业务 HTTP，仅 depends_on。"},{"id":"phase3","label":"Phase 3 设计","focus":["harness","opslab","nginx","models"],"note":"虚线接到 nginx。generate() 已存在，调用方在 phase3-runtime.html。"}]</script>
+    <script id="archify-source-evidence-data" type="application/json">{"schemaVersion":1,"verified":true,"repository":{"url":"https://github.com/FluxForgeLab/SkillForge","revision":"6e928eef8574becd1d46c7811bb74d45a9a6e9e8","shortRevision":"6e928ee"},"referenceCount":28,"nodes":{"web":[{"path":"apps/web/src/App.tsx","line":3,"endLine":10,"label":"no fetch","href":"https://github.com/FluxForgeLab/SkillForge/blob/6e928eef8574becd1d46c7811bb74d45a9a6e9e8/apps/web/src/App.tsx#L3-L10"},{"path":"apps/web/vite.config.ts","line":13,"endLine":17,"label":"strictPort 5173","href":"https://github.com/FluxForgeLab/SkillForge/blob/6e928eef8574becd1d46c7811bb74d45a9a6e9e8/apps/web/vite.config.ts#L13-L17"}],"api":[{"path":"skillforge/api/main.py","line":31,"endLine":64,"label":"lifespan · routes","href":"https://github.com/FluxForgeLab/SkillForge/blob/6e928eef8574becd1d46c7811bb74d45a9a6e9e8/skillforge/api/main.py#L31-L64"},{"path":"skillforge/api/routers/projects.py","line":57,"endLine":86,"label":"GET POST","href":"https://github.com/FluxForgeLab/SkillForge/blob/6e928eef8574becd1d46c7811bb74d45a9a6e9e8/skillforge/api/routers/projects.py#L57-L86"},{"path":"skillforge/api/ws.py","line":53,"endLine":65,"label":"WS /events","href":"https://github.com/FluxForgeLab/SkillForge/blob/6e928eef8574becd1d46c7811bb74d45a9a6e9e8/skillforge/api/ws.py#L53-L65"}],"models":[{"path":"skillforge/models/gateway.py","line":42,"endLine":70,"label":"emit then adapter","href":"https://github.com/FluxForgeLab/SkillForge/blob/6e928eef8574becd1d46c7811bb74d45a9a6e9e8/skillforge/models/gateway.py#L42-L70"},{"path":"skillforge/models/gateway.py","line":73,"endLine":94,"label":"stepfun raises","href":"https://github.com/FluxForgeLab/SkillForge/blob/6e928eef8574becd1d46c7811bb74d45a9a6e9e8/skillforge/models/gateway.py#L73-L94"},{"path":"skillforge/models/structured.py","line":121,"endLine":137,"label":"schema retry","href":"https://github.com/FluxForgeLab/SkillForge/blob/6e928eef8574becd1d46c7811bb74d45a9a6e9e8/skillforge/models/structured.py#L121-L137"}],"tracing":[{"path":"skillforge/tracing/emitter.py","line":46,"endLine":62,"label":"write then publish","href":"https://github.com/FluxForgeLab/SkillForge/blob/6e928eef8574becd1d46c7811bb74d45a9a6e9e8/skillforge/tracing/emitter.py#L46-L62"},{"path":"skillforge/tracing/sink.py","line":31,"endLine":34,"label":"INSERT","href":"https://github.com/FluxForgeLab/SkillForge/blob/6e928eef8574becd1d46c7811bb74d45a9a6e9e8/skillforge/tracing/sink.py#L31-L34"}],"sqlite":[{"path":"skillforge/db/schema.sql","line":1,"endLine":8,"label":"projects, no FTS","href":"https://github.com/FluxForgeLab/SkillForge/blob/6e928eef8574becd1d46c7811bb74d45a9a6e9e8/skillforge/db/schema.sql#L1-L8"},{"path":"skillforge/db/schema.sql","line":54,"endLine":65,"label":"skill_versions","href":"https://github.com/FluxForgeLab/SkillForge/blob/6e928eef8574becd1d46c7811bb74d45a9a6e9e8/skillforge/db/schema.sql#L54-L65"},{"path":"skillforge/db/schema.sql","line":88,"endLine":93,"label":"trace_events","href":"https://github.com/FluxForgeLab/SkillForge/blob/6e928eef8574becd1d46c7811bb74d45a9a6e9e8/skillforge/db/schema.sql#L88-L93"}],"registry":[{"path":"skillforge/registry/service.py","line":70,"endLine":117,"label":"create_version","href":"https://github.com/FluxForgeLab/SkillForge/blob/6e928eef8574becd1d46c7811bb74d45a9a6e9e8/skillforge/registry/service.py#L70-L117"},{"path":"skillforge/registry/service.py","line":131,"endLine":138,"label":"transition","href":"https://github.com/FluxForgeLab/SkillForge/blob/6e928eef8574becd1d46c7811bb74d45a9a6e9e8/skillforge/registry/service.py#L131-L138"},{"path":"skillforge/registry/store.py","line":24,"endLine":35,"label":"manifest sha256","href":"https://github.com/FluxForgeLab/SkillForge/blob/6e928eef8574becd1d46c7811bb74d45a9a6e9e8/skillforge/registry/store.py#L24-L35"}],"harness":[{"path":"docs/execution-plan.md","line":164,"endLine":165,"label":"run + skill_path","href":"https://github.com/FluxForgeLab/SkillForge/blob/6e928eef8574becd1d46c7811bb74d45a9a6e9e8/docs/execution-plan.md#L164-L165"}],"opslab":[{"path":"docs/execution-plan.md","line":163,"endLine":163,"label":"deny mock-db","href":"https://github.com/FluxForgeLab/SkillForge/blob/6e928eef8574becd1d46c7811bb74d45a9a6e9e8/docs/execution-plan.md#L163"},{"path":"docs/execution-plan.md","line":19,"endLine":19,"label":"two planes","href":"https://github.com/FluxForgeLab/SkillForge/blob/6e928eef8574becd1d46c7811bb74d45a9a6e9e8/docs/execution-plan.md#L19"}],"verifier":[{"path":"demo/ops-lab/verifier/verify.py","line":27,"endLine":50,"label":"healthy iff all","href":"https://github.com/FluxForgeLab/SkillForge/blob/6e928eef8574becd1d46c7811bb74d45a9a6e9e8/demo/ops-lab/verifier/verify.py#L27-L50"}],"faults":[{"path":"demo/ops-lab/faults/inject.py","line":19,"endLine":28,"label":"catalog dispatch","href":"https://github.com/FluxForgeLab/SkillForge/blob/6e928eef8574becd1d46c7811bb74d45a9a6e9e8/demo/ops-lab/faults/inject.py#L19-L28"},{"path":"demo/ops-lab/faults/dockerutil.py","line":13,"endLine":13,"label":"protect mock-db","href":"https://github.com/FluxForgeLab/SkillForge/blob/6e928eef8574becd1d46c7811bb74d45a9a6e9e8/demo/ops-lab/faults/dockerutil.py#L13"},{"path":"demo/ops-lab/faults/catalog.yaml","line":5,"endLine":16,"label":"F1 expected","href":"https://github.com/FluxForgeLab/SkillForge/blob/6e928eef8574becd1d46c7811bb74d45a9a6e9e8/demo/ops-lab/faults/catalog.yaml#L5-L16"}],"nginx":[{"path":"demo/ops-lab/docker-compose.yml","line":22,"endLine":30,"label":"8088:80 ro conf","href":"https://github.com/FluxForgeLab/SkillForge/blob/6e928eef8574becd1d46c7811bb74d45a9a6e9e8/demo/ops-lab/docker-compose.yml#L22-L30"}],"backend":[{"path":"demo/ops-lab/backend/app.py","line":35,"endLine":41,"label":"/health /api/items","href":"https://github.com/FluxForgeLab/SkillForge/blob/6e928eef8574becd1d46c7811bb74d45a9a6e9e8/demo/ops-lab/backend/app.py#L35-L41"},{"path":"demo/ops-lab/docker-compose.yml","line":9,"endLine":15,"label":"PORT 8080","href":"https://github.com/FluxForgeLab/SkillForge/blob/6e928eef8574becd1d46c7811bb74d45a9a6e9e8/demo/ops-lab/docker-compose.yml#L9-L15"}],"mockdb":[{"path":"demo/ops-lab/mock-db/app.py","line":11,"endLine":18,"label":"/health only","href":"https://github.com/FluxForgeLab/SkillForge/blob/6e928eef8574becd1d46c7811bb74d45a9a6e9e8/demo/ops-lab/mock-db/app.py#L11-L18"},{"path":"demo/ops-lab/faults/dockerutil.py","line":60,"endLine":62,"label":"PermissionError","href":"https://github.com/FluxForgeLab/SkillForge/blob/6e928eef8574becd1d46c7811bb74d45a9a6e9e8/demo/ops-lab/faults/dockerutil.py#L60-L62"}]}}</script>
     <div class="guided-views no-print" id="guided-views" hidden aria-label="Guided diagram views">
       <button id="guided-view-prev" type="button" aria-label="Previous guided view" title="Previous guided view ([)">&#8592;</button>
       <div class="guided-view-copy">
@@ -4544,9 +4544,9 @@
 
     <!-- Main Diagram -->
     <div class="diagram-container" data-detail-level="read">
-      <svg viewBox="0 0 1228 504" role="img" aria-labelledby="archify-diagram-title archify-diagram-description" data-preset="editorial" data-quality-profile="showcase">
-        <title id="archify-diagram-title">SkillForge：C0–C2 已落地</title>
-        <desc id="archify-diagram-description">实线=已接线。Web 仍是 Vite 脚手架（CORS 已放行）。详图：phase2-control-plane.html · domain-*-state.html。</desc>
+      <svg viewBox="0 0 1618 688" role="img" aria-labelledby="archify-diagram-title archify-diagram-description" data-preset="editorial" data-quality-profile="showcase">
+        <title id="archify-diagram-title">SkillForge：Phase 0–2 已落地 · Phase 3 设计</title>
+        <desc id="archify-diagram-description">实线=已调用。虚线=未实现或未消费。Phase 3 细图：phase3-runtime.html。</desc>
         <!-- Definitions -->
         <defs>
           <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
@@ -4570,224 +4570,254 @@
         <rect width="100%" height="100%" fill="url(#grid)" />
 
         <!-- Boundaries (behind everything) -->
-        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="0" x="10" y="50" width="1000" height="386" rx="12" class="c-region" stroke-width="1"/>
-        <text x="18" y="68" class="t-cloud" font-size="9" font-weight="600">宿主机 skillforge/</text>
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="0" x="10" y="18" width="1316" height="602" rx="12" class="c-region" stroke-width="1"/>
+        <text x="18" y="36" class="t-cloud" font-size="9" font-weight="600">宿主机</text>
 
-        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="1" x="650" y="330" width="538" height="106" rx="12" class="c-region" stroke-width="1"/>
-        <text x="658" y="348" class="t-cloud" font-size="9" font-weight="600">Docker skillforge-lab</text>
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="1" x="550" y="506" width="516" height="114" rx="12" class="c-region" stroke-width="1"/>
+        <text x="558" y="524" class="t-cloud" font-size="9" font-weight="600">Phase 3 设计（未实现）</text>
+
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="2" x="830" y="262" width="748" height="114" rx="12" class="c-region" stroke-width="1"/>
+        <text x="838" y="280" class="t-cloud" font-size="9" font-weight="600">Docker project skillforge-lab</text>
 
         <!-- Connection paths (before components for correct z-order) -->
-        <path data-edge-from="web" data-edge-to="api" data-edge-key="0" data-edge-id="web-api" data-composition-points="168,108;240,108" d="M 168 108 L 240 108" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
-        <path data-edge-from="api" data-edge-to="sqlite" data-edge-key="1" data-edge-id="api-sqlite" data-composition-points="306,136;306,220" d="M 306 136 L 306 220" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="registry" data-edge-to="sqlite" data-edge-key="2" data-edge-id="registry-sqlite" data-composition-points="440,248;372,248" d="M 440 248 L 372 248" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="tracing" data-edge-to="sqlite" data-edge-key="3" data-edge-id="tracing-sqlite" data-composition-points="172,248;240,248" d="M 172 248 L 240 248" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="operator" data-edge-to="nginx" data-edge-label=":8088" data-edge-key="4" data-edge-id="op-nginx" data-composition-points="168,388;680,388" d="M 168 388 L 680 388" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
-        <path data-edge-from="nginx" data-edge-to="backend" data-edge-key="5" data-edge-id="ngx-be" data-composition-points="800,388;860,388" d="M 800 388 L 860 388" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="backend" data-edge-to="mockdb" data-edge-key="6" data-edge-id="be-db" data-composition-points="980,388;1040,388" d="M 980 388 L 1040 388" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="verifier" data-edge-to="nginx" data-edge-key="7" data-edge-id="ver-ngx" data-composition-points="740,276;740,300;756,300;756,336;733,336;733,360" d="M 740 276 L 740 292 Q 740 300 748 300 L 748 300 Q 756 300 756 308 L 756 328 Q 756 336 748 336 L 741 336 Q 733 336 733 344 L 733 360" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="faults" data-edge-to="backend" data-edge-key="8" data-edge-id="f-be" data-composition-points="920,276;920,360" d="M 920 276 L 920 360" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="faults" data-edge-to="nginx" data-edge-key="9" data-edge-id="f-ngx" data-composition-points="860,248;836,248;836,336;747,336;747,360" d="M 860 248 L 844 248 Q 836 248 836 256 L 836 328 Q 836 336 828 336 L 755 336 Q 747 336 747 344 L 747 360" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="web" data-edge-to="api" data-edge-key="0" data-edge-id="web-api" data-composition-points="208,80;300,80" d="M 208 80 L 300 80" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
+        <path data-edge-from="api" data-edge-to="sqlite" data-edge-label="projects" data-edge-key="1" data-edge-id="api-sqlite" data-composition-points="394,112;394,292" d="M 394 112 L 394 292" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="tracing" data-edge-to="sqlite" data-edge-label="trace_events" data-edge-key="2" data-edge-id="tracing-sqlite" data-composition-points="208,324;300,324" d="M 208 324 L 300 324" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="registry" data-edge-to="sqlite" data-edge-label="versions" data-edge-key="3" data-edge-id="registry-sqlite" data-composition-points="580,324;488,324" d="M 580 324 L 488 324" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="verifier" data-edge-to="nginx" data-edge-label="GET /health" data-edge-key="4" data-edge-id="ver-ngx" data-composition-points="948,112;948,292" d="M 948 112 L 948 292" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="faults" data-edge-to="backend" data-edge-label="F1 stop" data-edge-key="5" data-edge-id="f-be" data-composition-points="1208,112;1208,292" d="M 1208 112 L 1208 292" class="a-security" stroke-width="1.5" marker-end="url(#arrowhead-security)"/>
+        <path data-edge-from="nginx" data-edge-to="backend" data-edge-label=":8080" data-edge-key="6" data-edge-id="ngx-be" data-composition-points="1036,324;1120,324" d="M 1036 324 L 1120 324" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="backend" data-edge-to="mockdb" data-edge-label="depends_on" data-edge-key="7" data-edge-id="be-db" data-composition-points="1296,324;1380,324" d="M 1296 324 L 1380 324" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
+        <path data-edge-from="harness" data-edge-to="opslab" data-edge-key="8" data-edge-id="harness-ops" data-composition-points="756,568;860,568" d="M 756 568 L 860 568" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
+        <path data-edge-from="opslab" data-edge-to="nginx" data-edge-key="9" data-edge-id="ops-nginx" data-composition-points="948,536;948,356" d="M 948 536 L 948 356" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
 
         <!-- Components -->
-        <g id="node-web" data-node-id="web" data-node-label="Web" tabindex="0" role="button" aria-label="Focus Web, Vite :5173 脚手架, 宿主机 skillforge/" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="Vite :5173 脚手架" data-node-tag="C0.4" data-node-context="宿主机 skillforge/">
-          <title>Web · Vite :5173 脚手架 · 宿主机 skillforge/ · C0.4</title>
-          <rect x="40" y="80" width="128" height="56" rx="6" class="c-mask"/>
-          <rect x="40" y="80" width="128" height="56" rx="6" class="c-frontend" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(46 86) scale(0.6875)">
+        <g id="node-web" data-node-id="web" data-node-label="Web" tabindex="0" role="button" aria-label="Focus Web, 127.0.0.1:5173 Hello, 宿主机" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="127.0.0.1:5173 Hello" data-node-tag="C0.4" data-node-context="宿主机">
+          <title>Web · 127.0.0.1:5173 Hello · 宿主机 · C0.4</title>
+          <rect x="40" y="48" width="168" height="64" rx="6" class="c-mask"/>
+          <rect x="40" y="48" width="168" height="64" rx="6" class="c-frontend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(46 54) scale(0.6875)">
             <rect x="2" y="3" width="12" height="10" rx="2"/>
             <path d="M2 6.5h12"/>
             <circle cx="4.1" cy="4.8" r=".7" class="sigil-fill"/>
             <circle cx="6.3" cy="4.8" r=".7" class="sigil-fill"/>
           </g>
-          <text data-detail-anchor x="104" y="106" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Web</text>
-        <text data-detail="context" x="104" y="122" class="t-muted" font-size="9" text-anchor="middle">Vite :5173 脚手架</text>
-        <text data-detail="fine" x="104" y="128" class="t-frontend" font-size="7" text-anchor="middle">C0.4</text>
+          <text data-detail-anchor x="124" y="78" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Web</text>
+        <text data-detail="context" x="124" y="94" class="t-muted" font-size="9" text-anchor="middle">127.0.0.1:5173 Hello</text>
+        <text data-detail="fine" x="124" y="104" class="t-frontend" font-size="7" text-anchor="middle">C0.4</text>
         </g>
 
-        <g id="node-api" data-node-id="api" data-node-label="api/" tabindex="0" role="button" aria-label="Focus api/, health · WS · projects, 宿主机 skillforge/" aria-pressed="false" data-node-kind="backend" data-node-sublabel="health · WS · projects" data-node-tag="C2.8" data-node-context="宿主机 skillforge/">
-          <title>api/ · health · WS · projects · 宿主机 skillforge/ · C2.8</title>
-          <rect x="240" y="80" width="132" height="56" rx="6" class="c-mask"/>
-          <rect x="240" y="80" width="132" height="56" rx="6" class="c-backend" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(246 86) scale(0.6875)">
+        <g id="node-api" data-node-id="api" data-node-label="api/" tabindex="0" role="button" aria-label="Focus api/, :8000 health · WS · projects, 宿主机" aria-pressed="false" data-node-kind="backend" data-node-sublabel=":8000 health · WS · projects" data-node-tag="C2.8" data-node-context="宿主机">
+          <title>api/ · :8000 health · WS · projects · 宿主机 · C2.8</title>
+          <rect x="300" y="48" width="188" height="64" rx="6" class="c-mask"/>
+          <rect x="300" y="48" width="188" height="64" rx="6" class="c-backend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(306 54) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
-          <text data-detail-anchor x="306" y="106" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">api/</text>
-        <text data-detail="context" x="306" y="122" class="t-muted" font-size="9" text-anchor="middle">health · WS · projects</text>
-        <text data-detail="fine" x="306" y="128" class="t-backend" font-size="7" text-anchor="middle">C2.8</text>
+          <text data-detail-anchor x="394" y="78" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">api/</text>
+        <text data-detail="context" x="394" y="94" class="t-muted" font-size="9" text-anchor="middle">:8000 health · WS · projects</text>
+        <text data-detail="fine" x="394" y="104" class="t-backend" font-size="7" text-anchor="middle">C2.8</text>
         </g>
 
-        <g id="node-models" data-node-id="models" data-node-label="models/" tabindex="0" role="button" aria-label="Focus models/, Gateway · structured, 宿主机 skillforge/" aria-pressed="false" data-node-kind="cloud" data-node-sublabel="Gateway · structured" data-node-tag="C2.6" data-node-context="宿主机 skillforge/">
-          <title>models/ · Gateway · structured · 宿主机 skillforge/ · C2.6</title>
-          <rect x="440" y="80" width="132" height="56" rx="6" class="c-mask"/>
-          <rect x="440" y="80" width="132" height="56" rx="6" class="c-cloud" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="cloud" class="semantic-sigil s-cloud" transform="translate(446 86) scale(0.6875)">
+        <g id="node-models" data-node-id="models" data-node-label="models/" tabindex="0" role="button" aria-label="Focus models/, Gateway · 默认 Fake, 宿主机" aria-pressed="false" data-node-kind="cloud" data-node-sublabel="Gateway · 默认 Fake" data-node-tag="C2.6" data-node-context="宿主机">
+          <title>models/ · Gateway · 默认 Fake · 宿主机 · C2.6</title>
+          <rect x="580" y="48" width="176" height="64" rx="6" class="c-mask"/>
+          <rect x="580" y="48" width="176" height="64" rx="6" class="c-cloud" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="cloud" class="semantic-sigil s-cloud" transform="translate(586 54) scale(0.6875)">
             <path d="M4.3 12.5h7.3a2.4 2.4 0 0 0 .2-4.8 4 4 0 0 0-7.5-1.3A3.1 3.1 0 0 0 4.3 12.5Z"/>
           </g>
-          <text data-detail-anchor x="506" y="106" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">models/</text>
-        <text data-detail="context" x="506" y="122" class="t-muted" font-size="9" text-anchor="middle">Gateway · structured</text>
-        <text data-detail="fine" x="506" y="128" class="t-cloud" font-size="7" text-anchor="middle">C2.6</text>
+          <text data-detail-anchor x="668" y="78" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">models/</text>
+        <text data-detail="context" x="668" y="94" class="t-muted" font-size="9" text-anchor="middle">Gateway · 默认 Fake</text>
+        <text data-detail="fine" x="668" y="104" class="t-cloud" font-size="7" text-anchor="middle">C2.6</text>
         </g>
 
-        <g id="node-sqlite" data-node-id="sqlite" data-node-label="SQLite" tabindex="0" role="button" aria-label="Focus SQLite, schema · repos, 宿主机 skillforge/" aria-pressed="false" data-node-kind="database" data-node-sublabel="schema · repos" data-node-tag="C2.1" data-node-context="宿主机 skillforge/">
-          <title>SQLite · schema · repos · 宿主机 skillforge/ · C2.1</title>
-          <rect x="240" y="220" width="132" height="56" rx="6" class="c-mask"/>
-          <rect x="240" y="220" width="132" height="56" rx="6" class="c-database" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(246 226) scale(0.6875)">
-            <ellipse cx="8" cy="4" rx="5" ry="2"/>
-            <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
-          </g>
-          <text data-detail-anchor x="306" y="246" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">SQLite</text>
-        <text data-detail="context" x="306" y="262" class="t-muted" font-size="9" text-anchor="middle">schema · repos</text>
-        <text data-detail="fine" x="306" y="268" class="t-database" font-size="7" text-anchor="middle">C2.1</text>
-        </g>
-
-        <g id="node-registry" data-node-id="registry" data-node-label="registry/" tabindex="0" role="button" aria-label="Focus registry/, manifest · 版本链, 宿主机 skillforge/" aria-pressed="false" data-node-kind="backend" data-node-sublabel="manifest · 版本链" data-node-tag="C2.7" data-node-context="宿主机 skillforge/">
-          <title>registry/ · manifest · 版本链 · 宿主机 skillforge/ · C2.7</title>
-          <rect x="440" y="220" width="132" height="56" rx="6" class="c-mask"/>
-          <rect x="440" y="220" width="132" height="56" rx="6" class="c-backend" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(446 226) scale(0.6875)">
-            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
-          </g>
-          <text data-detail-anchor x="506" y="246" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">registry/</text>
-        <text data-detail="context" x="506" y="262" class="t-muted" font-size="9" text-anchor="middle">manifest · 版本链</text>
-        <text data-detail="fine" x="506" y="268" class="t-backend" font-size="7" text-anchor="middle">C2.7</text>
-        </g>
-
-        <g id="node-tracing" data-node-id="tracing" data-node-label="tracing/" tabindex="0" role="button" aria-label="Focus tracing/, sink → bus, 宿主机 skillforge/" aria-pressed="false" data-node-kind="messagebus" data-node-sublabel="sink → bus" data-node-tag="C2.3" data-node-context="宿主机 skillforge/">
-          <title>tracing/ · sink → bus · 宿主机 skillforge/ · C2.3</title>
-          <rect x="40" y="220" width="132" height="56" rx="6" class="c-mask"/>
-          <rect x="40" y="220" width="132" height="56" rx="6" class="c-messagebus" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="messagebus" class="semantic-sigil s-messagebus" transform="translate(46 226) scale(0.6875)">
+        <g id="node-tracing" data-node-id="tracing" data-node-label="tracing/" tabindex="0" role="button" aria-label="Focus tracing/, sink 先写，再 publish, 宿主机" aria-pressed="false" data-node-kind="messagebus" data-node-sublabel="sink 先写，再 publish" data-node-tag="C2.3" data-node-context="宿主机">
+          <title>tracing/ · sink 先写，再 publish · 宿主机 · C2.3</title>
+          <rect x="40" y="292" width="168" height="64" rx="6" class="c-mask"/>
+          <rect x="40" y="292" width="168" height="64" rx="6" class="c-messagebus" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="messagebus" class="semantic-sigil s-messagebus" transform="translate(46 298) scale(0.6875)">
             <path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11"/>
             <circle cx="5" cy="4.5" r="1" class="sigil-fill"/>
             <circle cx="10.5" cy="8" r="1" class="sigil-fill"/>
             <circle cx="7" cy="11.5" r="1" class="sigil-fill"/>
           </g>
-          <text data-detail-anchor x="106" y="246" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">tracing/</text>
-        <text data-detail="context" x="106" y="262" class="t-muted" font-size="9" text-anchor="middle">sink → bus</text>
-        <text data-detail="fine" x="106" y="268" class="t-messagebus" font-size="7" text-anchor="middle">C2.3</text>
+          <text data-detail-anchor x="124" y="322" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">tracing/</text>
+        <text data-detail="context" x="124" y="338" class="t-muted" font-size="9" text-anchor="middle">sink 先写，再 publish</text>
+        <text data-detail="fine" x="124" y="348" class="t-messagebus" font-size="7" text-anchor="middle">C2.3</text>
         </g>
 
-        <g id="node-operator" data-node-id="operator" data-node-label="操作者" tabindex="0" role="button" aria-label="Focus 操作者, 浏览器 / curl, 宿主机 skillforge/" aria-pressed="false" data-node-kind="external" data-node-sublabel="浏览器 / curl" data-node-context="宿主机 skillforge/">
-          <title>操作者 · 浏览器 / curl · 宿主机 skillforge/</title>
-          <rect x="40" y="360" width="128" height="56" rx="6" class="c-mask"/>
-          <rect x="40" y="360" width="128" height="56" rx="6" class="c-external" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(46 366) scale(0.6875)">
-            <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
-            <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
-          </g>
-          <text data-detail-anchor x="104" y="386" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">操作者</text>
-        <text data-detail="context" x="104" y="402" class="t-muted" font-size="9" text-anchor="middle">浏览器 / curl</text>
-        </g>
-
-        <g id="node-verifier" data-node-id="verifier" data-node-label="verifier" tabindex="0" role="button" aria-label="Focus verifier, 五字段 JSON, 宿主机 skillforge/" aria-pressed="false" data-node-kind="security" data-node-sublabel="五字段 JSON" data-node-tag="C1.3" data-node-context="宿主机 skillforge/">
-          <title>verifier · 五字段 JSON · 宿主机 skillforge/ · C1.3</title>
-          <rect x="680" y="220" width="120" height="56" rx="6" class="c-mask"/>
-          <rect x="680" y="220" width="120" height="56" rx="6" class="c-security" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(686 226) scale(0.6875)">
-            <path d="M8 2.2 13 4v3.5c0 3.1-1.8 5.4-5 6.5-3.2-1.1-5-3.4-5-6.5V4Z"/>
-            <path d="m5.8 8 1.5 1.5 3-3"/>
-          </g>
-          <text data-detail-anchor x="740" y="246" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">verifier</text>
-        <text data-detail="context" x="740" y="262" class="t-muted" font-size="9" text-anchor="middle">五字段 JSON</text>
-        <text data-detail="fine" x="740" y="268" class="t-security" font-size="7" text-anchor="middle">C1.3</text>
-        </g>
-
-        <g id="node-faults" data-node-id="faults" data-node-label="faults" tabindex="0" role="button" aria-label="Focus faults, F1–F3 catalog, 宿主机 skillforge/" aria-pressed="false" data-node-kind="security" data-node-sublabel="F1–F3 catalog" data-node-tag="C1.7" data-node-context="宿主机 skillforge/">
-          <title>faults · F1–F3 catalog · 宿主机 skillforge/ · C1.7</title>
-          <rect x="860" y="220" width="120" height="56" rx="6" class="c-mask"/>
-          <rect x="860" y="220" width="120" height="56" rx="6" class="c-security" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(866 226) scale(0.6875)">
-            <path d="M8 2.2 13 4v3.5c0 3.1-1.8 5.4-5 6.5-3.2-1.1-5-3.4-5-6.5V4Z"/>
-            <path d="m5.8 8 1.5 1.5 3-3"/>
-          </g>
-          <text data-detail-anchor x="920" y="246" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">faults</text>
-        <text data-detail="context" x="920" y="262" class="t-muted" font-size="9" text-anchor="middle">F1–F3 catalog</text>
-        <text data-detail="fine" x="920" y="268" class="t-security" font-size="7" text-anchor="middle">C1.7</text>
-        </g>
-
-        <g id="node-nginx" data-node-id="nginx" data-node-label="nginx" tabindex="0" role="button" aria-label="Focus nginx, 宿主 :8088, Docker skillforge-lab" aria-pressed="false" data-node-kind="cloud" data-node-sublabel="宿主 :8088" data-node-tag="C1.2" data-node-context="Docker skillforge-lab">
-          <title>nginx · 宿主 :8088 · Docker skillforge-lab · C1.2</title>
-          <rect x="680" y="360" width="120" height="56" rx="6" class="c-mask"/>
-          <rect x="680" y="360" width="120" height="56" rx="6" class="c-cloud" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="cloud" class="semantic-sigil s-cloud" transform="translate(686 366) scale(0.6875)">
-            <path d="M4.3 12.5h7.3a2.4 2.4 0 0 0 .2-4.8 4 4 0 0 0-7.5-1.3A3.1 3.1 0 0 0 4.3 12.5Z"/>
-          </g>
-          <text data-detail-anchor x="740" y="386" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">nginx</text>
-        <text data-detail="context" x="740" y="402" class="t-muted" font-size="9" text-anchor="middle">宿主 :8088</text>
-        <text data-detail="fine" x="740" y="408" class="t-cloud" font-size="7" text-anchor="middle">C1.2</text>
-        </g>
-
-        <g id="node-backend" data-node-id="backend" data-node-label="backend" tabindex="0" role="button" aria-label="Focus backend, ops-lab, Docker skillforge-lab" aria-pressed="false" data-node-kind="backend" data-node-sublabel="ops-lab" data-node-tag="C1.1" data-node-context="Docker skillforge-lab">
-          <title>backend · ops-lab · Docker skillforge-lab · C1.1</title>
-          <rect x="860" y="360" width="120" height="56" rx="6" class="c-mask"/>
-          <rect x="860" y="360" width="120" height="56" rx="6" class="c-backend" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(866 366) scale(0.6875)">
-            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
-          </g>
-          <text data-detail-anchor x="920" y="386" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">backend</text>
-        <text data-detail="context" x="920" y="402" class="t-muted" font-size="9" text-anchor="middle">ops-lab</text>
-        <text data-detail="fine" x="920" y="408" class="t-backend" font-size="7" text-anchor="middle">C1.1</text>
-        </g>
-
-        <g id="node-mockdb" data-node-id="mockdb" data-node-label="mock-db" tabindex="0" role="button" aria-label="Focus mock-db, deny restart, Docker skillforge-lab" aria-pressed="false" data-node-kind="database" data-node-sublabel="deny restart" data-node-tag="C1.2" data-node-context="Docker skillforge-lab">
-          <title>mock-db · deny restart · Docker skillforge-lab · C1.2</title>
-          <rect x="1040" y="360" width="118" height="56" rx="6" class="c-mask"/>
-          <rect x="1040" y="360" width="118" height="56" rx="6" class="c-database" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(1046 366) scale(0.6875)">
+        <g id="node-sqlite" data-node-id="sqlite" data-node-label="SQLite" tabindex="0" role="button" aria-label="Focus SQLite, data/skillforge.db, 宿主机" aria-pressed="false" data-node-kind="database" data-node-sublabel="data/skillforge.db" data-node-tag="C2.1" data-node-context="宿主机">
+          <title>SQLite · data/skillforge.db · 宿主机 · C2.1</title>
+          <rect x="300" y="292" width="188" height="64" rx="6" class="c-mask"/>
+          <rect x="300" y="292" width="188" height="64" rx="6" class="c-database" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(306 298) scale(0.6875)">
             <ellipse cx="8" cy="4" rx="5" ry="2"/>
             <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
           </g>
-          <text data-detail-anchor x="1099" y="386" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">mock-db</text>
-        <text data-detail="context" x="1099" y="402" class="t-muted" font-size="9" text-anchor="middle">deny restart</text>
-        <text data-detail="fine" x="1099" y="408" class="t-database" font-size="7" text-anchor="middle">C1.2</text>
+          <text data-detail-anchor x="394" y="322" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">SQLite</text>
+        <text data-detail="context" x="394" y="338" class="t-muted" font-size="9" text-anchor="middle">data/skillforge.db</text>
+        <text data-detail="fine" x="394" y="348" class="t-database" font-size="7" text-anchor="middle">C2.1</text>
+        </g>
+
+        <g id="node-registry" data-node-id="registry" data-node-label="registry/" tabindex="0" role="button" aria-label="Focus registry/, 版本链 · generated/, 宿主机" aria-pressed="false" data-node-kind="backend" data-node-sublabel="版本链 · generated/" data-node-tag="C2.7" data-node-context="宿主机">
+          <title>registry/ · 版本链 · generated/ · 宿主机 · C2.7</title>
+          <rect x="580" y="292" width="176" height="64" rx="6" class="c-mask"/>
+          <rect x="580" y="292" width="176" height="64" rx="6" class="c-backend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(586 298) scale(0.6875)">
+            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
+          </g>
+          <text data-detail-anchor x="668" y="322" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">registry/</text>
+        <text data-detail="context" x="668" y="338" class="t-muted" font-size="9" text-anchor="middle">版本链 · generated/</text>
+        <text data-detail="fine" x="668" y="348" class="t-backend" font-size="7" text-anchor="middle">C2.7</text>
+        </g>
+
+        <g id="node-harness" data-node-id="harness" data-node-label="LocalHarness" tabindex="0" role="button" aria-label="Focus LocalHarness, ReAct · 尚未实现, 宿主机 › Phase 3 设计（未实现）" aria-pressed="false" data-node-kind="backend" data-node-sublabel="ReAct · 尚未实现" data-node-tag="C3.6" data-node-context="宿主机 › Phase 3 设计（未实现）">
+          <title>LocalHarness · ReAct · 尚未实现 · 宿主机 › Phase 3 设计（未实现） · C3.6</title>
+          <rect x="580" y="536" width="176" height="64" rx="6" class="c-mask"/>
+          <rect x="580" y="536" width="176" height="64" rx="6" class="c-backend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(586 542) scale(0.6875)">
+            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
+          </g>
+          <text data-detail-anchor x="668" y="566" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">LocalHarness</text>
+        <text data-detail="context" x="668" y="582" class="t-muted" font-size="9" text-anchor="middle">ReAct · 尚未实现</text>
+        <text data-detail="fine" x="668" y="592" class="t-backend" font-size="7" text-anchor="middle">C3.6</text>
+        </g>
+
+        <g id="node-opslab" data-node-id="opslab" data-node-label="OpsLab adapter" tabindex="0" role="button" aria-label="Focus OpsLab adapter, 宿主白名单 · 未写, 宿主机 › Phase 3 设计（未实现）" aria-pressed="false" data-node-kind="security" data-node-sublabel="宿主白名单 · 未写" data-node-tag="C3.5" data-node-context="宿主机 › Phase 3 设计（未实现）">
+          <title>OpsLab adapter · 宿主白名单 · 未写 · 宿主机 › Phase 3 设计（未实现） · C3.5</title>
+          <rect x="860" y="536" width="176" height="64" rx="6" class="c-mask"/>
+          <rect x="860" y="536" width="176" height="64" rx="6" class="c-security" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(866 542) scale(0.6875)">
+            <path d="M8 2.2 13 4v3.5c0 3.1-1.8 5.4-5 6.5-3.2-1.1-5-3.4-5-6.5V4Z"/>
+            <path d="m5.8 8 1.5 1.5 3-3"/>
+          </g>
+          <text data-detail-anchor x="948" y="566" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">OpsLab adapter</text>
+        <text data-detail="context" x="948" y="582" class="t-muted" font-size="9" text-anchor="middle">宿主白名单 · 未写</text>
+        <text data-detail="fine" x="948" y="592" class="t-security" font-size="7" text-anchor="middle">C3.5</text>
+        </g>
+
+        <g id="node-verifier" data-node-id="verifier" data-node-label="verifier" tabindex="0" role="button" aria-label="Focus verifier, 宿主五字段 JSON, 宿主机" aria-pressed="false" data-node-kind="security" data-node-sublabel="宿主五字段 JSON" data-node-tag="C1.3" data-node-context="宿主机">
+          <title>verifier · 宿主五字段 JSON · 宿主机 · C1.3</title>
+          <rect x="860" y="48" width="176" height="64" rx="6" class="c-mask"/>
+          <rect x="860" y="48" width="176" height="64" rx="6" class="c-security" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(866 54) scale(0.6875)">
+            <path d="M8 2.2 13 4v3.5c0 3.1-1.8 5.4-5 6.5-3.2-1.1-5-3.4-5-6.5V4Z"/>
+            <path d="m5.8 8 1.5 1.5 3-3"/>
+          </g>
+          <text data-detail-anchor x="948" y="78" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">verifier</text>
+        <text data-detail="context" x="948" y="94" class="t-muted" font-size="9" text-anchor="middle">宿主五字段 JSON</text>
+        <text data-detail="fine" x="948" y="104" class="t-security" font-size="7" text-anchor="middle">C1.3</text>
+        </g>
+
+        <g id="node-faults" data-node-id="faults" data-node-label="faults" tabindex="0" role="button" aria-label="Focus faults, F1 F2 F3 · 宿主 Docker, 宿主机" aria-pressed="false" data-node-kind="security" data-node-sublabel="F1 F2 F3 · 宿主 Docker" data-node-tag="C1.7" data-node-context="宿主机">
+          <title>faults · F1 F2 F3 · 宿主 Docker · 宿主机 · C1.7</title>
+          <rect x="1120" y="48" width="176" height="64" rx="6" class="c-mask"/>
+          <rect x="1120" y="48" width="176" height="64" rx="6" class="c-security" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="security" class="semantic-sigil s-security" transform="translate(1126 54) scale(0.6875)">
+            <path d="M8 2.2 13 4v3.5c0 3.1-1.8 5.4-5 6.5-3.2-1.1-5-3.4-5-6.5V4Z"/>
+            <path d="m5.8 8 1.5 1.5 3-3"/>
+          </g>
+          <text data-detail-anchor x="1208" y="78" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">faults</text>
+        <text data-detail="context" x="1208" y="94" class="t-muted" font-size="9" text-anchor="middle">F1 F2 F3 · 宿主 Docker</text>
+        <text data-detail="fine" x="1208" y="104" class="t-security" font-size="7" text-anchor="middle">C1.7</text>
+        </g>
+
+        <g id="node-nginx" data-node-id="nginx" data-node-label="nginx" tabindex="0" role="button" aria-label="Focus nginx, 宿主 :8088 → :80, Docker project skillforge-lab" aria-pressed="false" data-node-kind="cloud" data-node-sublabel="宿主 :8088 → :80" data-node-tag="C1.2" data-node-context="Docker project skillforge-lab">
+          <title>nginx · 宿主 :8088 → :80 · Docker project skillforge-lab · C1.2</title>
+          <rect x="860" y="292" width="176" height="64" rx="6" class="c-mask"/>
+          <rect x="860" y="292" width="176" height="64" rx="6" class="c-cloud" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="cloud" class="semantic-sigil s-cloud" transform="translate(866 298) scale(0.6875)">
+            <path d="M4.3 12.5h7.3a2.4 2.4 0 0 0 .2-4.8 4 4 0 0 0-7.5-1.3A3.1 3.1 0 0 0 4.3 12.5Z"/>
+          </g>
+          <text data-detail-anchor x="948" y="322" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">nginx</text>
+        <text data-detail="context" x="948" y="338" class="t-muted" font-size="9" text-anchor="middle">宿主 :8088 → :80</text>
+        <text data-detail="fine" x="948" y="348" class="t-cloud" font-size="7" text-anchor="middle">C1.2</text>
+        </g>
+
+        <g id="node-backend" data-node-id="backend" data-node-label="backend" tabindex="0" role="button" aria-label="Focus backend, 容器 :8080 不发布, Docker project skillforge-lab" aria-pressed="false" data-node-kind="backend" data-node-sublabel="容器 :8080 不发布" data-node-tag="C1.1" data-node-context="Docker project skillforge-lab">
+          <title>backend · 容器 :8080 不发布 · Docker project skillforge-lab · C1.1</title>
+          <rect x="1120" y="292" width="176" height="64" rx="6" class="c-mask"/>
+          <rect x="1120" y="292" width="176" height="64" rx="6" class="c-backend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(1126 298) scale(0.6875)">
+            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
+          </g>
+          <text data-detail-anchor x="1208" y="322" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">backend</text>
+        <text data-detail="context" x="1208" y="338" class="t-muted" font-size="9" text-anchor="middle">容器 :8080 不发布</text>
+        <text data-detail="fine" x="1208" y="348" class="t-backend" font-size="7" text-anchor="middle">C1.1</text>
+        </g>
+
+        <g id="node-mockdb" data-node-id="mockdb" data-node-label="mock-db" tabindex="0" role="button" aria-label="Focus mock-db, :8090 禁止 stop, Docker project skillforge-lab" aria-pressed="false" data-node-kind="database" data-node-sublabel=":8090 禁止 stop" data-node-tag="C1.2" data-node-context="Docker project skillforge-lab">
+          <title>mock-db · :8090 禁止 stop · Docker project skillforge-lab · C1.2</title>
+          <rect x="1380" y="292" width="168" height="64" rx="6" class="c-mask"/>
+          <rect x="1380" y="292" width="168" height="64" rx="6" class="c-database" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(1386 298) scale(0.6875)">
+            <ellipse cx="8" cy="4" rx="5" ry="2"/>
+            <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
+          </g>
+          <text data-detail-anchor x="1464" y="322" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">mock-db</text>
+        <text data-detail="context" x="1464" y="338" class="t-muted" font-size="9" text-anchor="middle">:8090 禁止 stop</text>
+        <text data-detail="fine" x="1464" y="348" class="t-database" font-size="7" text-anchor="middle">C1.2</text>
         </g>
 
         <!-- Connection labels -->
 
-
-
-
-        <g data-detail="context" data-edge-from="operator" data-edge-to="nginx" data-edge-label=":8088" data-edge-key="4" data-edge-id="op-nginx">
-          <rect x="407" y="368" width="34" height="14" rx="3" class="c-mask"/>
-          <text x="424" y="378" class="t-backend" font-size="8" text-anchor="middle">:8088</text>
+        <g data-detail="context" data-edge-from="api" data-edge-to="sqlite" data-edge-label="projects" data-edge-key="1" data-edge-id="api-sqlite">
+          <rect x="369.8" y="116" width="48.4" height="14" rx="3" class="c-mask"/>
+          <text x="394" y="126" class="t-muted" font-size="8" text-anchor="middle">projects</text>
         </g>
-
-
-
+        <g data-detail="context" data-edge-from="tracing" data-edge-to="sqlite" data-edge-label="trace_events" data-edge-key="2" data-edge-id="tracing-sqlite">
+          <rect x="220.2" y="304" width="67.6" height="14" rx="3" class="c-mask"/>
+          <text x="254" y="314" class="t-muted" font-size="8" text-anchor="middle">trace_events</text>
+        </g>
+        <g data-detail="context" data-edge-from="registry" data-edge-to="sqlite" data-edge-label="versions" data-edge-key="3" data-edge-id="registry-sqlite">
+          <rect x="509.8" y="304" width="48.4" height="14" rx="3" class="c-mask"/>
+          <text x="534" y="314" class="t-muted" font-size="8" text-anchor="middle">versions</text>
+        </g>
+        <g data-detail="context" data-edge-from="verifier" data-edge-to="nginx" data-edge-label="GET /health" data-edge-key="4" data-edge-id="ver-ngx">
+          <rect x="916.6" y="116" width="62.8" height="14" rx="3" class="c-mask"/>
+          <text x="948" y="126" class="t-muted" font-size="8" text-anchor="middle">GET /health</text>
+        </g>
+        <g data-detail="context" data-edge-from="faults" data-edge-to="backend" data-edge-label="F1 stop" data-edge-key="5" data-edge-id="f-be">
+          <rect x="1186.2" y="116" width="43.6" height="14" rx="3" class="c-mask"/>
+          <text x="1208" y="126" class="t-security" font-size="8" text-anchor="middle">F1 stop</text>
+        </g>
+        <g data-detail="context" data-edge-from="nginx" data-edge-to="backend" data-edge-label=":8080" data-edge-key="6" data-edge-id="ngx-be">
+          <rect x="1061" y="304" width="34" height="14" rx="3" class="c-mask"/>
+          <text x="1078" y="314" class="t-muted" font-size="8" text-anchor="middle">:8080</text>
+        </g>
+        <g data-detail="context" data-edge-from="backend" data-edge-to="mockdb" data-edge-label="depends_on" data-edge-key="7" data-edge-id="be-db">
+          <rect x="1309" y="304" width="58" height="14" rx="3" class="c-mask"/>
+          <text x="1338" y="314" class="t-messagebus" font-size="8" text-anchor="middle">depends_on</text>
+        </g>
 
 
 
         <!-- Legend -->
         <g data-legend-bridge>
-          <text x="40" y="475" class="t-primary" font-size="9" font-weight="600">Legend</text>
+          <text x="40" y="659" class="t-primary" font-size="9" font-weight="600">Legend</text>
           <g data-legend-kind="frontend">
-            <rect x="40" y="480" width="14" height="9" rx="2" class="c-frontend" stroke-width="1"/>
-            <text x="60" y="488" class="t-muted" font-size="8">Frontend</text>
+            <rect x="40" y="664" width="14" height="9" rx="2" class="c-frontend" stroke-width="1"/>
+            <text x="60" y="672" class="t-muted" font-size="8">Frontend</text>
           </g>
           <g data-legend-kind="backend">
-            <rect x="144" y="480" width="14" height="9" rx="2" class="c-backend" stroke-width="1"/>
-            <text x="164" y="488" class="t-muted" font-size="8">Backend</text>
+            <rect x="144" y="664" width="14" height="9" rx="2" class="c-backend" stroke-width="1"/>
+            <text x="164" y="672" class="t-muted" font-size="8">Backend</text>
           </g>
           <g data-legend-kind="cloud">
-            <rect x="243" y="480" width="14" height="9" rx="2" class="c-cloud" stroke-width="1"/>
-            <text x="263" y="488" class="t-muted" font-size="8">Cloud</text>
-          </g>
-          <g data-legend-kind="database">
-            <rect x="332" y="480" width="14" height="9" rx="2" class="c-database" stroke-width="1"/>
-            <text x="352" y="488" class="t-muted" font-size="8">Database</text>
+            <rect x="243" y="664" width="14" height="9" rx="2" class="c-cloud" stroke-width="1"/>
+            <text x="263" y="672" class="t-muted" font-size="8">Cloud</text>
           </g>
           <g data-legend-kind="messagebus">
-            <rect x="436" y="480" width="14" height="9" rx="2" class="c-messagebus" stroke-width="1"/>
-            <text x="456" y="488" class="t-muted" font-size="8">Message bus</text>
+            <rect x="332" y="664" width="14" height="9" rx="2" class="c-messagebus" stroke-width="1"/>
+            <text x="352" y="672" class="t-muted" font-size="8">Message bus</text>
           </g>
-          <g data-legend-kind="external">
-            <rect x="555" y="480" width="14" height="9" rx="2" class="c-external" stroke-width="1"/>
-            <text x="575" y="488" class="t-muted" font-size="8">External</text>
+          <g data-legend-kind="database">
+            <rect x="451" y="664" width="14" height="9" rx="2" class="c-database" stroke-width="1"/>
+            <text x="471" y="672" class="t-muted" font-size="8">Database</text>
           </g>
           <g data-legend-kind="security">
-            <rect x="659" y="480" width="14" height="9" rx="2" class="c-security" stroke-width="1"/>
-            <text x="679" y="488" class="t-muted" font-size="8">Security</text>
+            <rect x="555" y="664" width="14" height="9" rx="2" class="c-security" stroke-width="1"/>
+            <text x="575" y="672" class="t-muted" font-size="8">Security</text>
           </g>
         </g>
       </svg>
@@ -4976,46 +5006,49 @@
       <div class="card">
         <div class="card-header">
           <div class="card-dot emerald"></div>
-          <h3>已接线</h3>
+          <h3>进程里已调用</h3>
         </div>
         <ul>
-          <li>&bull; api → SQLite：POST/GET /api/projects（C2.8）。</li>
-          <li>&bull; api lifespan 订阅 bus，WS /api/events 推 TraceEvent（C2.4）。</li>
-          <li>&bull; tracing：先 sqlite sink 再 bus.publish（C2.3）。</li>
-          <li>&bull; registry 写 skill_versions + skills/generated（C2.7），无 HTTP。</li>
+          <li>&bull; lifespan：initialize_database，并 subscribe EventBus → WS broadcast。</li>
+          <li>&bull; POST/GET /api/projects → repositories.projects。不写 trace。</li>
+          <li>&bull; emit()：SqliteTraceSink 先 INSERT，再 bus.publish。当前唯一调用方是 ModelGateway.generate。</li>
+          <li>&bull; SkillRegistry 写 skills / skill_versions，并落盘 skills/generated/&lt;key&gt;/&lt;version&gt;/manifest.json。</li>
         </ul>
       </div>
 
       <div class="card">
         <div class="card-header">
           <div class="card-dot amber"></div>
-          <h3>虚线＝未消费</h3>
+          <h3>库在、路由不在</h3>
         </div>
         <ul>
-          <li>&bull; Web 仍是 Hello 脚手架；CORS 已允许 :5173。</li>
-          <li>&bull; models/ 已实现 Gateway+structured；无 API 路由调用它。</li>
-        </ul>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <div class="card-dot slate"></div>
-          <h3>详图</h3>
-        </div>
-        <ul>
-          <li>&bull; 控制面模块：phase2-control-plane.html。</li>
-          <li>&bull; 双状态机：domain-pipeline-state.html · domain-skill-version-state.html。</li>
+          <li>&bull; Web 无 fetch、无 WebSocket 客户端。虚线只表示 CORS 允许 :5173。</li>
+          <li>&bull; 无 /api/skills，无 HTTP 调用 generate()。stepfun_local / stepfun_api 在 build_adapter 里直接 NotImplementedError。</li>
+          <li>&bull; 表已建但无写入方：chunks、knowledge_units、eval_cases、evaluation_runs。schema.sql 无 FTS。</li>
         </ul>
       </div>
 
       <div class="card">
         <div class="card-header">
           <div class="card-dot cyan"></div>
-          <h3>下一步 C3</h3>
+          <h3>Ops Lab 事实</h3>
         </div>
         <ul>
-          <li>&bull; golden skill、Sandbox、Runtime、OpsLabToolAdapter。</li>
-          <li>&bull; schema.sql 仍无 FTS（R12）。</li>
+          <li>&bull; backend 不请求 mock-db。compose 只有 depends_on；mock-db 只提供 /health。</li>
+          <li>&bull; F2/F3 改的是宿主 nginx.conf，再 reload。容器以只读卷挂载该文件。</li>
+          <li>&bull; 细图：docs/diagrams/ops-lab-topology.html。</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot violet"></div>
+          <h3>Phase 3 虚线（未写）</h3>
+        </div>
+        <ul>
+          <li>&bull; LocalHarness 将成为 generate() 的调用方。Control 与 Treatment 只差 SKILL.md。</li>
+          <li>&bull; docker/nginx 走宿主 OpsLab adapter，不进沙箱。沙箱与 golden skill 见 phase3-runtime.html。</li>
+          <li>&bull; C3.10 才会给 API 加 inject/reset/runs。今天仍是宿主脚本注入，curl :8088 验证。</li>
         </ul>
       </div>
     </div>

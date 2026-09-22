@@ -1,0 +1,217 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "ops-lab：端口、判定与三条故障",
+    "subtitle": "compose project 固定 skillforge-lab。注入与 verifier 都在宿主执行，不进入沙箱。",
+    "output": "ops-lab-topology.html",
+    "quality_profile": "showcase",
+    "visual_preset": "editorial",
+    "repository": {
+      "url": "https://github.com/FluxForgeLab/SkillForge.git",
+      "revision": "6e928eef8574becd1d46c7811bb74d45a9a6e9e8"
+    },
+    "views": [
+      {
+        "id": "healthy",
+        "label": "健康路径",
+        "focus": ["operator", "nginx", "backend", "mockdb"],
+        "note": "只有 :8088 发布到宿主。backend:8080 与 mock-db:8090 留在网络内部。"
+      },
+      {
+        "id": "oracle",
+        "label": "Verifier",
+        "focus": ["verifier", "nginx", "hostconf", "backend", "mockdb"],
+        "note": "exit 0 当且仅当 HTTP 200 且四个布尔都为 true。连接失败才重试，502 不重试。"
+      },
+      {
+        "id": "faults",
+        "label": "F1 F2 F3",
+        "focus": ["faults", "backend", "hostconf", "nginx"],
+        "note": "F1 停 backend。F2/F3 改宿主 conf。mock-db 在 stop_service 里被拒绝。"
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "operator",
+      "type": "external",
+      "label": "操作者",
+      "sublabel": "curl 127.0.0.1:8088",
+      "pos": [40, 250],
+      "size": [168, 64]
+    },
+    {
+      "id": "nginx",
+      "type": "cloud",
+      "label": "nginx",
+      "sublabel": "发布 8088:80",
+      "tag": "C1.2",
+      "pos": [300, 250],
+      "size": [168, 64],
+      "sources": [
+        { "path": "demo/ops-lab/docker-compose.yml", "line": 22, "end_line": 30, "label": "ro volume" }
+      ]
+    },
+    {
+      "id": "backend",
+      "type": "backend",
+      "label": "backend",
+      "sublabel": "听 8080，无宿主端口",
+      "tag": "C1.1",
+      "pos": [580, 250],
+      "size": [176, 64],
+      "sources": [
+        { "path": "demo/ops-lab/backend/app.py", "line": 31, "end_line": 41, "label": "health + items" },
+        { "path": "demo/ops-lab/docker-compose.yml", "line": 16, "end_line": 20, "label": "healthcheck" }
+      ]
+    },
+    {
+      "id": "mockdb",
+      "type": "database",
+      "label": "mock-db",
+      "sublabel": "听 8090，只 /health",
+      "tag": "C1.2",
+      "pos": [860, 250],
+      "size": [176, 64],
+      "sources": [
+        { "path": "demo/ops-lab/mock-db/app.py", "line": 14, "end_line": 17, "label": "status ok" },
+        { "path": "demo/ops-lab/docker-compose.yml", "line": 4, "end_line": 15, "label": "depends_on" }
+      ]
+    },
+    {
+      "id": "verifier",
+      "type": "security",
+      "label": "verify.py",
+      "sublabel": "五字段，宿主进程",
+      "tag": "C1.3",
+      "pos": [300, 40],
+      "size": [168, 64],
+      "sources": [
+        { "path": "demo/ops-lab/verifier/verify.py", "line": 27, "end_line": 50, "label": "five fields" },
+        { "path": "demo/ops-lab/verifier/verify.py", "line": 79, "end_line": 90, "label": "collect" }
+      ]
+    },
+    {
+      "id": "hostconf",
+      "type": "external",
+      "label": "nginx.conf",
+      "sublabel": "宿主文件，容器只读",
+      "tag": "C1.2",
+      "pos": [40, 40],
+      "size": [176, 64],
+      "sources": [
+        { "path": "demo/ops-lab/verifier/verify.py", "line": 20, "end_line": 24, "label": "host path" },
+        { "path": "demo/ops-lab/verifier/verify.py", "line": 64, "end_line": 68, "label": "upstream port" }
+      ]
+    },
+    {
+      "id": "faults",
+      "type": "security",
+      "label": "inject / reset",
+      "sublabel": "catalog.yaml 驱动",
+      "tag": "C1.7",
+      "pos": [580, 470],
+      "size": [176, 64],
+      "sources": [
+        { "path": "demo/ops-lab/faults/inject.py", "line": 19, "end_line": 28, "label": "F1 F2 F3" },
+        { "path": "demo/ops-lab/faults/catalog.yaml", "line": 10, "end_line": 49, "label": "expected JSON" },
+        { "path": "demo/ops-lab/faults/dockerutil.py", "line": 60, "end_line": 62, "label": "deny mock-db" }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "宿主进程与文件",
+      "wraps": ["operator", "verifier", "hostconf", "faults"]
+    },
+    {
+      "kind": "region",
+      "label": "容器 skillforge-lab",
+      "wraps": ["nginx", "backend", "mockdb"]
+    }
+  ],
+  "connections": [
+    {
+      "id": "op-ngx",
+      "from": "operator",
+      "to": "nginx",
+      "label": ":8088",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "ngx-be",
+      "from": "nginx",
+      "to": "backend",
+      "label": ":8080",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "be-db",
+      "from": "backend",
+      "to": "mockdb",
+      "label": "depends_on",
+      "variant": "dashed",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "ver-ngx",
+      "from": "verifier",
+      "to": "nginx",
+      "label": "http_status",
+      "labelAt": [384, 118],
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "ver-conf",
+      "from": "hostconf",
+      "to": "verifier",
+      "label": "upstream",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "f-be",
+      "from": "faults",
+      "to": "backend",
+      "label": "F1 stop",
+      "variant": "security",
+      "fromSide": "top",
+      "toSide": "bottom"
+    }  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "健康态",
+      "items": [
+        "宿主只发布 nginx 的 8088。backend 与 mock-db 没有 ports:。",
+        "upstream 模板是 backend:8080。backend 的 /health 与 /api/items 不访问 mock-db。",
+        "verifier 读宿主上的 nginx.conf，并用 Docker API 看 backend、mock-db 是否在跑。"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "注入后 catalog 期望",
+      "items": [
+        "F1 backend_stopped：HTTP 502，backend_running=false，db_running=true。",
+        "F2 nginx_wrong_upstream：502，backend 仍在跑，upstream_port_matches=false，配置语法仍有效。",
+        "F3 nginx_bad_config_reload：502，nginx_config_valid=false，且 upstream 也指向 8081。reload 不能成功。",
+        "reset 恢复模板端口 8080 并等 backend healthcheck。stop mock-db 会 PermissionError。"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "和 Phase 3 的边界",
+      "items": [
+        "这张图是环境。Agent 侧设计见 phase3-runtime.html：沙箱不挂 docker.sock。",
+        "Phase 3 的 OpsLab adapter 将白名单操作 skillforge-lab；现在只能在宿主直接跑脚本。"
+      ]
+    }
+  ]
+}

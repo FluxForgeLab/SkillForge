@@ -1,0 +1,180 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "控制面：现在实际会发生的调用",
+    "subtitle": "项目创建不写 trace。WS 只转发已经 emit 的事件。generate() 没有 HTTP 入口。",
+    "output": "control-plane-calls.html",
+    "quality_profile": "showcase",
+    "visual_preset": "editorial",
+    "viewBox": [980, 920],
+    "views": [
+      {
+        "id": "create",
+        "label": "创建项目",
+        "focus": ["caller", "api", "sqlite"],
+        "note": "201 在 INSERT 之后返回。这条路径不调用 emit。"
+      },
+      {
+        "id": "ws",
+        "label": "WebSocket",
+        "focus": ["caller", "api"],
+        "note": "客户端可 ping/pong。没有 emit 时不会收到 TraceEvent。"
+      },
+      {
+        "id": "model",
+        "label": "模型库",
+        "focus": ["gateway", "tracing", "sqlite", "api"],
+        "note": "generate 先写 trace_events，再 publish。已连接的 WS 才会收到广播。"
+      }
+    ]
+  },
+  "participants": [
+    { "id": "caller", "type": "external", "label": "调用方", "sublabel": "curl / 测试" },
+    { "id": "api", "type": "backend", "label": "FastAPI", "sublabel": ":8000" },
+    { "id": "sqlite", "type": "database", "label": "SQLite", "sublabel": "system of record" },
+    { "id": "gateway", "type": "cloud", "label": "ModelGateway", "sublabel": "无路由" },
+    { "id": "tracing", "type": "messagebus", "label": "emit + bus", "sublabel": "sink 然后 publish" }
+  ],
+  "segments": [
+    { "from": 165, "to": 360, "label": "POST /api/projects" },
+    { "from": 385, "to": 560, "label": "WS /api/events" },
+    { "from": 585, "to": 820, "label": "仅当有人调用 generate" }
+  ],
+  "messages": [
+    {
+      "id": "post",
+      "from": "caller",
+      "to": "api",
+      "y": 190,
+      "label": "POST /api/projects",
+      "variant": "emphasis"
+    },
+    {
+      "id": "insert",
+      "from": "api",
+      "to": "sqlite",
+      "y": 240,
+      "label": "INSERT projects",
+      "variant": "default"
+    },
+    {
+      "id": "inserted",
+      "from": "sqlite",
+      "to": "api",
+      "y": 285,
+      "label": "row",
+      "variant": "return"
+    },
+    {
+      "id": "created",
+      "from": "api",
+      "to": "caller",
+      "y": 330,
+      "label": "201 JSON",
+      "variant": "return"
+    },
+    {
+      "id": "ws-open",
+      "from": "caller",
+      "to": "api",
+      "y": 410,
+      "label": "WS /api/events",
+      "variant": "emphasis"
+    },
+    {
+      "id": "ws-accept",
+      "from": "api",
+      "to": "caller",
+      "y": 455,
+      "label": "accept",
+      "variant": "return"
+    },
+    {
+      "id": "ping",
+      "from": "caller",
+      "to": "api",
+      "y": 500,
+      "label": "ping",
+      "variant": "dashed"
+    },
+    {
+      "id": "pong",
+      "from": "api",
+      "to": "caller",
+      "y": 540,
+      "label": "pong",
+      "variant": "return"
+    },
+    {
+      "id": "generate",
+      "from": "gateway",
+      "to": "tracing",
+      "y": 620,
+      "label": "emit model_request",
+      "variant": "dashed"
+    },
+    {
+      "id": "sink",
+      "from": "tracing",
+      "to": "sqlite",
+      "y": 670,
+      "label": "INSERT trace_events",
+      "variant": "default"
+    },
+    {
+      "id": "publish",
+      "from": "tracing",
+      "to": "api",
+      "y": 720,
+      "label": "publish",
+      "variant": "dashed"
+    },
+    {
+      "id": "broadcast",
+      "from": "api",
+      "to": "caller",
+      "y": 770,
+      "label": "WS JSON if connected",
+      "variant": "return"
+    }
+  ],
+  "activations": [
+    { "participant": "api", "from": 190, "to": 340, "type": "backend" },
+    { "participant": "sqlite", "from": 240, "to": 295, "type": "database" },
+    { "participant": "api", "from": 410, "to": 550, "type": "backend" },
+    { "participant": "gateway", "from": 610, "to": 660, "type": "cloud" },
+    { "participant": "tracing", "from": 620, "to": 740, "type": "messagebus" },
+    { "participant": "sqlite", "from": 670, "to": 710, "type": "database" },
+    { "participant": "api", "from": 720, "to": 785, "type": "backend" }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "已挂上的 HTTP",
+      "items": [
+        "GET /health 返回 status=ok，不碰数据库。",
+        "POST /api/projects 在线程里打开 sqlite_path，INSERT 后 201。",
+        "GET /api/projects 按 created_at 升序列出。"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "启动时做一次",
+      "items": [
+        "lifespan 调用 initialize_database，幂等建表。",
+        "同一 lifespan subscribe EventBus，把 TraceEvent 交给 ConnectionManager.broadcast。",
+        "进程退出时 unsubscribe。项目路由本身不 subscribe、不 emit。"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "模型调用还没入口",
+      "items": [
+        "第三段不是 API 请求。没有任何路由调用 ModelGateway。",
+        "一旦 generate() 被调用：先 model_request，适配器返回后再 model_response，每次都先落库再广播。",
+        "Fake 适配器不访问网络。OpenAI 兼容适配器另发 POST /chat/completions，图中不展开。"
+      ]
+    }
+  ]
+}

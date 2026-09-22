@@ -2,33 +2,39 @@
   "schema_version": 1,
   "diagram_type": "architecture",
   "meta": {
-    "title": "SkillForge：C0–C2 已落地",
-    "subtitle": "实线=已接线。Web 仍是 Vite 脚手架（CORS 已放行）。详图：phase2-control-plane.html · domain-*-state.html。",
+    "title": "SkillForge：Phase 0–2 已落地 · Phase 3 设计",
+    "subtitle": "实线=已调用。虚线=未实现或未消费。Phase 3 细图：phase3-runtime.html。",
     "output": "c0-c1-architecture.html",
     "quality_profile": "showcase",
     "visual_preset": "editorial",
     "repository": {
       "url": "https://github.com/FluxForgeLab/SkillForge.git",
-      "revision": "8dae42729b90a25f3ca1139ddcc5838f3bbfb4ad"
+      "revision": "6e928eef8574becd1d46c7811bb74d45a9a6e9e8"
     },
     "views": [
       {
-        "id": "ops-lab",
-        "label": "C1 Ops Lab",
-        "focus": ["operator", "nginx", "backend", "mockdb", "verifier", "faults"],
-        "note": "宿主 :8088；F1–F3 inject/reset；verifier 五字段 JSON。"
-      },
-      {
-        "id": "control-plane",
-        "label": "Phase 2 控制面",
-        "focus": ["web", "api", "sqlite", "tracing", "registry", "models"],
-        "note": "C2.1–C2.8 已提交。HTTP 已接 SQLite；Gateway/Registry 是库，尚未挂路由。"
-      },
-      {
-        "id": "api-surface",
-        "label": "API 表面",
+        "id": "http",
+        "label": "唯一 HTTP 写路径",
         "focus": ["web", "api", "sqlite"],
-        "note": "GET /health · WS /api/events · POST/GET /api/projects。Vite 尚未调用。"
+        "note": "POST/GET /api/projects 写 projects 表。创建项目不 emit trace。"
+      },
+      {
+        "id": "libraries",
+        "label": "已实现、无路由",
+        "focus": ["models", "registry", "sqlite", "tracing"],
+        "note": "Gateway 与 SkillRegistry 是库。前者 emit；后者写版本表与 generated/。"
+      },
+      {
+        "id": "ops-lab",
+        "label": "Ops Lab 入口",
+        "focus": ["nginx", "backend", "mockdb", "verifier", "faults"],
+        "note": "宿主 :8088→容器 :80→backend:8080。mock-db 无业务 HTTP，仅 depends_on。"
+      },
+      {
+        "id": "phase3",
+        "label": "Phase 3 设计",
+        "focus": ["harness", "opslab", "nginx", "models"],
+        "note": "虚线接到 nginx。generate() 已存在，调用方在 phase3-runtime.html。"
       }
     ]
   },
@@ -37,140 +43,188 @@
       "id": "web",
       "type": "frontend",
       "label": "Web",
-      "sublabel": "Vite :5173 脚手架",
+      "sublabel": "127.0.0.1:5173 Hello",
       "tag": "C0.4",
-      "pos": [40, 80],
-      "size": [128, 56],
+      "pos": [40, 48],
+      "size": [168, 64],
       "sources": [
-        { "path": "apps/web/src/App.tsx", "line": 3, "end_line": 10, "label": "scaffold" },
-        { "path": "apps/web/vite.config.ts", "line": 13, "end_line": 17, "label": "host 5173" }
+        { "path": "apps/web/src/App.tsx", "line": 3, "end_line": 10, "label": "no fetch" },
+        { "path": "apps/web/vite.config.ts", "line": 13, "end_line": 17, "label": "strictPort 5173" }
       ]
     },
     {
       "id": "api",
       "type": "backend",
       "label": "api/",
-      "sublabel": "health · WS · projects",
+      "sublabel": ":8000 health · WS · projects",
       "tag": "C2.8",
-      "pos": [240, 80],
-      "size": [132, 56],
+      "pos": [300, 48],
+      "size": [188, 64],
       "sources": [
-        { "path": "skillforge/api/main.py", "line": 59, "end_line": 64, "label": "routes" },
-        { "path": "skillforge/api/routers/projects.py", "line": 58, "end_line": 85, "label": "projects" }
+        { "path": "skillforge/api/main.py", "line": 31, "end_line": 64, "label": "lifespan · routes" },
+        { "path": "skillforge/api/routers/projects.py", "line": 57, "end_line": 86, "label": "GET POST" },
+        { "path": "skillforge/api/ws.py", "line": 53, "end_line": 65, "label": "WS /events" }
       ]
     },
     {
       "id": "models",
       "type": "cloud",
       "label": "models/",
-      "sublabel": "Gateway · structured",
+      "sublabel": "Gateway · 默认 Fake",
       "tag": "C2.6",
-      "pos": [440, 80],
-      "size": [132, 56],
+      "pos": [580, 48],
+      "size": [176, 64],
       "sources": [
-        { "path": "skillforge/models/gateway.py", "line": 42, "end_line": 70, "label": "generate" }
-      ]
-    },
-    {
-      "id": "sqlite",
-      "type": "database",
-      "label": "SQLite",
-      "sublabel": "schema · repos",
-      "tag": "C2.1",
-      "pos": [240, 220],
-      "size": [132, 56],
-      "sources": [
-        { "path": "skillforge/db/schema.sql", "line": 1, "end_line": 8, "label": "projects" },
-        { "path": "skillforge/db/repositories/projects.py", "line": 11, "end_line": 22, "label": "insert" }
-      ]
-    },
-    {
-      "id": "registry",
-      "type": "backend",
-      "label": "registry/",
-      "sublabel": "manifest · 版本链",
-      "tag": "C2.7",
-      "pos": [440, 220],
-      "size": [132, 56],
-      "sources": [
-        { "path": "skillforge/registry/service.py", "line": 70, "end_line": 117, "label": "create_version" }
+        { "path": "skillforge/models/gateway.py", "line": 42, "end_line": 70, "label": "emit then adapter" },
+        { "path": "skillforge/models/gateway.py", "line": 73, "end_line": 94, "label": "stepfun raises" },
+        { "path": "skillforge/models/structured.py", "line": 121, "end_line": 137, "label": "schema retry" }
       ]
     },
     {
       "id": "tracing",
       "type": "messagebus",
       "label": "tracing/",
-      "sublabel": "sink → bus",
+      "sublabel": "sink 先写，再 publish",
       "tag": "C2.3",
-      "pos": [40, 220],
-      "size": [132, 56],
+      "pos": [40, 292],
+      "size": [168, 64],
       "sources": [
-        { "path": "skillforge/tracing/emitter.py", "line": 59, "end_line": 62, "label": "sink then bus" }
+        { "path": "skillforge/tracing/emitter.py", "line": 46, "end_line": 62, "label": "write then publish" },
+        { "path": "skillforge/tracing/sink.py", "line": 31, "end_line": 34, "label": "INSERT" }
       ]
     },
     {
-      "id": "operator",
-      "type": "external",
-      "label": "操作者",
-      "sublabel": "浏览器 / curl",
-      "pos": [40, 360],
-      "size": [128, 56]
+      "id": "sqlite",
+      "type": "database",
+      "label": "SQLite",
+      "sublabel": "data/skillforge.db",
+      "tag": "C2.1",
+      "pos": [300, 292],
+      "size": [188, 64],
+      "sources": [
+        { "path": "skillforge/db/schema.sql", "line": 1, "end_line": 8, "label": "projects, no FTS" },
+        { "path": "skillforge/db/schema.sql", "line": 54, "end_line": 65, "label": "skill_versions" },
+        { "path": "skillforge/db/schema.sql", "line": 88, "end_line": 93, "label": "trace_events" }
+      ]
+    },
+    {
+      "id": "registry",
+      "type": "backend",
+      "label": "registry/",
+      "sublabel": "版本链 · generated/",
+      "tag": "C2.7",
+      "pos": [580, 292],
+      "size": [176, 64],
+      "sources": [
+        { "path": "skillforge/registry/service.py", "line": 70, "end_line": 117, "label": "create_version" },
+        { "path": "skillforge/registry/service.py", "line": 131, "end_line": 138, "label": "transition" },
+        { "path": "skillforge/registry/store.py", "line": 24, "end_line": 35, "label": "manifest sha256" }
+      ]
+    },
+    {
+      "id": "harness",
+      "type": "backend",
+      "label": "LocalHarness",
+      "sublabel": "ReAct · 尚未实现",
+      "tag": "C3.6",
+      "pos": [580, 536],
+      "size": [176, 64],
+      "sources": [
+        { "path": "docs/execution-plan.md", "line": 164, "end_line": 165, "label": "run + skill_path" }
+      ]
+    },
+    {
+      "id": "opslab",
+      "type": "security",
+      "label": "OpsLab adapter",
+      "sublabel": "宿主白名单 · 未写",
+      "tag": "C3.5",
+      "pos": [860, 536],
+      "size": [176, 64],
+      "sources": [
+        { "path": "docs/execution-plan.md", "line": 163, "end_line": 163, "label": "deny mock-db" },
+        { "path": "docs/execution-plan.md", "line": 19, "end_line": 19, "label": "two planes" }
+      ]
     },
     {
       "id": "verifier",
       "type": "security",
       "label": "verifier",
-      "sublabel": "五字段 JSON",
+      "sublabel": "宿主五字段 JSON",
       "tag": "C1.3",
-      "pos": [680, 220],
-      "size": [120, 56]
+      "pos": [860, 48],
+      "size": [176, 64],
+      "sources": [
+        { "path": "demo/ops-lab/verifier/verify.py", "line": 27, "end_line": 50, "label": "healthy iff all" }
+      ]
     },
     {
       "id": "faults",
       "type": "security",
       "label": "faults",
-      "sublabel": "F1–F3 catalog",
+      "sublabel": "F1 F2 F3 · 宿主 Docker",
       "tag": "C1.7",
-      "pos": [860, 220],
-      "size": [120, 56]
+      "pos": [1120, 48],
+      "size": [176, 64],
+      "sources": [
+        { "path": "demo/ops-lab/faults/inject.py", "line": 19, "end_line": 28, "label": "catalog dispatch" },
+        { "path": "demo/ops-lab/faults/dockerutil.py", "line": 13, "end_line": 13, "label": "protect mock-db" },
+        { "path": "demo/ops-lab/faults/catalog.yaml", "line": 5, "end_line": 16, "label": "F1 expected" }
+      ]
     },
     {
       "id": "nginx",
       "type": "cloud",
       "label": "nginx",
-      "sublabel": "宿主 :8088",
+      "sublabel": "宿主 :8088 → :80",
       "tag": "C1.2",
-      "pos": [680, 360],
-      "size": [120, 56]
+      "pos": [860, 292],
+      "size": [176, 64],
+      "sources": [
+        { "path": "demo/ops-lab/docker-compose.yml", "line": 22, "end_line": 30, "label": "8088:80 ro conf" }
+      ]
     },
     {
       "id": "backend",
       "type": "backend",
       "label": "backend",
-      "sublabel": "ops-lab",
+      "sublabel": "容器 :8080 不发布",
       "tag": "C1.1",
-      "pos": [860, 360],
-      "size": [120, 56]
+      "pos": [1120, 292],
+      "size": [176, 64],
+      "sources": [
+        { "path": "demo/ops-lab/backend/app.py", "line": 35, "end_line": 41, "label": "/health /api/items" },
+        { "path": "demo/ops-lab/docker-compose.yml", "line": 9, "end_line": 15, "label": "PORT 8080" }
+      ]
     },
     {
       "id": "mockdb",
       "type": "database",
       "label": "mock-db",
-      "sublabel": "deny restart",
+      "sublabel": ":8090 禁止 stop",
       "tag": "C1.2",
-      "pos": [1040, 360],
-      "size": [118, 56]
+      "pos": [1380, 292],
+      "size": [168, 64],
+      "sources": [
+        { "path": "demo/ops-lab/mock-db/app.py", "line": 11, "end_line": 18, "label": "/health only" },
+        { "path": "demo/ops-lab/faults/dockerutil.py", "line": 60, "end_line": 62, "label": "PermissionError" }
+      ]
     }
   ],
   "boundaries": [
     {
       "kind": "region",
-      "label": "宿主机 skillforge/",
-      "wraps": ["web", "api", "models", "sqlite", "registry", "tracing", "operator", "verifier", "faults"]
+      "label": "宿主机",
+      "wraps": ["web", "api", "models", "tracing", "sqlite", "registry", "harness", "opslab", "verifier", "faults"]
     },
     {
       "kind": "region",
-      "label": "Docker skillforge-lab",
+      "label": "Phase 3 设计（未实现）",
+      "wraps": ["harness", "opslab"]
+    },
+    {
+      "kind": "region",
+      "label": "Docker project skillforge-lab",
       "wraps": ["nginx", "backend", "mockdb"]
     }
   ],
@@ -187,50 +241,33 @@
       "id": "api-sqlite",
       "from": "api",
       "to": "sqlite",
+      "label": "projects",
+      "labelAt": [394, 126],
       "fromSide": "bottom",
       "toSide": "top"
-    },
-    {
-      "id": "registry-sqlite",
-      "from": "registry",
-      "to": "sqlite",
-      "fromSide": "left",
-      "toSide": "right"
     },
     {
       "id": "tracing-sqlite",
       "from": "tracing",
       "to": "sqlite",
+      "label": "trace_events",
       "fromSide": "right",
       "toSide": "left"
     },
     {
-      "id": "op-nginx",
-      "from": "operator",
-      "to": "nginx",
-      "label": ":8088",
-      "variant": "emphasis",
-      "fromSide": "right",
-      "toSide": "left"
-    },
-    {
-      "id": "ngx-be",
-      "from": "nginx",
-      "to": "backend",
-      "fromSide": "right",
-      "toSide": "left"
-    },
-    {
-      "id": "be-db",
-      "from": "backend",
-      "to": "mockdb",
-      "fromSide": "right",
-      "toSide": "left"
+      "id": "registry-sqlite",
+      "from": "registry",
+      "to": "sqlite",
+      "label": "versions",
+      "fromSide": "left",
+      "toSide": "right"
     },
     {
       "id": "ver-ngx",
       "from": "verifier",
       "to": "nginx",
+      "label": "GET /health",
+      "labelAt": [948, 126],
       "fromSide": "bottom",
       "toSide": "top"
     },
@@ -238,50 +275,82 @@
       "id": "f-be",
       "from": "faults",
       "to": "backend",
+      "label": "F1 stop",
+      "labelAt": [1208, 126],
+      "variant": "security",
       "fromSide": "bottom",
       "toSide": "top"
     },
     {
-      "id": "f-ngx",
-      "from": "faults",
+      "id": "ngx-be",
+      "from": "nginx",
+      "to": "backend",
+      "label": ":8080",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "be-db",
+      "from": "backend",
+      "to": "mockdb",
+      "label": "depends_on",
+      "variant": "dashed",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "harness-ops",
+      "from": "harness",
+      "to": "opslab",
+      "variant": "dashed",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "ops-nginx",
+      "from": "opslab",
       "to": "nginx",
-      "fromSide": "left",
-      "toSide": "top"
+      "variant": "dashed",
+      "fromSide": "top",
+      "toSide": "bottom"
     }
   ],
   "cards": [
     {
       "dot": "emerald",
-      "title": "已接线",
+      "title": "进程里已调用",
       "items": [
-        "api → SQLite：POST/GET /api/projects（C2.8）。",
-        "api lifespan 订阅 bus，WS /api/events 推 TraceEvent（C2.4）。",
-        "tracing：先 sqlite sink 再 bus.publish（C2.3）。",
-        "registry 写 skill_versions + skills/generated（C2.7），无 HTTP。"
+        "lifespan：initialize_database，并 subscribe EventBus → WS broadcast。",
+        "POST/GET /api/projects → repositories.projects。不写 trace。",
+        "emit()：SqliteTraceSink 先 INSERT，再 bus.publish。当前唯一调用方是 ModelGateway.generate。",
+        "SkillRegistry 写 skills / skill_versions，并落盘 skills/generated/<key>/<version>/manifest.json。"
       ]
     },
     {
       "dot": "amber",
-      "title": "虚线＝未消费",
+      "title": "库在、路由不在",
       "items": [
-        "Web 仍是 Hello 脚手架；CORS 已允许 :5173。",
-        "models/ 已实现 Gateway+structured；无 API 路由调用它。"
-      ]
-    },
-    {
-      "dot": "slate",
-      "title": "详图",
-      "items": [
-        "控制面模块：phase2-control-plane.html。",
-        "双状态机：domain-pipeline-state.html · domain-skill-version-state.html。"
+        "Web 无 fetch、无 WebSocket 客户端。虚线只表示 CORS 允许 :5173。",
+        "无 /api/skills，无 HTTP 调用 generate()。stepfun_local / stepfun_api 在 build_adapter 里直接 NotImplementedError。",
+        "表已建但无写入方：chunks、knowledge_units、eval_cases、evaluation_runs。schema.sql 无 FTS。"
       ]
     },
     {
       "dot": "cyan",
-      "title": "下一步 C3",
+      "title": "Ops Lab 事实",
       "items": [
-        "golden skill、Sandbox、Runtime、OpsLabToolAdapter。",
-        "schema.sql 仍无 FTS（R12）。"
+        "backend 不请求 mock-db。compose 只有 depends_on；mock-db 只提供 /health。",
+        "F2/F3 改的是宿主 nginx.conf，再 reload。容器以只读卷挂载该文件。",
+        "细图：docs/diagrams/ops-lab-topology.html。"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Phase 3 虚线（未写）",
+      "items": [
+        "LocalHarness 将成为 generate() 的调用方。Control 与 Treatment 只差 SKILL.md。",
+        "docker/nginx 走宿主 OpsLab adapter，不进沙箱。沙箱与 golden skill 见 phase3-runtime.html。",
+        "C3.10 才会给 API 加 inject/reset/runs。今天仍是宿主脚本注入，curl :8088 验证。"
       ]
     }
   ]

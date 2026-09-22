@@ -1,0 +1,317 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Phase 3 设计：两个执行面",
+    "subtitle": "虚线=执行方案里的接线，模块还没写。实线=ops-lab 里已经在跑的路径。沙箱不挂 docker.sock。",
+    "output": "phase3-runtime.html",
+    "quality_profile": "showcase",
+    "visual_preset": "editorial",
+    "repository": {
+      "url": "https://github.com/FluxForgeLab/SkillForge.git",
+      "revision": "6e928eef8574becd1d46c7811bb74d45a9a6e9e8"
+    },
+    "views": [
+      {
+        "id": "loop",
+        "label": "ReAct 循环",
+        "focus": ["cli", "harness", "skill", "models"],
+        "note": "Control 与 Treatment 同模型、同工具、同预算。差别只是 skill_path 是否注入 SKILL.md。"
+      },
+      {
+        "id": "sandbox-plane",
+        "label": "沙箱执行面",
+        "focus": ["harness", "sandbox", "satools"],
+        "note": "生成脚本与 shell/file/http 只在 DockerSandbox 里。sudo、mount、shutdown 拒绝。"
+      },
+      {
+        "id": "ops-plane",
+        "label": "控制面工具",
+        "focus": ["harness", "opslab", "nginx", "backend"],
+        "note": "docker restart 与 nginx test/reload 在宿主白名单里，不进沙箱。mock-db 重启拒绝。"
+      },
+      {
+        "id": "f1",
+        "label": "F1 脚本",
+        "focus": ["opslab", "backend", "satools", "verifier"],
+        "note": "C3.9：FakeModel 按 golden 调用 inspect、logs、restart，再用 http.get。verifier 在测试里判定。"
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "cli",
+      "type": "external",
+      "label": "skillforge run",
+      "sublabel": "C3.8 设计",
+      "tag": "C3.8",
+      "pos": [40, 200],
+      "size": [168, 64],
+      "sources": [
+        { "path": "docs/execution-plan.md", "line": 166, "end_line": 166, "label": "CLI run" }
+      ]
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "api/ runs",
+      "sublabel": "C3.10 尚未挂路由",
+      "tag": "C3.10",
+      "pos": [40, 40],
+      "size": [168, 64],
+      "sources": [
+        { "path": "docs/execution-plan.md", "line": 168, "end_line": 168, "label": "inject reset runs" },
+        { "path": "skillforge/api/main.py", "line": 59, "end_line": 64, "label": "routes today" }
+      ]
+    },
+    {
+      "id": "skill",
+      "type": "external",
+      "label": "golden skill",
+      "sublabel": "SKILL.md 或空 prompt",
+      "tag": "C3.1",
+      "pos": [280, 40],
+      "size": [176, 64],
+      "sources": [
+        { "path": "docs/execution-plan.md", "line": 159, "end_line": 159, "label": "service-recovery" },
+        { "path": "docs/execution-plan.md", "line": 165, "end_line": 165, "label": "skill_path None" }
+      ]
+    },
+    {
+      "id": "harness",
+      "type": "backend",
+      "label": "LocalHarness",
+      "sublabel": "ReAct · 预算来自 Settings",
+      "tag": "C3.6",
+      "pos": [280, 200],
+      "size": [176, 64],
+      "sources": [
+        { "path": "docs/execution-plan.md", "line": 164, "end_line": 164, "label": "run(task, skill)" },
+        { "path": "docs/SkillForge_Architecture_Design_v0.1.md", "line": 670, "end_line": 676, "label": "RunResult" }
+      ]
+    },
+    {
+      "id": "models",
+      "type": "cloud",
+      "label": "ModelGateway",
+      "sublabel": "已实现 · generate",
+      "tag": "C2.6",
+      "pos": [530, 200],
+      "size": [176, 64],
+      "sources": [
+        { "path": "skillforge/models/gateway.py", "line": 42, "end_line": 70, "label": "emit + adapter" }
+      ]
+    },
+    {
+      "id": "sandbox",
+      "type": "security",
+      "label": "DockerSandbox",
+      "sublabel": "只挂 workspace",
+      "tag": "C3.3",
+      "pos": [40, 420],
+      "size": [168, 64],
+      "sources": [
+        { "path": "docs/execution-plan.md", "line": 161, "end_line": 161, "label": "no docker.sock" },
+        { "path": "docs/SkillForge_Architecture_Design_v0.1.md", "line": 695, "end_line": 701, "label": "create exec destroy" }
+      ]
+    },
+    {
+      "id": "satools",
+      "type": "backend",
+      "label": "沙箱工具",
+      "sublabel": "shell.read file http.get",
+      "tag": "C3.4",
+      "pos": [280, 420],
+      "size": [176, 64],
+      "sources": [
+        { "path": "docs/execution-plan.md", "line": 162, "end_line": 162, "label": "policy_violation" }
+      ]
+    },
+    {
+      "id": "opslab",
+      "type": "security",
+      "label": "OpsLabToolAdapter",
+      "sublabel": "宿主白名单",
+      "tag": "C3.5",
+      "pos": [530, 420],
+      "size": [188, 64],
+      "sources": [
+        { "path": "docs/execution-plan.md", "line": 163, "end_line": 163, "label": "deny mock-db" },
+        { "path": "docs/execution-plan.md", "line": 19, "end_line": 19, "label": "two planes" }
+      ]
+    },
+    {
+      "id": "nginx",
+      "type": "cloud",
+      "label": "nginx",
+      "sublabel": "已发布 :8088",
+      "tag": "C1.2",
+      "pos": [790, 420],
+      "size": [160, 64],
+      "sources": [
+        { "path": "demo/ops-lab/docker-compose.yml", "line": 22, "end_line": 28, "label": "8088:80" }
+      ]
+    },
+    {
+      "id": "backend",
+      "type": "backend",
+      "label": "backend",
+      "sublabel": "容器 :8080",
+      "tag": "C1.1",
+      "pos": [790, 620],
+      "size": [160, 64],
+      "sources": [
+        { "path": "demo/ops-lab/docker-compose.yml", "line": 9, "end_line": 14, "label": "PORT 8080" }
+      ]
+    },
+    {
+      "id": "verifier",
+      "type": "security",
+      "label": "verifier",
+      "sublabel": "已实现 · 测试侧",
+      "tag": "C1.3",
+      "pos": [530, 620],
+      "size": [176, 64],
+      "sources": [
+        { "path": "demo/ops-lab/verifier/verify.py", "line": 44, "end_line": 50, "label": "healthy()" }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "控制面设计（未实现）",
+      "wraps": ["cli", "skill", "harness", "opslab"]
+    },
+    {
+      "kind": "security-group",
+      "label": "DockerSandbox 无 docker.sock",
+      "wraps": ["sandbox", "satools"]
+    },
+    {
+      "kind": "region",
+      "label": "skillforge-lab 已存在",
+      "wraps": ["nginx", "backend"]
+    }
+  ],
+  "connections": [
+    {
+      "id": "cli-harness",
+      "from": "cli",
+      "to": "harness",
+      "variant": "dashed",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "api-harness",
+      "from": "api",
+      "to": "harness",
+      "variant": "dashed",
+      "fromSide": "right",
+      "toSide": "top"
+    },
+    {
+      "id": "skill-harness",
+      "from": "skill",
+      "to": "harness",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "harness-models",
+      "from": "harness",
+      "to": "models",
+      "variant": "dashed",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "harness-sandbox",
+      "from": "harness",
+      "to": "sandbox",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "sandbox-tools",
+      "from": "sandbox",
+      "to": "satools",
+      "variant": "dashed",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "harness-ops",
+      "from": "harness",
+      "to": "opslab",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "ops-nginx",
+      "from": "opslab",
+      "to": "nginx",
+      "variant": "dashed",
+      "fromSide": "right",
+      "toSide": "left"
+    },
+    {
+      "id": "ngx-be",
+      "from": "nginx",
+      "to": "backend",
+      "label": ":8080",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "ver-ngx",
+      "from": "verifier",
+      "to": "nginx",
+      "fromSide": "right",
+      "toSide": "bottom"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "两条执行面",
+      "items": [
+        "Sandbox 跑生成脚本和 shell.read / file.read / file.write / http.get。网络默认 restricted，只允许 localhost。",
+        "OpsLabToolAdapter 留在控制面：docker.inspect、logs、restart，以及 nginx 的读、写、nginx -t、reload。只作用于 compose project skillforge-lab。",
+        "沙箱不挂 docker.sock、宿主根目录、SSH key、.env。永久拒绝：删 volume、重启 mock-db、rm、sudo、mount、shutdown。违规记 policy_violation。"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "虚线都还没写",
+      "items": [
+        "LocalHarness.run(task, skill_path, workspace)。max_steps、max_seconds、temperature 读 Settings。",
+        "skill_path=None 是 Control：同一工具集，system prompt 里没有 SKILL.md。",
+        "C3.10 才会加 POST /api/demo/faults/:id/inject、POST /api/demo/reset、GET /api/runs/:id。今天 API 没有这些路由。",
+        "ModelGateway.generate 已经存在。图上的虚线表示还没有调用方。"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "F1 验收路径",
+      "items": [
+        "golden service-recovery 是手写契约，Compiler 以后照它验收。evals 覆盖 F1/F2/F3。",
+        "C3.9 用 FakeModel 按脚本走 docker.inspect → docker.logs → docker.restart → http.get。",
+        "跑完由已有 verifier 判断五字段是否全真。Agent 自己不改 verifier。"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "不在这张图里",
+      "items": [
+        "OpenShellSandbox 是以后的适配器，不是 Phase 3 主路径。",
+        "mock-db 不出现在工具白名单的允许重启列表里。",
+        "总图：c0-c1-architecture.html。已落地的控制面：phase2-control-plane.html。"
+      ]
+    }
+  ]
+}
