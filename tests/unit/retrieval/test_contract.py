@@ -17,18 +17,21 @@ from skillforge.db.repositories.source_documents import insert_source_document
 from skillforge.domain.entities import Chunk, KnowledgeUnit, Project, SourceDocument, TraceEvent
 from skillforge.domain.enums import KnowledgeUnitType, TraceEventType
 from skillforge.knowledge.retrieval.backends.memory import MemoryIndex
+from skillforge.knowledge.retrieval.backends.sqlite_fts import SqliteFtsIndex
 from skillforge.knowledge.retrieval.base import IndexDocument, RetrievalQuery
 from skillforge.knowledge.retrieval.embedder import NullEmbedder
 from skillforge.knowledge.retrieval.indexer import Indexer
 from skillforge.knowledge.retrieval.retriever import Retriever
 
-pytestmark = pytest.mark.parametrize("backend", ["memory"], indirect=True)
+pytestmark = pytest.mark.parametrize("backend", ["memory", "sqlite_fts"], indirect=True)
 
 
 @pytest.fixture
-def backend(request: pytest.FixtureRequest) -> MemoryIndex:
+def backend(request: pytest.FixtureRequest, tmp_path: Path) -> MemoryIndex | SqliteFtsIndex:
     if request.param == "memory":
         return MemoryIndex()
+    if request.param == "sqlite_fts":
+        return SqliteFtsIndex(tmp_path / "index.sqlite")
     raise AssertionError(f"unknown backend {request.param}")
 
 
@@ -122,7 +125,7 @@ async def test_hybrid_request_degrades_to_keyword(backend: MemoryIndex) -> None:
     await backend.upsert([_doc(id="kw", text="degrade-token")])
     hits = await backend.search(_query("degrade-token", mode="hybrid"))
     assert hits[0].mode_used == "keyword"
-    assert hits[0].backend == "memory"
+    assert hits[0].backend == backend.name
 
 
 async def test_rebuild_is_idempotent(backend: MemoryIndex, tmp_path: Path) -> None:
@@ -152,7 +155,7 @@ async def test_retriever_emits_retrieval_query(backend: MemoryIndex) -> None:
     assert [hit.id for hit in hits] == ["emit_1"]
     event = sink.events[-1]
     assert event.type is TraceEventType.RETRIEVAL_QUERY
-    assert event.output["backend"] == "memory"
+    assert event.output["backend"] == backend.name
     assert event.output["mode_used"] == "keyword"
     assert event.output["k"] == 5
     assert event.output["query_len"] == len("emit-token")

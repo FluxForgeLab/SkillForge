@@ -31,6 +31,9 @@ packages = ["skillforge"]
 "skillforge/db/schema.sql" = "skillforge/db/schema.sql"
 "skillforge/sandbox/policies/default.yaml" = "skillforge/sandbox/policies/default.yaml"
 
+[project.optional-dependencies]
+lancedb = ["lancedb>=0.17", "pyarrow"]
+
 [dependency-groups]
 dev = [
     "pytest-asyncio>=0.24",
@@ -53,9 +56,13 @@ select = ["E", "F", "I", "UP", "B", "TID251"]
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "lancedb".msg = "lancedb is only allowed in knowledge/retrieval/backends"
 "pyarrow".msg = "pyarrow is only allowed in knowledge/retrieval/backends"
+"sqlite3".msg = "sqlite3 is only allowed in skillforge/db and sqlite_fts"
 
 [tool.ruff.lint.per-file-ignores]
-"skillforge/knowledge/retrieval/backends/**" = ["TID251"]
+"skillforge/db/**" = ["TID251"]
+"skillforge/knowledge/retrieval/backends/sqlite_fts.py" = ["TID251"]
+"skillforge/evaluator/guard.py" = ["TID251"]
+"tests/**" = ["TID251"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

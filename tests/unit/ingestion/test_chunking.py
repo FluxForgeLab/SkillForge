@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import asyncio
 from datetime import UTC, datetime
 from pathlib import Path
 
+from skillforge.config import Settings
 from skillforge.db.connection import connection
 from skillforge.db.init import initialize_database
 from skillforge.db.repositories.chunks import list_chunks_by_document
@@ -13,6 +15,8 @@ from skillforge.db.repositories.source_documents import insert_source_document
 from skillforge.domain.entities import Project, SourceDocument
 from skillforge.ingestion.chunking import chunk_document
 from skillforge.ingestion.text import ParsedDocument, ParsedSegment, parse_markdown
+from skillforge.knowledge.retrieval.backends.sqlite_fts import SqliteFtsIndex
+from skillforge.knowledge.retrieval.base import RetrievalQuery
 
 _MARKDOWN = """\
 intro
@@ -31,7 +35,11 @@ look at logs
 """
 
 
-def test_markdown_line_numbers_slice_back_to_source(tmp_path: Path) -> None:
+def test_markdown_line_numbers_slice_back_to_source(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setattr(
+        "skillforge.ingestion.chunking.get_settings",
+        lambda: Settings(_env_file=None),
+    )
     db_path = tmp_path / "app.sqlite"
     document = _seed(db_path)
     parsed = parse_markdown(_MARKDOWN)
@@ -47,7 +55,11 @@ def test_markdown_line_numbers_slice_back_to_source(tmp_path: Path) -> None:
     assert [chunk.ordinal for chunk in chunks] == [0, 1, 2]
 
 
-def test_pdf_pages_and_openapi_titles(tmp_path: Path) -> None:
+def test_pdf_pages_and_openapi_titles(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setattr(
+        "skillforge.ingestion.chunking.get_settings",
+        lambda: Settings(_env_file=None),
+    )
     db_path = tmp_path / "app.sqlite"
     document = _seed(db_path, document_id="doc_pdf", parser="pdf")
     pdf = ParsedDocument(
@@ -76,7 +88,27 @@ def test_pdf_pages_and_openapi_titles(tmp_path: Path) -> None:
     assert all(chunk.line_start is None and chunk.page is None for chunk in ops)
 
 
-def test_rechunk_replaces_rows(tmp_path: Path) -> None:
+def test_chunk_document_is_searchable_in_fts(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setattr(
+        "skillforge.ingestion.chunking.get_settings",
+        lambda: Settings(_env_file=None),
+    )
+    db_path = tmp_path / "app.sqlite"
+    document = _seed(db_path)
+    chunk_document(db_path, document, parse_markdown(_MARKDOWN))
+    hits = asyncio.run(
+        SqliteFtsIndex(db_path).search(
+            RetrievalQuery(text="Service", project_id=document.project_id)
+        )
+    )
+    assert any(hit.title == "Service Down" for hit in hits)
+
+
+def test_rechunk_replaces_rows(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setattr(
+        "skillforge.ingestion.chunking.get_settings",
+        lambda: Settings(_env_file=None),
+    )
     db_path = tmp_path / "app.sqlite"
     document = _seed(db_path)
     parsed = parse_markdown(_MARKDOWN)

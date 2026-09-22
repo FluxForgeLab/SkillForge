@@ -51,7 +51,7 @@ class Settings(BaseSettings):
     opslab_nginx_conf: Path = Path("demo/ops-lab/nginx/nginx.conf")
     sandbox_image: str = "skillforge-sandbox:local"
 
-    retrieval_backend: RetrievalBackendName = "memory"
+    retrieval_backend: RetrievalBackendName = "sqlite_fts"
     retrieval_default_mode: RetrievalModeName = "keyword"
     index_dir: Path = Path("data/index")
     embedder: EmbedderName = "null"

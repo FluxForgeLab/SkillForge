@@ -2,15 +2,19 @@
 
 from __future__ import annotations
 
+import asyncio
 import re
 from pathlib import Path
 from uuid import uuid4
 
+from skillforge.config import get_settings
 from skillforge.db.connection import connection
 from skillforge.db.init import initialize_database
 from skillforge.db.repositories.chunks import delete_chunks_by_document, insert_chunks
 from skillforge.domain.entities import Chunk, SourceDocument
 from skillforge.ingestion.text import ParsedDocument, ParsedLine, ParsedSegment
+from skillforge.knowledge.retrieval.factory import build_index
+from skillforge.knowledge.retrieval.indexer import Indexer
 
 _ATX = re.compile(r"^ {0,3}(#{1,6})(?:[ \t]+(.*))?$")
 _FENCE = re.compile(r"^ {0,3}(`{3,}|~{3,})")
@@ -21,13 +25,15 @@ def chunk_document(
     document: SourceDocument,
     parsed: ParsedDocument,
 ) -> list[Chunk]:
-    """Replace this document's chunks. Does not touch a retrieval index."""
+    """Replace this document's chunks, then project them into the retrieval index."""
     chunks = _chunks(document, parsed)
     initialize_database(db_path)
     with connection(db_path) as conn:
         delete_chunks_by_document(conn, document.id)
         if chunks:
             insert_chunks(conn, chunks)
+    index = build_index(get_settings(), db_path=db_path)
+    asyncio.run(Indexer(db_path, index).index_document(document.id))
     return chunks
 
 
