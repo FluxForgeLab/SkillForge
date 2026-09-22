@@ -1,0 +1,18 @@
+[
+  {
+    "type": "diagnostic_rule",
+    "title": "Appendix B",
+    "confidence": 0.7,
+    "trigger": "nginx reload failed",
+    "steps": ["run nginx -t"],
+    "source_ref_count": 1
+  },
+  {
+    "type": "procedure",
+    "title": "Recover backend service",
+    "confidence": 0.9,
+    "trigger": "HTTP 502",
+    "steps": ["inspect backend", "restart backend", "verify health"],
+    "source_ref_count": 2
+  }
+]

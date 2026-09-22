@@ -9,6 +9,10 @@ from skillforge.domain.entities import KnowledgeUnit
 from skillforge.domain.enums import KnowledgeUnitType
 
 
+def delete_knowledge_units_by_document(conn: sqlite3.Connection, document_id: str) -> None:
+    conn.execute("DELETE FROM knowledge_units WHERE document_id = ?", (document_id,))
+
+
 def insert_knowledge_unit(conn: sqlite3.Connection, unit: KnowledgeUnit) -> None:
     conn.execute(
         """
