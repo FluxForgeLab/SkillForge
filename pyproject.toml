@@ -17,6 +17,9 @@ dependencies = [
     "websockets>=14.0",
 ]
 
+[project.scripts]
+skillforge = "skillforge.cli:main"
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
