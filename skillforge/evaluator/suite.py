@@ -113,6 +113,7 @@ async def run_suite(
                     verify=verify,
                     settle_sec=settle_sec,
                     baseline=baseline,
+                    evals_dir=skill_path,
                 )
                 runs.append(record)
     return summarize(runs, skill_version_id=skill_version_id, repeats=repeats)

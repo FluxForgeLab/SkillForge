@@ -20,6 +20,8 @@ from skillforge.domain.entities import EvaluationRun, TraceEvent
 from skillforge.domain.enums import EvaluationRunStatus
 from skillforge.evaluator.assertions import assert_case
 from skillforge.evaluator.cases import LoadedEvalCase
+from skillforge.evaluator.errors import EvalGuardError
+from skillforge.evaluator.guard import verify_sealed_evals
 from skillforge.runtime.agent import AgentRuntime
 from skillforge.tracing.sink import TraceSink
 
@@ -52,16 +54,28 @@ async def run_case(
     verify: VerifyFn | None = None,
     settle_sec: float = _SETTLE_SEC,
     baseline: bool = False,
+    evals_dir: str | Path | None = None,
 ) -> EvaluationRun:
     """Execute one case and insert its EvaluationRun.
 
     ``sink`` must keep written events on ``sink.events`` so forbidden checks can see tool calls.
     The harness must use the same ``run_id`` and sink. ``skill_version_id`` must already exist.
     ``skill_path=None`` is the control arm. ``baseline`` is stored on the evaluation row.
+    ``evals_dir`` (or ``skill_path`` when set) is checked against a candidate eval seal
+    before inject.
     """
     reset_lab = reset if reset is not None else _reset_lab
     inject_lab = inject if inject is not None else _inject_lab
     read_verifier = verify if verify is not None else _verify_lab
+    sealed_dir: Path | None
+    if evals_dir is not None:
+        sealed_dir = Path(evals_dir)
+    elif skill_path is not None:
+        sealed_dir = Path(skill_path)
+    else:
+        sealed_dir = None
+    if sealed_dir is not None:
+        verify_sealed_evals(db_path, skill_version_id, sealed_dir)
     started_at = datetime.now(UTC)
     timed_out = False
     passed = False
@@ -100,6 +114,8 @@ async def run_case(
         )
         passed = assertion.passed
         status = EvaluationRunStatus.FAILED if timed_out else EvaluationRunStatus.COMPLETED
+    except EvalGuardError:
+        raise
     except Exception:
         logger.exception("eval case %s failed", loaded.case.id)
         status = EvaluationRunStatus.FAILED

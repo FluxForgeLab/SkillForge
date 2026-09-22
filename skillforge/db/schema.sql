@@ -85,6 +85,12 @@ CREATE TABLE IF NOT EXISTS evaluation_runs (
     FOREIGN KEY (skill_version_id) REFERENCES skill_versions (id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS eval_seals (
+    skill_version_id TEXT PRIMARY KEY NOT NULL,
+    evals_sha256 TEXT NOT NULL,
+    FOREIGN KEY (skill_version_id) REFERENCES skill_versions (id) ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS trace_events (
     id TEXT PRIMARY KEY NOT NULL,
     run_id TEXT NOT NULL,
