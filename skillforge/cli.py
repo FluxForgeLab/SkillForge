@@ -1,4 +1,4 @@
-"""Debug CLI. `run` injects a lab fault and prints the harness trace."""
+"""Debug CLI. `run` injects a lab fault; `eval --replay` reads the eval cache."""
 
 from __future__ import annotations
 
@@ -19,6 +19,9 @@ from skillforge.db.init import initialize_database
 from skillforge.db.repositories.agent_runs import AgentRunRecord, insert_agent_run
 from skillforge.domain.entities import TraceEvent
 from skillforge.domain.enums import TraceEventType
+from skillforge.evaluator.cache import replay_trials
+from skillforge.evaluator.cases import load_eval_cases
+from skillforge.evaluator.errors import CacheMiss
 from skillforge.models.adapters.recording import RecordingAdapter
 from skillforge.models.gateway import ModelGateway, build_adapter
 from skillforge.runtime.agent import AgentRuntime, LocalHarness, RunResult
@@ -51,6 +54,45 @@ def main(
     args = sys.argv[1:] if argv is None else argv
     try:
         parsed = _parse(args)
+    except ValueError as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
+    if parsed.command == "eval":
+        return _eval_replay(parsed)
+    return _run(parsed, inject=inject, harness=harness, sink=sink)
+
+
+def _eval_replay(parsed: argparse.Namespace) -> int:
+    try:
+        cases = load_eval_cases(parsed.skill)
+        runs = replay_trials(
+            get_settings().sqlite_path,
+            version_hash=parsed.version_hash,
+            model=parsed.model,
+            case_ids=[loaded.case.id for loaded in cases],
+        )
+    except CacheMiss as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
+    except Exception as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
+    for run in runs:
+        case_id = run.metrics["case_id"]
+        arm = "control" if run.baseline.get("baseline") is True else "treatment"
+        passed = "true" if run.metrics.get("passed") is True else "false"
+        print(f"replay\t{case_id}\t{arm}\tpassed={passed}")
+    return 0
+
+
+def _run(
+    parsed: argparse.Namespace,
+    *,
+    inject: Inject | None,
+    harness: AgentRuntime | None,
+    sink: TraceSink | None,
+) -> int:
+    try:
         fault_id = resolve_fault(parsed.fault)
     except ValueError as exc:
         print(str(exc), file=sys.stderr)
@@ -129,6 +171,11 @@ def _parse(argv: list[str]) -> argparse.Namespace:
     run.add_argument("--task", required=True)
     run.add_argument("--fault", required=True)
     run.add_argument("--skill", default=None)
+    eval_cmd = sub.add_parser("eval")
+    eval_cmd.add_argument("--skill", required=True)
+    eval_cmd.add_argument("--version-hash", required=True)
+    eval_cmd.add_argument("--model", required=True)
+    eval_cmd.add_argument("--replay", action="store_true", required=True)
     return parser.parse_args(argv)
 
 

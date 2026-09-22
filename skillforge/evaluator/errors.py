@@ -11,3 +11,12 @@ class EvalLoadError(SkillForgeError):
 
 class EvalGuardError(SkillForgeError):
     """Raised when sealed evals.json is missing, duplicated, or tampered with."""
+
+
+class CacheMiss(SkillForgeError):
+    """Raised when a cached eval trial is required but missing."""
+
+    def __init__(self, case_id: str, arm: str) -> None:
+        self.case_id = case_id
+        self.arm = arm
+        super().__init__(f"eval cache miss: case_id={case_id!r} arm={arm!r}")

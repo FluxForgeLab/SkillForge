@@ -91,6 +91,15 @@ CREATE TABLE IF NOT EXISTS eval_seals (
     FOREIGN KEY (skill_version_id) REFERENCES skill_versions (id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS eval_cache (
+    version_hash TEXT NOT NULL,
+    case_id TEXT NOT NULL,
+    arm TEXT NOT NULL,
+    model TEXT NOT NULL,
+    payload TEXT NOT NULL,
+    PRIMARY KEY (version_hash, case_id, arm, model)
+);
+
 CREATE TABLE IF NOT EXISTS trace_events (
     id TEXT PRIMARY KEY NOT NULL,
     run_id TEXT NOT NULL,

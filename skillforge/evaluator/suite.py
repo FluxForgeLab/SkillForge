@@ -9,6 +9,7 @@ from uuid import uuid4
 from pydantic import BaseModel, ConfigDict
 
 from skillforge.domain.entities import EvaluationRun, TraceEvent
+from skillforge.evaluator.cache import replay_trials, store_trial
 from skillforge.evaluator.cases import LoadedEvalCase
 from skillforge.evaluator.runner import _SETTLE_SEC, InjectFn, ResetFn, VerifyFn, run_case
 from skillforge.runtime.agent import AgentRuntime
@@ -83,14 +84,30 @@ async def run_suite(
     inject: InjectFn | None = None,
     verify: VerifyFn | None = None,
     settle_sec: float = _SETTLE_SEC,
+    version_hash: str | None = None,
+    model: str | None = None,
+    replay: bool = False,
 ) -> SuiteReport:
     """Run control then treatment for each case and repeat.
 
     ``harness_factory`` must attach the given sink and run_id, and use the same settings
     and default tool registry for every call. Control passes ``skill_path=None``.
+    When ``replay`` is True, trials are loaded from ``eval_cache`` and the harness is unused.
     """
     if repeats < 1:
         raise ValueError(f"repeats must be >= 1, got {repeats}")
+    if replay:
+        if version_hash is None or model is None:
+            raise ValueError("version_hash and model are required when replay=True")
+        case_ids = [loaded.case.id for loaded in cases]
+        runs = replay_trials(
+            db_path,
+            version_hash=version_hash,
+            model=model,
+            case_ids=case_ids,
+        )
+        return summarize(runs, skill_version_id=skill_version_id, repeats=repeats)
+
     prefix = suite_id if suite_id is not None else f"suite_{uuid4().hex}"
     runs: list[EvaluationRun] = []
     for case in cases:
@@ -116,6 +133,17 @@ async def run_suite(
                     evals_dir=skill_path,
                 )
                 runs.append(record)
+                if version_hash is not None and model is not None:
+                    store_trial(
+                        db_path,
+                        version_hash=version_hash,
+                        case_id=str(record.metrics["case_id"]),
+                        arm="control" if record.baseline["baseline"] is True else "treatment",
+                        model=model,
+                        baseline=bool(record.baseline["baseline"]),
+                        metrics=dict(record.metrics),
+                        status=record.status.value,
+                    )
     return summarize(runs, skill_version_id=skill_version_id, repeats=repeats)
 
 
