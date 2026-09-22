@@ -1,0 +1,13 @@
+openapi: 3.0.3
+info:
+  title: lab
+  version: "1"
+paths:
+  /health:
+    get:
+      operationId: getHealth
+      summary: Liveness
+    parameters: []
+  /restart:
+    post:
+      operationId: restart

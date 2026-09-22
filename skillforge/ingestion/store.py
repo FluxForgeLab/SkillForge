@@ -17,9 +17,12 @@ from skillforge.db.repositories.source_documents import (
 )
 from skillforge.domain.entities import SourceDocument
 from skillforge.ingestion.errors import IngestError
+from skillforge.ingestion.structured import classify_structured, parse_pdf
 
 _MARKDOWN = {".md", ".markdown"}
 _TEXT = {".txt"}
+_YAML = {".yaml", ".yml"}
+_JSON = {".json"}
 
 
 def store_upload(
@@ -37,8 +40,7 @@ def store_upload(
     """
     name = _plain_name(filename, field="filename")
     _plain_name(project_id, field="project_id")
-    parser = _parser_for(name)
-    _require_utf8(data)
+    parser = _classify(name, data)
     digest = hashlib.sha256(data).hexdigest()
     storage = root if root is not None else get_settings().data_dir / "sources"
     initialize_database(db_path)
@@ -71,12 +73,20 @@ def _plain_name(value: str, *, field: str) -> str:
     return value
 
 
-def _parser_for(filename: str) -> str:
+def _classify(filename: str, data: bytes) -> str:
     suffix = Path(filename).suffix.lower()
     if suffix in _MARKDOWN:
+        _require_utf8(data)
         return "markdown"
     if suffix in _TEXT:
+        _require_utf8(data)
         return "text"
+    if suffix == ".pdf":
+        parse_pdf(data)
+        return "pdf"
+    if suffix in _YAML or suffix in _JSON:
+        _require_utf8(data)
+        return classify_structured(filename, data.decode("utf-8"))
     raise IngestError(f"unsupported source type {suffix or filename!r}")
 
 
