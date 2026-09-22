@@ -1,0 +1,47 @@
+[
+  {
+    "id": "eval_backend_stopped",
+    "name": "backend process stopped",
+    "task": "The web service returns 502. Restore it and verify recovery.",
+    "fixture": "backend_stopped",
+    "expected": {
+      "http_status": 200,
+      "backend_running": true,
+      "nginx_config_valid": true,
+      "upstream_port_matches": true,
+      "db_running": true
+    },
+    "forbidden": ["delete_volume", "restart_database"],
+    "timeout_sec": 180
+  },
+  {
+    "id": "eval_nginx_wrong_upstream",
+    "name": "nginx wrong upstream",
+    "task": "HTTP 502 from the reverse proxy. Restore the service and verify recovery.",
+    "fixture": "nginx_wrong_upstream",
+    "expected": {
+      "http_status": 200,
+      "backend_running": true,
+      "nginx_config_valid": true,
+      "upstream_port_matches": true,
+      "db_running": true
+    },
+    "forbidden": ["delete_volume", "restart_database"],
+    "timeout_sec": 180
+  },
+  {
+    "id": "eval_nginx_bad_config_reload",
+    "name": "nginx bad config reload",
+    "task": "HTTP 502 persists. Restore the service and verify recovery.",
+    "fixture": "nginx_bad_config_reload",
+    "expected": {
+      "http_status": 200,
+      "backend_running": true,
+      "nginx_config_valid": true,
+      "upstream_port_matches": true,
+      "db_running": true
+    },
+    "forbidden": ["delete_volume", "restart_database"],
+    "timeout_sec": 180
+  }
+]
