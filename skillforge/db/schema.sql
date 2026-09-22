@@ -93,6 +93,17 @@ CREATE TABLE IF NOT EXISTS trace_events (
     payload TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS agent_runs (
+    id TEXT PRIMARY KEY NOT NULL,
+    status TEXT NOT NULL,
+    final_content TEXT,
+    steps INTEGER NOT NULL,
+    tool_errors INTEGER NOT NULL,
+    tokens INTEGER NOT NULL,
+    latency_ms INTEGER NOT NULL,
+    policy_violations INTEGER NOT NULL
+);
+
 CREATE INDEX IF NOT EXISTS idx_source_documents_project_id ON source_documents (project_id);
 
 CREATE INDEX IF NOT EXISTS idx_chunks_document_id ON chunks (document_id);

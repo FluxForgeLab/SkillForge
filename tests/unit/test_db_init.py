@@ -20,6 +20,7 @@ EXPECTED_TABLES = frozenset(
         "eval_cases",
         "evaluation_runs",
         "trace_events",
+        "agent_runs",
     }
 )
 

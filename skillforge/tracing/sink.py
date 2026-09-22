@@ -16,6 +16,17 @@ class TraceSink(Protocol):
     async def write(self, event: TraceEvent) -> None: ...
 
 
+class FanOutSink:
+    """Writes each event to every child sink, in order."""
+
+    def __init__(self, *sinks: TraceSink) -> None:
+        self._sinks = sinks
+
+    async def write(self, event: TraceEvent) -> None:
+        for sink in self._sinks:
+            await sink.write(event)
+
+
 class SqliteTraceSink:
     """Persists trace events to the system-of-record SQLite database."""
 

@@ -14,12 +14,15 @@ from pathlib import Path
 import yaml
 
 from skillforge.config import get_settings
+from skillforge.db.connection import connection
+from skillforge.db.init import initialize_database
+from skillforge.db.repositories.agent_runs import AgentRunRecord, insert_agent_run
 from skillforge.domain.entities import TraceEvent
 from skillforge.domain.enums import TraceEventType
 from skillforge.models.gateway import ModelGateway, build_adapter
 from skillforge.runtime.agent import AgentRuntime, LocalHarness, RunResult
 from skillforge.tracing.bus import EventBus
-from skillforge.tracing.sink import TraceSink
+from skillforge.tracing.sink import FanOutSink, SqliteTraceSink, TraceSink
 
 Inject = Callable[[str], None]
 
@@ -51,7 +54,17 @@ def main(
     except ValueError as exc:
         print(str(exc), file=sys.stderr)
         return 2
-    trace_sink = sink if sink is not None else ListSink()
+    persist = harness is None and sink is None
+    memory = ListSink()
+    if persist:
+        trace_sink: TraceSink = FanOutSink(memory, SqliteTraceSink())
+        printable: TraceSink = memory
+    elif sink is None:
+        trace_sink = memory
+        printable = memory
+    else:
+        trace_sink = sink
+        printable = sink
     apply_fault = inject if inject is not None else inject_fault
     try:
         apply_fault(fault_id)
@@ -61,7 +74,9 @@ def main(
     except Exception as exc:
         print(str(exc), file=sys.stderr)
         return 1
-    _print_trace(trace_sink, result)
+    _print_trace(printable, result)
+    if persist:
+        _store_run(result)
     return 0 if result.status == "completed" else 1
 
 
@@ -82,6 +97,28 @@ def resolve_fault(token: str, catalog_path: Path | None = None) -> str:
 def inject_fault(fault_id: str) -> None:
     script = _repo_root() / "demo" / "ops-lab" / "faults" / "inject.py"
     subprocess.run([sys.executable, str(script), fault_id], check=True)
+
+
+def reset_fault() -> None:
+    script = _repo_root() / "demo" / "ops-lab" / "faults" / "reset.py"
+    subprocess.run([sys.executable, str(script)], check=True)
+
+
+def _store_run(result: RunResult) -> None:
+    db_path = get_settings().sqlite_path
+    initialize_database(db_path)
+    record = AgentRunRecord(
+        id=result.run_id,
+        status=result.status,
+        final_content=result.final_content,
+        steps=result.steps,
+        tool_errors=result.tool_errors,
+        tokens=result.tokens,
+        latency_ms=result.latency_ms,
+        policy_violations=result.policy_violations,
+    )
+    with connection(db_path) as conn:
+        insert_agent_run(conn, record)
 
 
 def _parse(argv: list[str]) -> argparse.Namespace:
