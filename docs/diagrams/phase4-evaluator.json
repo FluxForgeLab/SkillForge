@@ -1,0 +1,213 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Phase 4 设计：Evaluator",
+    "subtitle": "虚线=尚未实现。实线=评测将复用的已有路径。同一模型、同一工具、同一预算。",
+    "output": "phase4-evaluator.html",
+    "quality_profile": "showcase",
+    "visual_preset": "editorial",
+    "repository": {
+      "url": "https://github.com/FluxForgeLab/SkillForge.git",
+      "revision": "4f8636d89b213354ea0d35f2233368e163b24b85"
+    },
+    "views": [
+      {
+        "id": "case",
+        "label": "单次 case",
+        "focus": ["runner", "harness", "verifier", "asserts"],
+        "note": "reset、inject、跑 harness、verifier、断言。失败也要 destroy 沙箱。"
+      },
+      {
+        "id": "ab",
+        "label": "A/B",
+        "focus": ["runner", "harness", "skill", "sqlite"],
+        "note": "Control 无 skill 段。Treatment 追加 Skill。工具列表相同。"
+      },
+      {
+        "id": "guard",
+        "label": "evals 只读",
+        "focus": ["evals", "guard", "runner"],
+        "note": "CANDIDATE 记录 sha256。产物若改 evals 则拒绝。"
+      },
+      {
+        "id": "api",
+        "label": "评测 API",
+        "focus": ["api", "runner", "bench"],
+        "note": "POST evaluate 返回 job。结果与 BENCHMARK 尚未有路由。"
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "evals",
+      "type": "external",
+      "label": "evals.json",
+      "sublabel": "F1 F2 F3 已在 golden",
+      "tag": "C3.1",
+      "pos": [40, 48],
+      "size": [176, 64],
+      "sources": [
+        { "path": "skills/golden/service-recovery/evals/evals.json", "line": 1, "end_line": 16, "label": "three cases" }
+      ]
+    },
+    {
+      "id": "runner",
+      "type": "backend",
+      "label": "case runner",
+      "sublabel": "C4.3 未写",
+      "tag": "C4.3",
+      "pos": [300, 200],
+      "size": [176, 64],
+      "sources": [
+        { "path": "docs/execution-plan.md", "line": 199, "end_line": 199, "label": "reset inject run" }
+      ]
+    },
+    {
+      "id": "harness",
+      "type": "backend",
+      "label": "LocalHarness",
+      "sublabel": "已实现 · 将被调用",
+      "tag": "C3.6",
+      "pos": [560, 200],
+      "size": [176, 64],
+      "sources": [
+        { "path": "skillforge/runtime/agent.py", "line": 66, "end_line": 76, "label": "run" }
+      ]
+    },
+    {
+      "id": "skill",
+      "type": "external",
+      "label": "SKILL.md",
+      "sublabel": "Treatment 才注入",
+      "tag": "C3.7",
+      "pos": [820, 48],
+      "size": [168, 64],
+      "sources": [
+        { "path": "skillforge/runtime/prompt.py", "line": 16, "end_line": 20, "label": "skill section" }
+      ]
+    },
+    {
+      "id": "verifier",
+      "type": "security",
+      "label": "verifier",
+      "sublabel": "五字段 · 已实现",
+      "tag": "C1.3",
+      "pos": [560, 420],
+      "size": [176, 64],
+      "sources": [
+        { "path": "demo/ops-lab/verifier/verify.py", "line": 44, "end_line": 50, "label": "healthy" }
+      ]
+    },
+    {
+      "id": "asserts",
+      "type": "security",
+      "label": "assertions",
+      "sublabel": "C4.2 未写",
+      "tag": "C4.2",
+      "pos": [300, 420],
+      "size": [176, 64],
+      "sources": [
+        { "path": "docs/execution-plan.md", "line": 198, "end_line": 198, "label": "expected forbidden" }
+      ]
+    },
+    {
+      "id": "guard",
+      "type": "security",
+      "label": "evals 守卫",
+      "sublabel": "sha256 · 未写",
+      "tag": "C4.5",
+      "pos": [40, 200],
+      "size": [176, 64],
+      "sources": [
+        { "path": "docs/execution-plan.md", "line": 201, "end_line": 201, "label": "reject tamper" }
+      ]
+    },
+    {
+      "id": "sqlite",
+      "type": "database",
+      "label": "SQLite",
+      "sublabel": "evaluation_runs 将写入",
+      "tag": "C4.3",
+      "pos": [820, 420],
+      "size": [176, 64],
+      "sources": [
+        { "path": "skillforge/db/schema.sql", "line": 77, "end_line": 86, "label": "evaluation_runs" }
+      ]
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "evaluate API",
+      "sublabel": "C4.6 未挂路由",
+      "tag": "C4.6",
+      "pos": [40, 420],
+      "size": [176, 64],
+      "sources": [
+        { "path": "docs/execution-plan.md", "line": 202, "end_line": 202, "label": "POST evaluate" }
+      ]
+    },
+    {
+      "id": "bench",
+      "type": "external",
+      "label": "BENCHMARK.md",
+      "sublabel": "C4.7 未生成",
+      "tag": "C4.7",
+      "pos": [300, 48],
+      "size": [176, 64],
+      "sources": [
+        { "path": "docs/execution-plan.md", "line": 203, "end_line": 203, "label": "five metrics" }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Phase 4 将新增",
+      "wraps": ["runner", "asserts", "guard", "api", "bench"]
+    },
+    {
+      "kind": "region",
+      "label": "已可复用",
+      "wraps": ["evals", "harness", "skill", "verifier", "sqlite"]
+    }
+  ],
+  "connections": [
+    { "id": "evals-runner", "from": "evals", "to": "runner", "variant": "dashed" },
+    { "id": "guard-evals", "from": "guard", "to": "evals", "variant": "dashed", "label": "sha256" },
+    { "id": "runner-harness", "from": "runner", "to": "harness", "variant": "dashed" },
+    { "id": "skill-harness", "from": "skill", "to": "harness", "label": "Treatment" },
+    { "id": "runner-asserts", "from": "runner", "to": "asserts", "variant": "dashed" },
+    { "id": "asserts-verifier", "from": "asserts", "to": "verifier", "variant": "dashed" },
+    { "id": "runner-sqlite", "from": "runner", "to": "sqlite", "variant": "dashed", "fromSide": "bottom", "toSide": "top" },
+    { "id": "api-runner", "from": "api", "to": "runner", "variant": "dashed" },
+    { "id": "runner-bench", "from": "runner", "to": "bench", "variant": "dashed" }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "尚未实现",
+      "items": [
+        "单次路径：reset、inject、跑 harness、读 verifier、比对 expected 与 forbidden。",
+        "A/B 只差 prompt 里的 Skill 段。工具集与预算相同。",
+        "改动 evals 的产物直接拒绝。"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "将复用",
+      "items": [
+        "LocalHarness、golden evals、verifier 五字段已经存在。",
+        "评测结果写入 evaluation_runs，不要写入 agent_runs。"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "与 v0.1 的边界",
+      "items": [
+        "golden 正文不含 F3 的 nginx -t 修法。评测应能记下 F3 失败。",
+        "forbidden 里的 restart_database 对应已有的 policy_violation 名称。"
+      ]
+    }
+  ]
+}
