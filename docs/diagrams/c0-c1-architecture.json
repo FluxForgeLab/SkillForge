@@ -2,39 +2,39 @@
   "schema_version": 1,
   "diagram_type": "architecture",
   "meta": {
-    "title": "SkillForge：Phase 0–3 已落地 · Phase 4 设计",
-    "subtitle": "实线=已调用。虚线=评测器尚未实现。细图：phase3-runtime.html · phase4-evaluator.html。",
+    "title": "SkillForge：Phase 0–4 已落地 · Phase 5 设计",
+    "subtitle": "实线=已调用。虚线=知识面尚未实现。细图：phase3-runtime.html · phase4-evaluator.html · phase5-knowledge.html。",
     "output": "c0-c1-architecture.html",
     "quality_profile": "showcase",
     "visual_preset": "editorial",
     "repository": {
       "url": "https://github.com/FluxForgeLab/SkillForge.git",
-      "revision": "4f8636d89b213354ea0d35f2233368e163b24b85"
+      "revision": "7e32019dae2c00e4158249918e3cac230a3417d1"
     },
     "views": [
       {
         "id": "loop",
         "label": "ReAct 循环",
         "focus": ["cli", "harness", "golden", "gateway"],
-        "note": "一次 generate 算一步。skill_path 为空则裸 prompt，否则追加 Skill 段。"
+        "note": "一次 generate 算一步。skill_path 为空是 Control，否则追加 Skill 段。"
       },
       {
         "id": "planes",
         "label": "两个执行面",
-        "focus": ["tools", "sandbox", "nginx"],
-        "note": "shell/file/http 进沙箱。docker 与 nginx 留在宿主，只动 skillforge-lab。"
+        "focus": ["tools", "sandbox"],
+        "note": "shell、file、http 进沙箱。docker 与 nginx 留在宿主，只动 skillforge-lab。"
       },
       {
-        "id": "records",
-        "label": "运行记录",
-        "focus": ["api", "sqlite", "harness"],
-        "note": "harness 的 RunResult 写入 agent_runs，不写入 evaluation_runs。"
+        "id": "eval",
+        "label": "评测",
+        "focus": ["evaluator", "verifier", "sqlite", "api"],
+        "note": "试验写入 evaluation_runs。harness 的 RunResult 仍写入 agent_runs。"
       },
       {
-        "id": "phase4",
-        "label": "Phase 4 设计",
-        "focus": ["evaluator", "harness", "verifier", "sqlite"],
-        "note": "虚线：reset、inject、跑 Agent、verifier 断言、A/B uplift。模块还没写。"
+        "id": "phase5",
+        "label": "Phase 5 设计",
+        "focus": ["ingest", "retriever", "sqlite"],
+        "note": "虚线：上传、切块进 SQLite。检索是投影，FTS 不进 schema.sql。"
       }
     ]
   },
@@ -42,13 +42,13 @@
     {
       "id": "cli",
       "type": "external",
-      "label": "skillforge run",
-      "sublabel": "注入故障后跑 harness",
-      "tag": "C3.8",
-      "pos": [40, 200],
+      "label": "skillforge CLI",
+      "sublabel": "run · eval --replay",
+      "tag": "C4.8",
+      "pos": [40, 220],
       "size": [176, 64],
       "sources": [
-        { "path": "skillforge/cli.py", "line": 40, "end_line": 66, "label": "inject then run" }
+        { "path": "skillforge/cli.py", "line": 60, "end_line": 62, "label": "eval replay" }
       ]
     },
     {
@@ -57,10 +57,10 @@
       "label": "LocalHarness",
       "sublabel": "一步一次 generate",
       "tag": "C3.6",
-      "pos": [300, 200],
+      "pos": [280, 220],
       "size": [176, 64],
       "sources": [
-        { "path": "skillforge/runtime/agent.py", "line": 66, "end_line": 80, "label": "run" }
+        { "path": "skillforge/runtime/agent.py", "line": 66, "end_line": 75, "label": "run" }
       ]
     },
     {
@@ -69,10 +69,10 @@
       "label": "golden skill",
       "sublabel": "v0.1 · 不含 F3 修法",
       "tag": "C3.1",
-      "pos": [300, 40],
+      "pos": [280, 40],
       "size": [176, 64],
       "sources": [
-        { "path": "skillforge/runtime/prompt.py", "line": 16, "end_line": 20, "label": "append skill" }
+        { "path": "skillforge/runtime/prompt.py", "line": 18, "end_line": 22, "label": "skill or bare" }
       ]
     },
     {
@@ -81,10 +81,10 @@
       "label": "ModelGateway",
       "sublabel": "点号工具名在边界改写",
       "tag": "C3.11",
-      "pos": [560, 200],
+      "pos": [540, 220],
       "size": [188, 64],
       "sources": [
-        { "path": "skillforge/models/adapters/openai_compatible.py", "line": 100, "end_line": 102, "label": "dot to underscore" }
+        { "path": "skillforge/models/adapters/openai_compatible.py", "line": 98, "end_line": 102, "label": "dot to underscore" }
       ]
     },
     {
@@ -96,7 +96,7 @@
       "pos": [40, 420],
       "size": [176, 64],
       "sources": [
-        { "path": "skillforge/sandbox/docker.py", "line": 70, "end_line": 88, "label": "create" }
+        { "path": "skillforge/sandbox/docker.py", "line": 90, "end_line": 95, "label": "create" }
       ]
     },
     {
@@ -105,68 +105,45 @@
       "label": "runtime_tools",
       "sublabel": "沙箱工具 + 宿主白名单",
       "tag": "C3.5",
-      "pos": [300, 420],
+      "pos": [280, 420],
       "size": [176, 64],
       "sources": [
-        { "path": "skillforge/runtime/tools/opslab.py", "line": 63, "end_line": 75, "label": "restart allow list" }
-      ]
-    },
-    {
-      "id": "nginx",
-      "type": "cloud",
-      "label": "nginx",
-      "sublabel": "宿主 :8088",
-      "tag": "C1.2",
-      "pos": [560, 420],
-      "size": [160, 64],
-      "sources": [
-        { "path": "demo/ops-lab/docker-compose.yml", "line": 22, "end_line": 30, "label": "8088:80" }
-      ]
-    },
-    {
-      "id": "backend",
-      "type": "backend",
-      "label": "backend",
-      "sublabel": "容器 :8080",
-      "tag": "C1.1",
-      "pos": [820, 420],
-      "size": [160, 64],
-      "sources": [
-        { "path": "demo/ops-lab/backend/app.py", "line": 35, "end_line": 41, "label": "health" }
+        { "path": "skillforge/runtime/tools/opslab.py", "line": 227, "end_line": 232, "label": "restart_database" }
       ]
     },
     {
       "id": "sqlite",
       "type": "database",
       "label": "SQLite",
-      "sublabel": "agent_runs · trace_events",
-      "tag": "C3.10",
-      "pos": [820, 200],
-      "size": [176, 64],
+      "sublabel": "agent_runs · evaluation_runs",
+      "tag": "C4.3",
+      "pos": [800, 220],
+      "size": [188, 64],
       "sources": [
-        { "path": "skillforge/db/schema.sql", "line": 96, "end_line": 106, "label": "agent_runs" }
+        { "path": "skillforge/db/schema.sql", "line": 77, "end_line": 86, "label": "evaluation_runs" },
+        { "path": "skillforge/db/schema.sql", "line": 111, "end_line": 120, "label": "agent_runs" }
       ]
     },
     {
       "id": "api",
       "type": "backend",
       "label": "FastAPI",
-      "sublabel": "projects · demo · runs",
-      "tag": "C3.10",
-      "pos": [820, 40],
-      "size": [176, 64],
+      "sublabel": "evaluate 返回 job_id",
+      "tag": "C4.6",
+      "pos": [800, 40],
+      "size": [188, 64],
       "sources": [
-        { "path": "skillforge/api/main.py", "line": 63, "end_line": 68, "label": "routers" }
+        { "path": "skillforge/api/main.py", "line": 67, "end_line": 71, "label": "routers" }
       ]
     },
     {
       "id": "verifier",
       "type": "security",
       "label": "verifier",
-      "sublabel": "五字段 · 已实现",
+      "sublabel": "五字段",
       "tag": "C1.3",
-      "pos": [560, 620],
-      "size": [160, 64],
+      "pos": [540, 420],
+      "size": [188, 64],
       "sources": [
         { "path": "demo/ops-lab/verifier/verify.py", "line": 44, "end_line": 50, "label": "healthy" }
       ]
@@ -175,20 +152,44 @@
       "id": "evaluator",
       "type": "backend",
       "label": "Evaluator",
-      "sublabel": "A/B · 尚未实现",
+      "sublabel": "断言 · uplift · 封印",
       "tag": "C4.4",
-      "pos": [1040, 620],
+      "pos": [800, 420],
+      "size": [188, 64],
+      "sources": [
+        { "path": "skillforge/evaluator/suite.py", "line": 73, "end_line": 99, "label": "run_suite" }
+      ]
+    },
+    {
+      "id": "ingest",
+      "type": "backend",
+      "label": "Ingestion",
+      "sublabel": "上传 · 解析 · 切块",
+      "tag": "C5.3",
+      "pos": [1040, 40],
       "size": [176, 64],
       "sources": [
-        { "path": "docs/execution-plan.md", "line": 199, "end_line": 201, "label": "case then uplift" }
+        { "path": "docs/execution-plan.md", "line": 226, "end_line": 228, "label": "chunks in sqlite" }
+      ]
+    },
+    {
+      "id": "retriever",
+      "type": "backend",
+      "label": "Retriever",
+      "sublabel": "索引是投影",
+      "tag": "C5.5",
+      "pos": [1040, 220],
+      "size": [176, 64],
+      "sources": [
+        { "path": "docs/retrieval-layer.md", "line": 3, "end_line": 5, "label": "index is projection" }
       ]
     }
   ],
   "boundaries": [
     {
       "kind": "region",
-      "label": "宿主机已落地",
-      "wraps": ["cli", "harness", "golden", "gateway", "sandbox", "tools", "sqlite", "api", "verifier"]
+      "label": "已落地",
+      "wraps": ["cli", "harness", "golden", "gateway", "sandbox", "tools", "sqlite", "api", "verifier", "evaluator"]
     },
     {
       "kind": "security-group",
@@ -197,13 +198,8 @@
     },
     {
       "kind": "region",
-      "label": "skillforge-lab",
-      "wraps": ["nginx", "backend"]
-    },
-    {
-      "kind": "region",
-      "label": "Phase 4 设计",
-      "wraps": ["evaluator"]
+      "label": "Phase 5 设计",
+      "wraps": ["ingest", "retriever"]
     }
   ],
   "connections": [
@@ -211,37 +207,37 @@
     { "id": "golden-harness", "from": "golden", "to": "harness" },
     { "id": "harness-gateway", "from": "harness", "to": "gateway" },
     { "id": "harness-tools", "from": "harness", "to": "tools" },
-    { "id": "tools-sandbox", "from": "tools", "to": "sandbox", "label": "http file shell" },
-    { "id": "tools-nginx", "from": "tools", "to": "nginx", "label": "docker nginx" },
-    { "id": "nginx-backend", "from": "nginx", "to": "backend", "label": ":8080" },
+    { "id": "tools-sandbox", "from": "tools", "to": "sandbox" },
     { "id": "api-sqlite", "from": "api", "to": "sqlite" },
-    { "id": "verifier-nginx", "from": "verifier", "to": "nginx", "label": "GET /health" },
-    { "id": "eval-verifier", "from": "evaluator", "to": "verifier", "variant": "dashed" }
+    { "id": "eval-sqlite", "from": "evaluator", "to": "sqlite" },
+    { "id": "eval-verifier", "from": "evaluator", "to": "verifier" },
+    { "id": "ingest-retriever", "from": "ingest", "to": "retriever", "variant": "dashed" },
+    { "id": "retriever-sqlite", "from": "retriever", "to": "sqlite", "variant": "dashed" }
   ],
   "cards": [
     {
       "dot": "emerald",
       "title": "已接通",
       "items": [
-        "CLI 注入故障后跑 LocalHarness。一次 generate 算一步。",
-        "两条臂共用 runtime_tools。差别只在 system prompt 是否追加 Skill 段。",
-        "RunResult 写入 agent_runs。trace 在 trace_events。"
+        "CLI 的 run 注入故障后跑 harness。eval --replay 只读缓存。",
+        "两条臂共用 runtime_tools。Control 的 skill_path 为空。",
+        "harness 写入 agent_runs。评测试验写入 evaluation_runs。"
       ]
     },
     {
       "dot": "cyan",
-      "title": "两个执行面",
+      "title": "评测",
       "items": [
-        "沙箱只挂 workspace，网络 bridge，不挂 docker.sock。",
-        "宿主白名单只重启 backend 与 nginx。mock-db 记为 restart_database。"
+        "passed 只表示断言。forbidden 同时看工具名和 policy_violation.output.name。",
+        "uplift 是两臂成功率之差乘 100。evals 封印要显式调用。"
       ]
     },
     {
       "dot": "amber",
-      "title": "Phase 4 虚线",
+      "title": "Phase 5 虚线",
       "items": [
-        "Evaluator 将 reset、inject、跑同一 harness、再读 verifier。",
-        "Control 与 Treatment 各跑一遍，算 uplift。模块尚未创建。"
+        "Runbook 上传后解析、切块，写入 SQLite 的 chunks。",
+        "检索索引是投影。FTS 表不进 schema.sql。Appendix B 将抽成独立 KU。"
       ]
     }
   ]

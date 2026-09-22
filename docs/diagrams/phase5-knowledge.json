@@ -1,0 +1,182 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Phase 5 设计：Knowledge Plane",
+    "subtitle": "虚线=尚未实现。实线节点是评测阶段已经在用的 SQLite 与 ModelGateway。",
+    "output": "phase5-knowledge.html",
+    "quality_profile": "showcase",
+    "visual_preset": "editorial",
+    "repository": {
+      "url": "https://github.com/FluxForgeLab/SkillForge.git",
+      "revision": "7e32019dae2c00e4158249918e3cac230a3417d1"
+    },
+    "views": [
+      {
+        "id": "ingest",
+        "label": "入库",
+        "focus": ["runbook", "api", "ingest", "sqlite"],
+        "note": "上传落在 data/sources。切块只写 SQLite 的 chunks，不建索引。"
+      },
+      {
+        "id": "index",
+        "label": "投影",
+        "focus": ["sqlite", "indexer", "retriever"],
+        "note": "FTS 由索引后端自建。schema.sql 不含 FTS。换后端不迁数据。"
+      },
+      {
+        "id": "extract",
+        "label": "抽取",
+        "focus": ["extractor", "gateway", "sqlite"],
+        "note": "每个 chunk 经 ModelGateway 得到 KnowledgeUnit。Appendix B 是独立 diagnostic_rule。"
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "runbook",
+      "type": "external",
+      "label": "Runbook",
+      "sublabel": "Appendix B 尚未入库",
+      "tag": "C5.8",
+      "pos": [40, 220],
+      "size": [176, 64],
+      "sources": [
+        { "path": "docs/execution-plan.md", "line": 233, "end_line": 234, "label": "runbook then recall" }
+      ]
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "knowledge API",
+      "sublabel": "upload · extract · search",
+      "tag": "C5.7",
+      "pos": [300, 40],
+      "size": [188, 64],
+      "sources": [
+        { "path": "docs/execution-plan.md", "line": 232, "end_line": 232, "label": "sources and search" }
+      ]
+    },
+    {
+      "id": "ingest",
+      "type": "backend",
+      "label": "Ingestion",
+      "sublabel": "解析后按标题切块",
+      "tag": "C5.3",
+      "pos": [300, 220],
+      "size": [188, 64],
+      "sources": [
+        { "path": "docs/execution-plan.md", "line": 226, "end_line": 228, "label": "line numbers" }
+      ]
+    },
+    {
+      "id": "sqlite",
+      "type": "database",
+      "label": "SQLite",
+      "sublabel": "chunks 表已在 schema",
+      "tag": "C2.1",
+      "pos": [560, 220],
+      "size": [188, 64],
+      "sources": [
+        { "path": "skillforge/db/schema.sql", "line": 21, "end_line": 33, "label": "chunks" },
+        { "path": "skillforge/db/schema.sql", "line": 35, "end_line": 44, "label": "knowledge_units" }
+      ]
+    },
+    {
+      "id": "indexer",
+      "type": "backend",
+      "label": "Indexer",
+      "sublabel": "投影 · 可重建",
+      "tag": "C5.5",
+      "pos": [820, 220],
+      "size": [176, 64],
+      "sources": [
+        { "path": "docs/execution-plan.md", "line": 229, "end_line": 230, "label": "fts outside schema" }
+      ]
+    },
+    {
+      "id": "retriever",
+      "type": "backend",
+      "label": "Retriever",
+      "sublabel": "调用方只走门面",
+      "tag": "C5.4",
+      "pos": [1040, 220],
+      "size": [176, 64],
+      "sources": [
+        { "path": "docs/retrieval-layer.md", "line": 3, "end_line": 5, "label": "projection" }
+      ]
+    },
+    {
+      "id": "gateway",
+      "type": "cloud",
+      "label": "ModelGateway",
+      "sublabel": "已落地 · 抽取将调用",
+      "tag": "C2.4",
+      "pos": [300, 420],
+      "size": [188, 64],
+      "sources": [
+        { "path": "skillforge/models/gateway.py", "line": 28, "end_line": 42, "label": "generate" }
+      ]
+    },
+    {
+      "id": "extractor",
+      "type": "backend",
+      "label": "Extractor",
+      "sublabel": "chunk 到 KnowledgeUnit",
+      "tag": "C5.6",
+      "pos": [560, 420],
+      "size": [188, 64],
+      "sources": [
+        { "path": "docs/execution-plan.md", "line": 231, "end_line": 231, "label": "structured output" }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Phase 5 尚未实现",
+      "wraps": ["runbook", "api", "ingest", "indexer", "retriever", "extractor"]
+    },
+    {
+      "kind": "region",
+      "label": "已在用",
+      "wraps": ["sqlite", "gateway"]
+    }
+  ],
+  "connections": [
+    { "id": "runbook-ingest", "from": "runbook", "to": "ingest", "variant": "dashed" },
+    { "id": "api-ingest", "from": "api", "to": "ingest", "variant": "dashed" },
+    { "id": "ingest-sqlite", "from": "ingest", "to": "sqlite", "variant": "dashed" },
+    { "id": "sqlite-indexer", "from": "sqlite", "to": "indexer", "variant": "dashed" },
+    { "id": "indexer-retriever", "from": "indexer", "to": "retriever", "variant": "dashed" },
+    { "id": "extractor-sqlite", "from": "extractor", "to": "sqlite", "variant": "dashed" },
+    { "id": "extractor-gateway", "from": "extractor", "to": "gateway", "variant": "dashed" }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "尚未实现",
+      "items": [
+        "md、txt、pdf、yaml、json、OpenAPI 解析后按标题切块，并记下页码和行号。",
+        "KnowledgeUnit 经 ModelGateway 抽取。Appendix B 的类型是 diagnostic_rule。",
+        "搜索 API 只调用 Retriever 门面，并返回实际使用的后端。"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "已经存在",
+      "items": [
+        "chunks 与 knowledge_units 已在 schema.sql，还没有写入路径。",
+        "ModelGateway 已是唯一的模型入口。"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "索引边界",
+      "items": [
+        "SQLite 是 system of record。FTS 或以后的向量索引都是可重建的投影。",
+        "MVP 不安装 lancedb，也不加载 embedding 模型。"
+      ]
+    }
+  ]
+}
