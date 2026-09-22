@@ -21,7 +21,7 @@ from skillforge.domain.enums import (
     KnowledgeUnitType,
     TraceEventType,
 )
-from skillforge.domain.errors import InvalidStateTransition, SkillForgeError
+from skillforge.domain.errors import InvalidStateTransition, PolicyViolation, SkillForgeError
 from skillforge.domain.state_machines import (
     PipelineState,
     SkillVersionStatus,
@@ -41,6 +41,7 @@ __all__ = [
     "KnowledgeUnitType",
     "PatchProposal",
     "PipelineState",
+    "PolicyViolation",
     "Project",
     "Skill",
     "SkillForgeError",

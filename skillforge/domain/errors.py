@@ -9,6 +9,22 @@ class SkillForgeError(Exception):
     """Base error for SkillForge application logic."""
 
 
+class PolicyViolation(SkillForgeError):
+    """Raised when an action is outside the sandbox policy."""
+
+    def __init__(
+        self,
+        *,
+        kind: Literal["process", "filesystem", "network"],
+        name: str,
+        detail: str,
+    ) -> None:
+        self.kind = kind
+        self.name = name
+        self.detail = detail
+        super().__init__(f"{kind} policy violation: {name}: {detail}")
+
+
 class InvalidStateTransition(SkillForgeError):
     """Raised when a state machine transition is not allowed."""
 

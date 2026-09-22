@@ -1,0 +1,18 @@
+network:
+  mode: restricted
+  allow:
+    - localhost
+    - 127.0.0.1
+filesystem:
+  read:
+    - /workspace
+  write:
+    - /workspace/runtime
+process:
+  deny:
+    - sudo
+    - mount
+    - shutdown
+    - rm
+dangerous_operations:
+  require_approval: true
