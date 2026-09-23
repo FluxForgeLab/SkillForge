@@ -18,9 +18,6 @@ SkillForge 把企业 Runbook 编译为可执行、可评测、可迭代、可治
 | 环境操作、评测、写 Skill 的具体步骤 | `.cursor/skills/*/SKILL.md` |
 | 连通性 / 打不开 / connection refused | `.cursor/skills/diagnose-listen/SKILL.md`；约束见 `measure-before-story` |
 | 持久约束 | `.cursor/rules/*.mdc`（自动加载） |
-| 重新建立项目 Mental Model | `.cursor/skills/align-project/SKILL.md` |
-| 开始一个 C 编号前做边界 / Contract 对齐 | `.cursor/skills/align-plan-step/SKILL.md` |
-| 实现后审查 Architecture Delta | `.cursor/skills/review-plan-step/SKILL.md` |
 
 设计文档与执行方案冲突时以执行方案为准；执行方案不合理时先提出，不要静默偏离。
 
@@ -73,35 +70,14 @@ uv run skillforge eval --skill <dir> --version-hash <hex> --model <name> --repla
 uv run skillforge demo
 ```
 
-## 工作方式：Human Control Loop
+## 工作方式
 
-默认的执行方案条目不再从“读计划 → 直接实现”开始，而是：
-
-```text
-align-plan-step
-      ↓
-HUMAN GATE
-      ↓
-implement-plan-step
-      ↓
-review-plan-step
-      ↓
-HUMAN COMMIT GATE
-      ↓
-git commit
-```
-
-1. **阶段切换、长时间中断、或人类开发者感觉失去系统认知时**，先运行 `align-project`。它只读当前代码与 git 历史，重建 LANDED / PLANNED、数据流、Contract 与 RED/YELLOW/GREEN 阅读地图，不修改仓库。
-2. **开始执行方案中的一个 commit 编号前**，默认先运行 `align-plan-step`。它只做 Preflight：为什么做、Before/After 数据流、修改半径、不可触碰文件、Contract / invariant、验收测试和最多 5 个需要人类重点阅读的文件。
-3. Preflight 后必须停在 **HUMAN GATE**。只有用户看过对齐结果并明确批准该编号，才进入 `implement-plan-step`。用户可以明确说“跳过对齐 / 直接实现”来旁路这道 Gate；不要替用户默认旁路。
-4. `implement-plan-step` 只做已批准范围内的实现、测试和验证。范围外发现写在回复末尾，不顺手重构。真正执行 `git commit` 仍需用户明确要求。
-5. 实现后、提交前默认运行 `review-plan-step`。它只审查 diff，不修代码，必须给出 Architecture Delta、Contract / State / Dependency / Failure Boundary 变化、测试证据以及人类应重点阅读的文件。
-6. Review 后停在 **HUMAN COMMIT GATE**。除非用户明确说“跳过 review / 直接提交”，否则不要把“实现完成”自动等同于“可以提交”。
-7. Commit message：`<type>(<scope>): <summary>`，执行方案条目的 body 首行 `Plan: C3.5`。
-8. 真实模型的响应录制到 `tests/fixtures/transcripts/`，测试用回放；本地开发默认用 `FakeModelAdapter` 或 OpenAI-compatible 云端端点，不假设本机有 GPU。
-9. 排障先测量 LISTEN 元组（尝试的地址族/IP/端口 vs 实际在听的），再解释原因。Cursor 内置浏览器失败不构成本机失败。
-
-用户明确要求实现并提交、且同时明确要求跳过某个 Gate 时，以用户的显式指令为准；否则默认保留 Human Gate。
+1. 工作单位是执行方案中的一个 commit 编号（`C3.5`）。先读该条目的"内容"与"完成标准"。
+2. 实现 + 测试 + 文档按同一个 commit 准备；提交前跑上面的 lint 与单测；涉及 Docker/前端时追加对应命令。真正执行 `git commit` 以 `workflow-and-commits.mdc` 为准，需要用户明确要求。
+3. Commit message：`<type>(<scope>): <summary>`，body 首行 `Plan: C3.5`。
+4. 范围外的发现写在回复末尾作为建议，不顺手改。
+5. 真实模型的响应录制到 `tests/fixtures/transcripts/`，测试用回放；本地开发默认用 `FakeModelAdapter` 或 OpenAI-compatible 云端端点，不假设本机有 GPU。
+6. 排障先测量 LISTEN 元组（尝试的地址族/IP/端口 vs 实际在听的），再解释原因。Cursor 内置浏览器失败不构成本机失败。
 
 ## 已拍板的决策（不重新讨论）
 
