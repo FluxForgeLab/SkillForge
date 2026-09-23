@@ -65,7 +65,7 @@ def test_knowledge_unit_diagnostic_rule() -> None:
     assert ku.type == KnowledgeUnitType.DIAGNOSTIC_RULE
 
 
-def test_skill_spec_placeholder() -> None:
+def test_skill_spec_section_8_4_shape() -> None:
     spec = SkillSpec.model_validate(
         {
             "name": "service-recovery",
@@ -77,6 +77,8 @@ def test_skill_spec_placeholder() -> None:
         },
     )
     assert spec.name == "service-recovery"
+    assert spec.permissions.network.allow == ["localhost"]
+    assert spec.permissions.shell.destructive_commands is False
 
 
 def test_transition_skill_version_returns_updated_copy() -> None:

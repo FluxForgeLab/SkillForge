@@ -156,8 +156,43 @@ class PatchProposal(BaseModel):
     evidence_refs: list[str] = Field(default_factory=list)
 
 
+class SkillSpecFilesystem(BaseModel):
+    """Filesystem grants inside a SkillSpec. Paths are checked against the default policy later."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    read: list[str] = Field(default_factory=list)
+    write: list[str] = Field(default_factory=list)
+
+
+class SkillSpecNetwork(BaseModel):
+    """Network grants inside a SkillSpec. Hosts are checked against the default policy."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    allow: list[str] = Field(default_factory=list)
+
+
+class SkillSpecShell(BaseModel):
+    """Shell grants inside a SkillSpec. Destructive commands stay false."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    destructive_commands: bool = False
+
+
+class SkillSpecPermissions(BaseModel):
+    """§8.4 permission block. This shape is not a SandboxPolicy."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    filesystem: SkillSpecFilesystem = Field(default_factory=SkillSpecFilesystem)
+    network: SkillSpecNetwork = Field(default_factory=SkillSpecNetwork)
+    shell: SkillSpecShell = Field(default_factory=SkillSpecShell)
+
+
 class SkillSpec(BaseModel):
-    """Placeholder IR for Compiler (§8.4); full validation in C6.1."""
+    """Compiler IR (§8.4). Tool-registry and policy checks live in compiler.spec."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -167,6 +202,6 @@ class SkillSpec(BaseModel):
     inputs: list[str] = Field(default_factory=list)
     outputs: list[str] = Field(default_factory=list)
     tools: list[str] = Field(default_factory=list)
-    permissions: dict[str, Any] = Field(default_factory=dict)
+    permissions: SkillSpecPermissions = Field(default_factory=SkillSpecPermissions)
     success: list[str] = Field(default_factory=list)
     sources: list[str] = Field(default_factory=list)
