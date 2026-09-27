@@ -1,0 +1,114 @@
+[
+  {
+    "name": "skillforge-lab-502-recovery",
+    "description": "Diagnose and recover from HTTP 502 returned by the reverse proxy in the skillforge-lab compose project. If the backend is unavailable, inspect the backend, nginx, and mock-db containers, review backend logs, and restart only the backend service. If the backend is running, suspect a wrong proxy upstream: read the nginx config, ensure the upstream line is exactly 'server backend:8080;' (replace only that line if it differs), run nginx -t before reloading, write the full config and reload. If nginx.reload fails, stop and report the error instead of continuing. Verify recovery with GET http://127.0.0.1:8088/health.",
+    "triggers": [
+      "HTTP 502 from reverse proxy",
+      "GET /health returns HTTP 502 from the reverse proxy",
+      "backend unavailable",
+      "nginx reload failed because of an upstream mismatch, or the edge still returns HTTP 502 after a config change"
+    ],
+    "inputs": [
+      "Current nginx configuration content (nginx.conf)",
+      "Container status and logs for backend, nginx, and mock-db in compose project skillforge-lab",
+      "Backend listening port to compare against the upstream port in nginx.conf"
+    ],
+    "outputs": [
+      "Recovery verification result from GET http://127.0.0.1:8088/health",
+      "Error report if nginx.reload fails"
+    ],
+    "tools": [
+      "nginx.read_config",
+      "nginx.write_config",
+      "nginx.reload",
+      "nginx -t",
+      "docker.inspect",
+      "docker.logs",
+      "docker.restart"
+    ],
+    "permissions": {
+      "network": {
+        "allow": [
+          "127.0.0.1"
+        ]
+      },
+      "shell": {
+        "destructive_commands": false
+      }
+    },
+    "success": [
+      "GET http://127.0.0.1:8088/health returns HTTP 200",
+      "Upstream line in nginx.conf matches the backend listening port (healthy: server backend:8080;)",
+      "No invalid directives remain in nginx.conf"
+    ],
+    "sources": [
+      "Fix reverse proxy upstream to resolve 502",
+      "Diagnose nginx reload failure caused by upstream mismatch or invalid directives",
+      "Diagnose and recover unavailable backend in skillforge-lab",
+      "502 with running backend indicates wrong proxy upstream"
+    ]
+  },
+  {
+    "instructions": [
+      {
+        "knowledge_unit_id": "ku_062f496e6f6e4e32993e9face7c44e84",
+        "text": "To resolve a 502 error, correct the reverse proxy upstream to point at the actual backend address.",
+        "kind": "procedure"
+      },
+      {
+        "knowledge_unit_id": "ku_4ef29b97cfeb44cd84d51729d741ca70",
+        "text": "When nginx fails to reload, test the config with nginx -t and fix upstream name mismatches or invalid directives it reports.",
+        "kind": "procedure"
+      },
+      {
+        "knowledge_unit_id": "ku_b3f55ed5460d4c68ab87c59fffc850f0",
+        "text": "If the skillforge-lab backend is unavailable, check its service status and restart or redeploy it before retrying the proxy.",
+        "kind": "procedure"
+      },
+      {
+        "knowledge_unit_id": "ku_fd9c3c9cfa1241f4b62405e7bfbe9a81",
+        "text": "If the backend is running but you still get a 502, verify the proxy_pass upstream matches the backend's actual host and port.",
+        "kind": "procedure"
+      }
+    ]
+  },
+  {
+    "calls": [
+      {
+        "function": "nginx.read_config",
+        "service": "nginx"
+      },
+      {
+        "function": "docker.inspect",
+        "service": "nginx"
+      },
+      {
+        "function": "docker.logs",
+        "service": "nginx",
+        "tail": 100
+      }
+    ]
+  },
+  {
+    "cases": [
+      {
+        "id": "backend_stopped_health",
+        "name": "Backend stopped: restore health endpoint",
+        "task": "GET http://127.0.0.1:8088/health is failing. Diagnose the stack: the backend service is stopped while nginx proxies to it. Start the backend so it listens on its healthy port, confirm the upstream line in nginx.conf matches the backend listening port (healthy state: server backend:8080;), remove any invalid directives from nginx.conf, and reload nginx if the configuration changed. Done when GET http://127.0.0.1:8088/health returns HTTP 200.",
+        "fixture": "backend_stopped"
+      },
+      {
+        "id": "nginx_bad_config_reload_health",
+        "name": "Invalid nginx directives: fix config and reload",
+        "task": "nginx fails to reload because nginx.conf contains invalid directives, and GET http://127.0.0.1:8088/health is not returning HTTP 200. Inspect nginx.conf, remove every invalid directive, ensure the upstream line matches the backend listening port (healthy state: server backend:8080;), then reload nginx successfully. Done when no invalid directives remain and GET http://127.0.0.1:8088/health returns HTTP 200.",
+        "fixture": "nginx_bad_config_reload"
+      },
+      {
+        "id": "nginx_wrong_upstream_health",
+        "name": "Wrong upstream port: point nginx at the backend",
+        "task": "GET http://127.0.0.1:8088/health fails because the upstream line in nginx.conf does not match the backend listening port. Edit nginx.conf so the upstream reads server backend:8080; (the healthy state), make sure no invalid directives remain in the file, and reload nginx. Done when GET http://127.0.0.1:8088/health returns HTTP 200.",
+        "fixture": "nginx_wrong_upstream"
+      }
+    ]
+  }
+]
