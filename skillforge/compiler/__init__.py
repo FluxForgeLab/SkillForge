@@ -1,6 +1,7 @@
 """Skill compiler. Validate a spec, draft it, then render the skill files."""
 
 from skillforge.compiler.evals import RenderedEvals, render_evals
+from skillforge.compiler.package import package_skill
 from skillforge.compiler.passes import CompiledSpec, TaskScope, compile_skill_spec
 from skillforge.compiler.scripts import SkillScripts, render_scripts
 from skillforge.compiler.skill_md import SkillMarkdown, render_skill_markdown
@@ -17,6 +18,7 @@ __all__ = [
     "ValidationResult",
     "compile_skill_spec",
     "load_skill_spec",
+    "package_skill",
     "render_evals",
     "render_scripts",
     "render_skill_markdown",
