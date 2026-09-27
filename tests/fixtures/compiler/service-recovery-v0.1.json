@@ -1,0 +1,56 @@
+[
+  {
+    "name": "service-recovery",
+    "description": "Diagnose and recover the edge service.",
+    "triggers": ["nginx reload failed / upstream mismatch"],
+    "tools": ["docker.inspect", "http.get"],
+    "permissions": {
+      "filesystem": {"read": ["/workspace"], "write": ["/workspace/runtime"]},
+      "network": {"allow": ["localhost"]},
+      "shell": {"destructive_commands": false}
+    },
+    "success": ["HTTP 200 from the health check."],
+    "sources": ["doc_other"]
+  },
+  {
+    "instructions": [
+      {
+        "knowledge_unit_id": "ku_down",
+        "text": "Inspect the backend.",
+        "kind": "procedure"
+      },
+      {
+        "knowledge_unit_id": "ku_proxy",
+        "text": "Read the upstream line.",
+        "kind": "procedure"
+      },
+      {
+        "knowledge_unit_id": "ku_appendix",
+        "text": "Run nginx -t and remove this_is_not_valid_nginx.",
+        "kind": "procedure"
+      }
+    ]
+  },
+  {
+    "calls": [
+      {"function": "docker_inspect", "service": "backend"},
+      {"function": "http_get"}
+    ]
+  },
+  {
+    "cases": [
+      {
+        "id": "eval_backend_stopped",
+        "name": "backend process stopped",
+        "task": "Restore the service.",
+        "fixture": "backend_stopped"
+      },
+      {
+        "id": "eval_nginx_wrong_upstream",
+        "name": "nginx wrong upstream",
+        "task": "Restore the proxy upstream.",
+        "fixture": "nginx_wrong_upstream"
+      }
+    ]
+  }
+]
