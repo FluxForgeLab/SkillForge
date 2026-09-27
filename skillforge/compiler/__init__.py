@@ -5,6 +5,7 @@ from skillforge.compiler.passes import CompiledSpec, TaskScope, compile_skill_sp
 from skillforge.compiler.scripts import SkillScripts, render_scripts
 from skillforge.compiler.skill_md import SkillMarkdown, render_skill_markdown
 from skillforge.compiler.spec import SkillSpecError, load_skill_spec, validate_skill_spec
+from skillforge.compiler.validate import ValidationResult, validate_skill_dir
 
 __all__ = [
     "CompiledSpec",
@@ -13,10 +14,12 @@ __all__ = [
     "SkillScripts",
     "SkillSpecError",
     "TaskScope",
+    "ValidationResult",
     "compile_skill_spec",
     "load_skill_spec",
     "render_evals",
     "render_scripts",
     "render_skill_markdown",
+    "validate_skill_dir",
     "validate_skill_spec",
 ]
