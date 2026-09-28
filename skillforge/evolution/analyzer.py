@@ -12,6 +12,8 @@ from skillforge.config import Settings, get_settings
 from skillforge.domain.entities import Failure, TraceEvent
 from skillforge.domain.enums import FailureClass
 from skillforge.evaluator.assertions import AssertionResult
+from skillforge.evolution.evidence import enrich_source_support
+from skillforge.knowledge.retrieval.retriever import Retriever
 from skillforge.models.gateway import ModelGateway
 from skillforge.models.structured import generate_structured
 from skillforge.models.types import ChatMessage
@@ -45,9 +47,13 @@ class FailureAnalyzer:
         gateway: ModelGateway,
         *,
         settings: Settings | None = None,
+        retriever: Retriever | None = None,
+        project_id: str | None = None,
     ) -> None:
         self._gateway = gateway
         self._settings = settings if settings is not None else get_settings()
+        self._retriever = retriever
+        self._project_id = project_id
 
     async def analyze(
         self,
@@ -56,6 +62,7 @@ class FailureAnalyzer:
         events: Sequence[TraceEvent],
         assertion: AssertionResult,
         verifier: Mapping[str, Any],
+        project_id: str | None = None,
     ) -> Failure:
         corpus = _evidence_corpus(events, verifier)
         draft = await generate_structured(
@@ -72,7 +79,7 @@ class FailureAnalyzer:
             stage="evolution",
             settings=self._settings,
         )
-        return Failure(
+        failure = Failure(
             run_id=run_id,
             failure_class=draft.failure_class,
             symptom=draft.symptom,
@@ -81,6 +88,11 @@ class FailureAnalyzer:
             suspected_skill_gap=draft.suspected_skill_gap,
             source_support=[],
         )
+        retriever = self._retriever
+        pid = project_id if project_id is not None else self._project_id
+        if retriever is None or pid is None:
+            return failure
+        return await enrich_source_support(failure, retriever, pid, run_id=run_id)
 
 
 def _user_prompt(
