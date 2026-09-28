@@ -12,6 +12,7 @@ from skillforge.api.errors import register_exception_handlers
 from skillforge.api.routers.demo import router as demo_router
 from skillforge.api.routers.evaluations import router as evaluations_router
 from skillforge.api.routers.evolution import router as evolution_router
+from skillforge.api.routers.jobs import router as jobs_router
 from skillforge.api.routers.projects import router as projects_router
 from skillforge.api.routers.runs import router as runs_router
 from skillforge.api.routers.skills import router as skills_router
@@ -21,6 +22,7 @@ from skillforge.api.ws import router as ws_router
 from skillforge.config import Settings, get_settings
 from skillforge.db.init import initialize_database
 from skillforge.domain.entities import TraceEvent
+from skillforge.orchestrator.jobs import JobRunner
 from skillforge.tracing.bus import EventBus
 from skillforge.tracing.emitter import get_bus
 
@@ -29,14 +31,17 @@ def create_app(
     settings: Settings | None = None,
     *,
     bus: EventBus | None = None,
+    job_runner: JobRunner | None = None,
 ) -> FastAPI:
     resolved_settings = settings if settings is not None else get_settings()
     resolved_bus = bus if bus is not None else get_bus()
+    resolved_runner = job_runner if job_runner is not None else JobRunner()
     ws_manager = ConnectionManager()
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         app.state.ws_manager = ws_manager
+        app.state.job_runner = resolved_runner
 
         async def forward(event: TraceEvent) -> None:
             await ws_manager.broadcast(event)
@@ -52,6 +57,7 @@ def create_app(
     app.state.settings = resolved_settings
     app.state.bus = resolved_bus
     app.state.ws_manager = ws_manager
+    app.state.job_runner = resolved_runner
 
     app.add_middleware(
         CORSMiddleware,
@@ -72,6 +78,7 @@ def create_app(
     app.include_router(demo_router, prefix="/api")
     app.include_router(runs_router, prefix="/api")
     app.include_router(evaluations_router, prefix="/api")
+    app.include_router(jobs_router, prefix="/api")
     app.include_router(skills_router, prefix="/api")
     app.include_router(evolution_router, prefix="/api")
     app.include_router(sources_router, prefix="/api")
