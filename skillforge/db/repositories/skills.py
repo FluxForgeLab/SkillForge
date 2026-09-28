@@ -43,6 +43,26 @@ def get_skill(conn: sqlite3.Connection, skill_id: str) -> Skill | None:
     )
 
 
+def list_skills(conn: sqlite3.Connection) -> list[Skill]:
+    rows = conn.execute(
+        """
+        SELECT id, project_id, name, description, current_version_id
+        FROM skills
+        ORDER BY name ASC, id ASC
+        """,
+    ).fetchall()
+    return [
+        Skill(
+            id=_id,
+            project_id=project_id,
+            name=name,
+            description=description,
+            current_version_id=current_version_id,
+        )
+        for _id, project_id, name, description, current_version_id in rows
+    ]
+
+
 def update_skill_current_version(
     conn: sqlite3.Connection,
     skill_id: str,

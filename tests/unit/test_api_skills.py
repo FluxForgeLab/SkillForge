@@ -16,8 +16,9 @@ from skillforge.db.connection import connection
 from skillforge.db.repositories.knowledge_units import insert_knowledge_unit
 from skillforge.db.repositories.projects import insert_project
 from skillforge.db.repositories.skill_versions import insert_skill_version
+from skillforge.db.repositories.skills import insert_skill
 from skillforge.db.repositories.source_documents import insert_source_document
-from skillforge.domain.entities import KnowledgeUnit, Project, SkillVersion, SourceDocument
+from skillforge.domain.entities import KnowledgeUnit, Project, Skill, SkillVersion, SourceDocument
 from skillforge.domain.enums import KnowledgeUnitType
 from skillforge.domain.state_machines import SkillVersionStatus
 from skillforge.models.adapters.fake import FakeModelAdapter
@@ -173,6 +174,44 @@ def test_unknown_project_and_skill_are_not_found(tmp_path: Path) -> None:
         ).status_code
         == 404
     )
+
+
+def test_list_skills_empty_db_returns_empty_list(tmp_path: Path) -> None:
+    db_path = tmp_path / "empty.sqlite"
+    initialize_database(db_path)
+    settings = Settings(_env_file=None, sqlite_path=db_path)
+    client = TestClient(create_app(settings, bus=EventBus()))
+    response = client.get("/api/skills")
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+def test_list_skills_returns_inserted_skill(tmp_path: Path) -> None:
+    client, _gateway = _client(tmp_path)
+    db_path = tmp_path / "api.sqlite"
+    with connection(db_path) as conn:
+        insert_skill(
+            conn,
+            Skill(
+                id="skill_list_1",
+                project_id=_PROJECT,
+                name="service-recovery",
+                description="Recover edge services.",
+                current_version_id=None,
+            ),
+        )
+
+    response = client.get("/api/skills")
+    assert response.status_code == 200
+    body = response.json()
+    assert len(body) == 1
+    assert body[0] == {
+        "id": "skill_list_1",
+        "project_id": _PROJECT,
+        "name": "service-recovery",
+        "description": "Recover edge services.",
+        "current_version_id": None,
+    }
 
 
 def _client(tmp_path: Path) -> tuple[TestClient, ModelGateway]:

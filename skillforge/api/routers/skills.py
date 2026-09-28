@@ -21,7 +21,7 @@ from skillforge.db.connection import connection
 from skillforge.db.repositories.knowledge_units import list_knowledge_units_by_project
 from skillforge.db.repositories.projects import get_project
 from skillforge.db.repositories.skill_versions import get_skill_version, list_skill_versions
-from skillforge.db.repositories.skills import get_skill
+from skillforge.db.repositories.skills import get_skill, list_skills
 from skillforge.domain.entities import SkillVersion
 from skillforge.knowledge.retrieval.factory import build_embedder, build_index
 from skillforge.knowledge.retrieval.retriever import Retriever
@@ -61,6 +61,16 @@ class SkillResponse(BaseModel):
     description: str | None
     current_version_id: str | None
     status: str | None
+
+
+class SkillListItemResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    id: str
+    project_id: str
+    name: str
+    description: str | None
+    current_version_id: str | None
 
 
 class VersionResponse(BaseModel):
@@ -160,6 +170,22 @@ async def compile_project_skill(
         version_id=version.id,
         status=version.status.value,
     )
+
+
+@router.get("/skills", response_model=list[SkillListItemResponse])
+async def list_all_skills(settings: SettingsDep) -> list[SkillListItemResponse]:
+    with connection(settings.sqlite_path) as conn:
+        skills = list_skills(conn)
+    return [
+        SkillListItemResponse(
+            id=skill.id,
+            project_id=skill.project_id,
+            name=skill.name,
+            description=skill.description,
+            current_version_id=skill.current_version_id,
+        )
+        for skill in skills
+    ]
 
 
 @router.get("/skills/{skill_id}", response_model=SkillResponse)

@@ -32,6 +32,12 @@ export default function App() {
         <NavLink to="/" end className={({ isActive }) => navClass(isActive)}>
           Home
         </NavLink>
+        <NavLink
+          to="/dashboard"
+          className={({ isActive }) => navClass(isActive)}
+        >
+          Dashboard
+        </NavLink>
         <NavLink to="/demo" className={({ isActive }) => navClass(isActive)}>
           Demo
         </NavLink>

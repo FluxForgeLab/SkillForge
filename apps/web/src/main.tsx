@@ -5,6 +5,7 @@ import { BrowserRouter, Route, Routes } from 'react-router'
 
 import App from './App.tsx'
 import './index.css'
+import DashboardPage from './pages/DashboardPage.tsx'
 import DemoPage from './pages/DemoPage.tsx'
 import EvaluationLabPage from './pages/EvaluationLabPage.tsx'
 import EvolutionTimelinePage from './pages/EvolutionTimelinePage.tsx'
@@ -30,6 +31,7 @@ createRoot(document.getElementById('root')!).render(
         <Routes>
           <Route element={<App />}>
             <Route index element={<HomePage />} />
+            <Route path="dashboard" element={<DashboardPage />} />
             <Route path="demo" element={<DemoPage />} />
             <Route path="runtime" element={<RuntimePage />} />
             <Route path="knowledge" element={<KnowledgeLabPage />} />
