@@ -81,6 +81,18 @@ async def test_broken_script_fails(tmp_path: Path) -> None:
     assert any("verify.py" in error for error in result.errors)
 
 
+async def test_nvidia_name_and_extra_path_fail(tmp_path: Path) -> None:
+    skill = _copy(tmp_path)
+    text = (skill / "SKILL.md").read_text(encoding="utf-8")
+    text = text.replace("name: service-recovery", "name: Service Recovery", 1)
+    (skill / "SKILL.md").write_text(text, encoding="utf-8")
+    (skill / "notes.txt").write_text("extra", encoding="utf-8")
+    result = await _validate(skill)
+    assert result.passed is False
+    assert any("hyphenated" in error for error in result.errors)
+    assert any("notes.txt" in error for error in result.errors)
+
+
 def _copy(tmp_path: Path) -> Path:
     dest = tmp_path / "skill"
     shutil.copytree(_GOLDEN, dest)

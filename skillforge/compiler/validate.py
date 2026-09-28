@@ -19,6 +19,19 @@ from skillforge.tracing.emitter import emit
 from skillforge.tracing.sink import TraceSink
 
 _INS = re.compile(r"ins_\d+")
+_SKILL_NAME = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+_ALLOWED_PATHS = frozenset(
+    {
+        "SKILL.md",
+        "skill-card.md",
+        "manifest.json",
+        "approver.txt",
+        "scripts",
+        "references",
+        "assets",
+        "evals",
+    }
+)
 _BANNED = (
     re.compile(r"\bsudo\b"),
     re.compile(r"rm -rf"),
@@ -56,6 +69,8 @@ async def validate_skill_dir(
         errors.append("SKILL.md is missing frontmatter")
     else:
         errors.extend(_frontmatter(frontmatter))
+        errors.extend(_nvidia_frontmatter(frontmatter))
+    errors.extend(_nvidia_layout(skill_dir))
     errors.extend(_coverage(body, skill_dir / "references" / "source-map.json"))
     errors.extend(_banned(_procedure(body)))
     for name in _SCRIPTS:
@@ -83,6 +98,30 @@ def _split(text: str) -> tuple[dict[str, object] | None, str]:
     if not isinstance(loaded, dict):
         return None, parts[2]
     return loaded, parts[2]
+
+
+def _nvidia_frontmatter(raw: dict[str, object]) -> list[str]:
+    """NVIDIA Agent Skills name and description limits. Extra SkillForge keys stay."""
+    errors: list[str] = []
+    name = raw.get("name")
+    if isinstance(name, str) and (len(name) > 64 or _SKILL_NAME.match(name) is None):
+        errors.append("frontmatter name must be a lowercase hyphenated skill name")
+    description = raw.get("description")
+    if isinstance(description, str) and len(description) > 1024:
+        errors.append("frontmatter description exceeds 1024 characters")
+    return errors
+
+
+def _nvidia_layout(skill_dir: Path) -> list[str]:
+    if not skill_dir.is_dir():
+        return ["skill directory is missing"]
+    errors: list[str] = []
+    if not (skill_dir / "SKILL.md").is_file():
+        errors.append("NVIDIA layout requires SKILL.md")
+    for child in skill_dir.iterdir():
+        if child.name not in _ALLOWED_PATHS:
+            errors.append(f"unexpected skill path {child.name}")
+    return errors
 
 
 def _frontmatter(raw: dict[str, object]) -> list[str]:
