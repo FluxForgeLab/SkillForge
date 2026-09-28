@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState } from 'react'
 
 import { Benchmark } from '@/components/Benchmark'
 import type { BenchmarkData } from '@/components/benchmarkModel'
+import { DgxRuntimePanel } from '@/components/DgxRuntimePanel'
 import { LiveTrace } from '@/components/LiveTrace'
 import { PipelineStepper } from '@/components/PipelineStepper'
 import { SkillDiff } from '@/components/SkillDiff'
@@ -669,15 +670,23 @@ export default function DemoPage() {
         <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">
           SkillForge — Live Demo
         </h1>
-        <div
-          className="flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm"
-          title={`GET ${API_BASE}/health`}
-        >
-          <span className={`size-2.5 rounded-full ${healthDot}`} aria-hidden />
-          <span className="text-muted-foreground">API</span>
-          <span className="font-medium">{healthLabel}</span>
+        <div className="flex flex-wrap items-center gap-2">
+          <div
+            className="flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm"
+            title={`GET ${API_BASE}/health`}
+          >
+            <span
+              className={`size-2.5 rounded-full ${healthDot}`}
+              aria-hidden
+            />
+            <span className="text-muted-foreground">API</span>
+            <span className="font-medium">{healthLabel}</span>
+          </div>
+          <DgxRuntimePanel variant="header" />
         </div>
       </header>
+
+      <DgxRuntimePanel variant="section" />
 
       <p className="text-xs text-muted-foreground">
         WS <code className="text-foreground">/api/events</code>:{' '}

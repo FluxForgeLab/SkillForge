@@ -13,6 +13,7 @@ from skillforge.api.routers.demo import router as demo_router
 from skillforge.api.routers.evaluations import router as evaluations_router
 from skillforge.api.routers.evolution import router as evolution_router
 from skillforge.api.routers.jobs import router as jobs_router
+from skillforge.api.routers.model import router as model_router
 from skillforge.api.routers.projects import router as projects_router
 from skillforge.api.routers.runs import router as runs_router
 from skillforge.api.routers.skills import router as skills_router
@@ -79,6 +80,7 @@ def create_app(
     app.include_router(runs_router, prefix="/api")
     app.include_router(evaluations_router, prefix="/api")
     app.include_router(jobs_router, prefix="/api")
+    app.include_router(model_router, prefix="/api")
     app.include_router(skills_router, prefix="/api")
     app.include_router(evolution_router, prefix="/api")
     app.include_router(sources_router, prefix="/api")
