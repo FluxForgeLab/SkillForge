@@ -2,6 +2,7 @@ import { Link } from 'react-router'
 
 import { Benchmark } from '@/components/Benchmark'
 import { LiveTrace } from '@/components/LiveTrace'
+import { PipelineStepper } from '@/components/PipelineStepper'
 import { useEvents } from '@/hooks/useEvents'
 
 export default function HomePage() {
@@ -22,6 +23,8 @@ export default function HomePage() {
           </Link>
         </p>
       </header>
+
+      <PipelineStepper events={events} />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <LiveTrace events={events} />
