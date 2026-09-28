@@ -1,8 +1,12 @@
-# SkillForge stack.
-# vLLM is the dgx profile. API, web, and ops-lab join this file in C10.7.
-# On the assigned Spark the weights are already on disk; set SKILLFORGE_VLLM_MODEL_DIR to override.
+# DGX full stack: docker compose --profile dgx up -d
+# vLLM stays on 127.0.0.1:8001. The API uses host networking so the existing
+# loopback ops-lab URL and the vLLM port stay valid. The socket is mounted on
+# the API only; the sandbox image does not receive it.
 
 name: skillforge
+
+include:
+  - demo/ops-lab/docker-compose.yml
 
 services:
   vllm:
@@ -74,3 +78,53 @@ services:
       timeout: 10s
       retries: 40
       start_period: 240s
+
+  api:
+    profiles: [dgx]
+    build:
+      context: .
+      dockerfile: deploy/api.Dockerfile
+      args:
+        PIP_INDEX_URL: ${PIP_INDEX_URL:-https://pypi.org/simple}
+    network_mode: host
+    command:
+      - uvicorn
+      - skillforge.api.main:app
+      - --host
+      - 127.0.0.1
+      - --port
+      - "8000"
+    environment:
+      SKILLFORGE_MODEL_PROFILE: local_vllm
+      SKILLFORGE_MODEL_LOCAL_BASE_URL: http://127.0.0.1:8001/v1
+      SKILLFORGE_TEMPERATURE: "0"
+      SKILLFORGE_API_HOST: 127.0.0.1
+      SKILLFORGE_API_PORT: "8000"
+      SKILLFORGE_SQLITE_PATH: /app/data/skillforge.db
+      SKILLFORGE_OPSLAB_BASE_URL: http://127.0.0.1:8088
+      SKILLFORGE_OPSLAB_PROJECT: skillforge
+      SKILLFORGE_OPSLAB_NGINX_CONF: /lab/nginx.conf
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./demo/ops-lab/nginx/nginx.conf:/lab/nginx.conf
+      - skillforge-data:/app/data
+    depends_on:
+      vllm:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+
+  web:
+    profiles: [dgx]
+    build:
+      context: .
+      dockerfile: deploy/web.Dockerfile
+      args:
+        NPM_CONFIG_REGISTRY: ${NPM_CONFIG_REGISTRY:-https://registry.npmjs.org}
+    ports:
+      - "127.0.0.1:5173:80"
+    depends_on:
+      - api
+
+volumes:
+  skillforge-data:

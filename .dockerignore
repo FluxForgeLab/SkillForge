@@ -1,0 +1,13 @@
+.venv
+.git
+data
+**/node_modules
+**/__pycache__
+**/.pytest_cache
+**/.ruff_cache
+skills/generated
+skills/published
+docs/*.xlsx
+docs/*.docx
+**/.env
+apps/web/dist

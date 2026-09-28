@@ -119,6 +119,18 @@ ops-lab 的 `nginx:alpine` 和 `python:3.12-slim` 经 `docker.m.daocloud.io` 拉
 
 `SKILLFORGE_SANDBOX_BACKEND` 默认 `docker`。2026-09-28 在这台 aarch64 机器上 `command -v openshell` 没有结果。`OpenShellSandbox` 只在显式改成 `openshell` 时被选中，并且在二进制不存在时直接失败，不进入主路径。
 
+## 全栈
+
+```bash
+export PIP_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple
+export NPM_CONFIG_REGISTRY=https://registry.npmmirror.com
+docker compose --profile dgx up -d --build
+```
+
+API 用 host network，只听 `127.0.0.1:8000`，千问地址是 `http://127.0.0.1:8001/v1`。`docker.sock` 只挂在 API 上，给白名单 ops-lab 适配器用；沙箱镜像不挂这个套接字。网页发布在 `127.0.0.1:5173`。ops-lab 仍是 `8088`。compose 项目名是 `skillforge`，所以 `SKILLFORGE_OPSLAB_PROJECT=skillforge`。
+
+这台机器访问 Docker Hub 和 npmjs 会超时。构建前把 DaoCloud 上的 `library/node:22-alpine`、`library/python:3.12-slim`、`library/nginx:alpine` tag 成官方名，不要改 `/etc/docker/daemon.json`。
+
 ```bash
 docker rm -f skillforge-vllm
 docker compose --profile dgx up -d
