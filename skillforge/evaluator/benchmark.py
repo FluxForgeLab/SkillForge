@@ -7,10 +7,16 @@ from collections import defaultdict
 from pathlib import Path
 
 from skillforge.domain.entities import EvaluationRun
+from skillforge.evaluator.nvidia import TierResult
 from skillforge.evaluator.suite import SuiteReport
 
 
-def write_benchmark(report: SuiteReport, version_dir: Path) -> tuple[Path, Path]:
+def write_benchmark(
+    report: SuiteReport,
+    version_dir: Path,
+    *,
+    skill_eval: list[TierResult] | None = None,
+) -> tuple[Path, Path]:
     """Write headline metrics and per-case matrix into ``version_dir``."""
     version_dir.mkdir(parents=True, exist_ok=True)
     cases = _per_case_rows(report.runs)
@@ -34,6 +40,8 @@ def write_benchmark(report: SuiteReport, version_dir: Path) -> tuple[Path, Path]
         },
         "cases": cases,
     }
+    if skill_eval is not None:
+        payload["skill_evaluator"] = [item.model_dump() for item in skill_eval]
     md_path = version_dir / "BENCHMARK.md"
     json_path = version_dir / "benchmark.json"
     md_path.write_text(_render_markdown(payload), encoding="utf-8")
@@ -99,9 +107,19 @@ def _render_markdown(payload: dict) -> str:
         f"- Recovery Time: control {_ms(recovery['control'])}, "
         f"treatment {_ms(recovery['treatment'])}",
         "",
-        "## Cases",
-        "",
     ]
+    if payload.get("skill_evaluator"):
+        lines.extend(["## NVIDIA SkillEvaluator", ""])
+        for row in payload["skill_evaluator"]:
+            if row["passed"] is None:
+                status = "not run"
+            elif row["passed"]:
+                status = "pass"
+            else:
+                status = "fail"
+            lines.append(f"- {row['tier']}: {status} ({row['source']}) {row['detail']}")
+        lines.append("")
+    lines.extend(["## Cases", ""])
     for case in payload["cases"]:
         lines.extend(
             [

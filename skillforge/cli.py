@@ -25,6 +25,7 @@ from skillforge.domain.enums import TraceEventType
 from skillforge.evaluator.cache import replay_trials
 from skillforge.evaluator.cases import load_eval_cases
 from skillforge.evaluator.errors import CacheMiss
+from skillforge.evaluator.nvidia import evaluate_skill
 from skillforge.knowledge.retrieval.factory import build_index
 from skillforge.knowledge.retrieval.indexer import Indexer
 from skillforge.models.adapters.recording import RecordingAdapter
@@ -86,7 +87,21 @@ def main(
             replay_runner=replay_runner,
             gateway=gateway,
         )
+    if parsed.command == "skill-eval":
+        return _skill_eval(parsed)
     return _run(parsed, inject=inject, harness=harness, sink=sink)
+
+
+def _skill_eval(parsed: argparse.Namespace) -> int:
+    skill_dir = Path(parsed.skill)
+    if not skill_dir.is_dir():
+        print(f"skill directory not found: {skill_dir}", file=sys.stderr)
+        return 2
+    rows = evaluate_skill(skill_dir, command=parsed.evaluator_command)
+    for row in rows:
+        status = "not-run" if row.passed is None else ("pass" if row.passed else "fail")
+        print(f"{row.tier}\t{status}\t{row.source}\t{row.detail}")
+    return 0
 
 
 def _demo(
@@ -259,6 +274,14 @@ def _parse(argv: list[str]) -> argparse.Namespace:
         "--replay",
         action="store_true",
         help="force recorded FakeModelAdapter path (overrides SKILLFORGE_DEMO_MODE=live)",
+    )
+    skill_eval = sub.add_parser("skill-eval")
+    skill_eval.add_argument("--skill", required=True)
+    skill_eval.add_argument(
+        "--command",
+        dest="evaluator_command",
+        default=None,
+        help="optional external SkillEvaluator binary; missing binaries use the mock",
     )
     return parser.parse_args(argv)
 
