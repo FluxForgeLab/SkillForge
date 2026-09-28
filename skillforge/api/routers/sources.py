@@ -45,6 +45,15 @@ class SourceResponse(BaseModel):
     created_at: datetime
 
 
+class SourceLocationResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    page: int | None = None
+    line_start: int | None = None
+    line_end: int | None = None
+    chunk_id: str | None = None
+
+
 class KnowledgeResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -54,6 +63,7 @@ class KnowledgeResponse(BaseModel):
     title: str
     confidence: float | None
     content: dict[str, Any]
+    source_location: SourceLocationResponse | None = None
 
 
 class SearchHitResponse(BaseModel):
@@ -113,6 +123,26 @@ def _source_response(document: SourceDocument) -> SourceResponse:
     )
 
 
+def _source_location_response(
+    location: dict[str, Any] | None,
+) -> SourceLocationResponse | None:
+    if location is None:
+        return None
+    chunk_id = location.get("chunk_id")
+    return SourceLocationResponse(
+        page=_optional_int(location.get("page")),
+        line_start=_optional_int(location.get("line_start")),
+        line_end=_optional_int(location.get("line_end")),
+        chunk_id=str(chunk_id) if chunk_id is not None else None,
+    )
+
+
+def _optional_int(value: Any) -> int | None:
+    if value is None:
+        return None
+    return int(value)
+
+
 def _knowledge_response(unit: KnowledgeUnit) -> KnowledgeResponse:
     title = unit.content.get("title")
     return KnowledgeResponse(
@@ -122,6 +152,7 @@ def _knowledge_response(unit: KnowledgeUnit) -> KnowledgeResponse:
         title=str(title) if title is not None else "",
         confidence=unit.confidence,
         content=unit.content,
+        source_location=_source_location_response(unit.source_location),
     )
 
 

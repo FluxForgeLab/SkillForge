@@ -1,4 +1,4 @@
-"""C5.7: source upload, extract, search, and index rebuild."""
+"""C5.7: source upload, extract, search, and index rebuild. C9.11: location round-trip."""
 
 from __future__ import annotations
 
@@ -13,8 +13,11 @@ from skillforge.api.routers.sources import get_gateway
 from skillforge.config import Settings
 from skillforge.db.connection import connection
 from skillforge.db.init import initialize_database
+from skillforge.db.repositories.knowledge_units import insert_knowledge_unit
 from skillforge.db.repositories.projects import insert_project
-from skillforge.domain.entities import Project, TraceEvent
+from skillforge.db.repositories.source_documents import insert_source_document
+from skillforge.domain.entities import KnowledgeUnit, Project, SourceDocument, TraceEvent
+from skillforge.domain.enums import KnowledgeUnitType
 from skillforge.models.adapters.fake import FakeModelAdapter
 from skillforge.models.gateway import ModelGateway
 from skillforge.models.types import ModelResponse
@@ -78,6 +81,54 @@ def test_unknown_project_and_empty_query(tmp_path: Path) -> None:
         assert missing.status_code == 404
         empty = client.get("/api/projects/proj_1/knowledge/search", params={"q": ""})
         assert empty.status_code == 422
+
+
+def test_list_knowledge_source_location_round_trip(tmp_path: Path) -> None:
+    """C9.11: stored source_location.page / line_start project onto KnowledgeResponse."""
+    client, db_path = _client(tmp_path)
+    created = datetime.now(UTC)
+    with connection(db_path) as conn:
+        insert_project(conn, Project(id="proj_1", name="lab", created_at=created))
+        insert_source_document(
+            conn,
+            SourceDocument(
+                id="doc_1",
+                project_id="proj_1",
+                filename="runbook.pdf",
+                sha256="abc",
+                version="1",
+                parser="pdf",
+                created_at=created,
+            ),
+        )
+        insert_knowledge_unit(
+            conn,
+            KnowledgeUnit(
+                id="ku_1",
+                document_id="doc_1",
+                type=KnowledgeUnitType.PROCEDURE,
+                content={"title": "Recover"},
+                source_location={
+                    "page": 3,
+                    "line_start": 12,
+                    "line_end": 18,
+                    "chunk_id": "chunk_1",
+                },
+                confidence=0.9,
+            ),
+        )
+
+    with client:
+        knowledge = client.get("/api/projects/proj_1/knowledge")
+        assert knowledge.status_code == 200
+        body = knowledge.json()
+        assert len(body) == 1
+        assert body[0]["source_location"] == {
+            "page": 3,
+            "line_start": 12,
+            "line_end": 18,
+            "chunk_id": "chunk_1",
+        }
 
 
 class _ListSink:

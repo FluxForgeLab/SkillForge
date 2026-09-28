@@ -50,6 +50,12 @@ export default function App() {
         <NavLink to={timelineTo} className={() => navClass(onTimeline)}>
           Timeline
         </NavLink>
+        <NavLink
+          to="/knowledge"
+          className={({ isActive }) => navClass(isActive)}
+        >
+          Knowledge
+        </NavLink>
       </nav>
       <Outlet />
     </div>
