@@ -1,13 +1,20 @@
-"""Headless 15-step DoD path for ``skillforge demo`` (recorded or live model).
+"""Headless 15-step DoD path for ``skillforge demo`` (judge-mode replay / live).
 
 Pipeline stays on the PASSED branch — never PipelineState.FAILED — so approve/publish
 remain reachable. The printed ``failure`` step is an evaluation outcome (v0.1 misses F3),
 not a pipeline terminal state.
+
+``demo_mode=replay`` (default) uses the recorded FakeModel path. ``demo_mode=live``
+still uses the recorded analyzer/patcher fixture (precomputed benchmark) but runs
+exactly one live agent case — F1 ``backend_stopped`` — during execute. Explicit CLI
+``--replay`` forces the recorded path even when settings say live.
 """
 
 from __future__ import annotations
 
+import asyncio
 import difflib
+import inspect
 import json
 import shutil
 import tempfile
@@ -16,7 +23,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from skillforge.config import Settings, get_settings
+from skillforge.config import DemoMode, Settings, get_settings
 from skillforge.db import initialize_database
 from skillforge.db.connection import connection
 from skillforge.db.repositories.projects import insert_project
@@ -24,6 +31,7 @@ from skillforge.domain.entities import EvaluationRun, Project, TraceEvent
 from skillforge.domain.enums import EvaluationRunStatus, TraceEventType
 from skillforge.domain.state_machines import PipelineState, SkillVersionStatus
 from skillforge.evaluator.assertions import AssertionResult
+from skillforge.evaluator.cases import load_eval_cases
 from skillforge.evaluator.suite import summarize
 from skillforge.evolution.analyzer import FailureAnalyzer
 from skillforge.evolution.apply import apply_patch
@@ -39,12 +47,14 @@ from skillforge.models.types import ModelResponse
 from skillforge.orchestrator.pipeline import PipelineRun
 from skillforge.registry.human import approve, publish
 from skillforge.registry.service import SkillRegistry
+from skillforge.runtime.agent import AgentRuntime, LocalHarness
 from skillforge.tracing.bus import EventBus
 from skillforge.tracing.sink import TraceSink
 
 Inject = Callable[[str], None]
 Reset = Callable[[], None]
 Verify = Callable[[], Mapping[str, Any]]
+DemoHook = Callable[[], Any]
 
 DEMO_STEPS: tuple[str, ...] = (
     "upload",
@@ -61,10 +71,16 @@ DEMO_STEPS: tuple[str, ...] = (
 )
 
 _DEMO_APPROVER = "demo-judge"
-_DEFAULT_FAULT = "nginx_bad_config_reload"
+_REPLAY_FAULT = "nginx_bad_config_reload"
+_LIVE_FAULT = "backend_stopped"
 _FIXTURE_REL = Path("tests") / "fixtures" / "demo" / "dod_replay.json"
 _RUNBOOK_INDEX_REL = Path("tests") / "fixtures" / "retrieval" / "runbook_index.json"
 _GOLDEN_REL = Path("skills") / "golden" / "service-recovery"
+
+
+def resolve_demo_replay(*, cli_replay: bool, demo_mode: DemoMode) -> bool:
+    """``--replay`` wins; otherwise follow ``Settings.demo_mode`` (default replay)."""
+    return bool(cli_replay) or demo_mode == "replay"
 
 
 class ListSink:
@@ -86,6 +102,10 @@ def run_dod_demo(
     fixture_path: Path | None = None,
     sink: TraceSink | None = None,
     work_dir: Path | None = None,
+    harness: AgentRuntime | None = None,
+    gateway: ModelGateway | None = None,
+    live_runner: DemoHook | None = None,
+    replay_runner: DemoHook | None = None,
 ) -> int:
     """Run the headless DoD. Returns 0 on green recorded/live path."""
     return _run_async(
@@ -98,12 +118,14 @@ def run_dod_demo(
         fixture_path=fixture_path,
         sink=sink,
         work_dir=work_dir,
+        harness=harness,
+        gateway=gateway,
+        live_runner=live_runner,
+        replay_runner=replay_runner,
     )
 
 
 def _run_async(**kwargs: Any) -> int:
-    import asyncio
-
     return asyncio.run(_run_dod(**kwargs))
 
 
@@ -118,6 +140,10 @@ async def _run_dod(
     fixture_path: Path | None,
     sink: TraceSink | None,
     work_dir: Path | None,
+    harness: AgentRuntime | None,
+    gateway: ModelGateway | None,
+    live_runner: DemoHook | None,
+    replay_runner: DemoHook | None,
 ) -> int:
     resolved = settings if settings is not None else get_settings()
     fixture = _load_fixture(fixture_path if fixture_path is not None else repo_root / _FIXTURE_REL)
@@ -192,11 +218,23 @@ async def _run_dod(
         await pipeline.advance(PipelineState.CANDIDATE)
         _step("compile")
 
-        # 4 inject — lab hook (faked in tests)
-        apply_inject(_DEFAULT_FAULT)
+        # 4 inject — F3 story fault in replay; F1 only in live (not the 3-case matrix)
+        fault_id = _REPLAY_FAULT if replay else _LIVE_FAULT
+        apply_inject(fault_id)
         _step("inject")
 
-        # 5 execute — recorded path does not call a live agent
+        # 5 execute — replay: recorded noop/hook; live: exactly one F1 agent case
+        await _run_execute(
+            replay=replay,
+            skill_dir=parent_dir,
+            workspace=root / "live_workspace",
+            settings=demo_settings,
+            harness=harness,
+            sink=trace_sink,
+            bus=bus,
+            live_runner=live_runner,
+            replay_runner=replay_runner,
+        )
         _step("execute")
 
         # 6 evaluate — F3 fails on v0.1; pipeline takes PASSED (not FAILED)
@@ -205,17 +243,19 @@ async def _run_dod(
         _step("evaluate")
 
         # 7 failure — FailureAnalyzer (evaluation miss, not PipelineState.FAILED)
-        gateway = await _build_gateway(
-            replay=replay,
-            fixture=fixture,
-            parent_skill_md=parent_md,
-            settings=demo_settings,
-            sink=trace_sink,
-            bus=bus,
-        )
+        # Analyzer/Patcher always use the recorded FakeModel fixture (precomputed).
+        analysis_gateway = gateway
+        if analysis_gateway is None:
+            analysis_gateway = await _build_gateway(
+                fixture=fixture,
+                parent_skill_md=parent_md,
+                settings=demo_settings,
+                sink=trace_sink,
+                bus=bus,
+            )
         retriever = await _memory_retriever(repo_root, demo_settings, bus)
         analyzer = FailureAnalyzer(
-            gateway,
+            analysis_gateway,
             settings=demo_settings,
             retriever=retriever,
             project_id=project_id,
@@ -231,7 +271,7 @@ async def _run_dod(
         _step("failure")
 
         # 8 patch
-        patcher = SkillPatcher(gateway, settings=demo_settings)
+        patcher = SkillPatcher(analysis_gateway, settings=demo_settings)
         proposal = await patcher.propose(
             skill_dir=parent_dir,
             failure=failure,
@@ -296,34 +336,84 @@ def _step(name: str) -> None:
     print(name)
 
 
-async def _build_gateway(
+async def _run_execute(
     *,
     replay: bool,
+    skill_dir: Path,
+    workspace: Path,
+    settings: Settings,
+    harness: AgentRuntime | None,
+    sink: TraceSink,
+    bus: EventBus,
+    live_runner: DemoHook | None,
+    replay_runner: DemoHook | None,
+) -> None:
+    if replay:
+        await _invoke_hook(replay_runner)
+        return
+    if live_runner is not None:
+        await _invoke_hook(live_runner)
+        return
+    cases = load_eval_cases(skill_dir)
+    if not cases:
+        raise RuntimeError("live demo requires at least one eval case")
+    loaded = cases[0]
+    if loaded.fault_id != _LIVE_FAULT:
+        raise RuntimeError(
+            f"live demo expects first eval fault {_LIVE_FAULT!r}, got {loaded.fault_id!r}"
+        )
+    workspace.mkdir(parents=True, exist_ok=True)
+    runner = harness if harness is not None else _default_live_harness(settings, sink, bus)
+    await runner.run(loaded.case.task, str(skill_dir), str(workspace))
+
+
+async def _invoke_hook(hook: DemoHook | None) -> None:
+    if hook is None:
+        return
+    result = hook()
+    if inspect.isawaitable(result):
+        await result
+
+
+def _default_live_harness(
+    settings: Settings,
+    sink: TraceSink,
+    bus: EventBus,
+) -> LocalHarness:
+    return LocalHarness(
+        gateway=ModelGateway(build_adapter(settings), settings=settings, sink=sink, bus=bus),
+        settings=settings,
+        sink=sink,
+        bus=bus,
+    )
+
+
+async def _build_gateway(
+    *,
     fixture: dict[str, Any],
     parent_skill_md: str,
     settings: Settings,
     sink: TraceSink,
     bus: EventBus,
 ) -> ModelGateway:
-    if replay:
-        new_md = _patched_skill_md(parent_skill_md, fixture)
-        diff = _unified(parent_skill_md, new_md)
-        patch_draft = {
-            "diff": diff,
-            "summary": fixture["patch_meta"]["summary"],
-            "evidence_refs": fixture["patch_meta"]["evidence_refs"],
-        }
-        script = [
-            ModelResponse(content=json.dumps(fixture["failure_draft"])),
-            ModelResponse(content=json.dumps(patch_draft)),
-        ]
-        return ModelGateway(
-            FakeModelAdapter(script),
-            settings=settings,
-            sink=sink,
-            bus=bus,
-        )
-    return ModelGateway(build_adapter(settings), settings=settings, sink=sink, bus=bus)
+    """Recorded FakeModel for FailureAnalyzer / Patcher (precomputed judge path)."""
+    new_md = _patched_skill_md(parent_skill_md, fixture)
+    diff = _unified(parent_skill_md, new_md)
+    patch_draft = {
+        "diff": diff,
+        "summary": fixture["patch_meta"]["summary"],
+        "evidence_refs": fixture["patch_meta"]["evidence_refs"],
+    }
+    script = [
+        ModelResponse(content=json.dumps(fixture["failure_draft"])),
+        ModelResponse(content=json.dumps(patch_draft)),
+    ]
+    return ModelGateway(
+        FakeModelAdapter(script),
+        settings=settings,
+        sink=sink,
+        bus=bus,
+    )
 
 
 async def _memory_retriever(

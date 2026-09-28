@@ -19,7 +19,7 @@ from skillforge.db.connection import connection
 from skillforge.db.init import initialize_database
 from skillforge.db.repositories.agent_runs import AgentRunRecord, insert_agent_run
 from skillforge.db.repositories.projects import get_project
-from skillforge.demo.dod import run_dod_demo
+from skillforge.demo.dod import resolve_demo_replay, run_dod_demo
 from skillforge.domain.entities import TraceEvent
 from skillforge.domain.enums import TraceEventType
 from skillforge.evaluator.cache import replay_trials
@@ -36,6 +36,7 @@ from skillforge.tracing.sink import FanOutSink, SqliteTraceSink, TraceSink
 Inject = Callable[[str], None]
 Reset = Callable[[], None]
 Verify = Callable[[], Mapping[str, Any]]
+DemoHook = Callable[[], Any]
 
 
 class ListSink:
@@ -59,6 +60,9 @@ def main(
     verify: Verify | None = None,
     harness: AgentRuntime | None = None,
     sink: TraceSink | None = None,
+    live_runner: DemoHook | None = None,
+    replay_runner: DemoHook | None = None,
+    gateway: ModelGateway | None = None,
 ) -> int:
     args = sys.argv[1:] if argv is None else argv
     try:
@@ -71,7 +75,17 @@ def main(
     if parsed.command == "index":
         return _index_rebuild(parsed)
     if parsed.command == "demo":
-        return _demo(parsed, inject=inject, reset=reset, verify=verify, sink=sink)
+        return _demo(
+            parsed,
+            inject=inject,
+            reset=reset,
+            verify=verify,
+            sink=sink,
+            harness=harness,
+            live_runner=live_runner,
+            replay_runner=replay_runner,
+            gateway=gateway,
+        )
     return _run(parsed, inject=inject, harness=harness, sink=sink)
 
 
@@ -82,16 +96,29 @@ def _demo(
     reset: Reset | None,
     verify: Verify | None,
     sink: TraceSink | None,
+    harness: AgentRuntime | None,
+    live_runner: DemoHook | None,
+    replay_runner: DemoHook | None,
+    gateway: ModelGateway | None,
 ) -> int:
+    settings = get_settings()
+    use_replay = resolve_demo_replay(
+        cli_replay=bool(parsed.replay),
+        demo_mode=settings.demo_mode,
+    )
     try:
         return run_dod_demo(
-            replay=bool(parsed.replay),
+            replay=use_replay,
             repo_root=_repo_root(),
-            settings=get_settings(),
+            settings=settings,
             inject=inject,
             reset=reset,
             verify=verify,
             sink=sink,
+            harness=harness,
+            gateway=gateway,
+            live_runner=live_runner,
+            replay_runner=replay_runner,
         )
     except Exception as exc:
         print(str(exc), file=sys.stderr)
@@ -231,7 +258,7 @@ def _parse(argv: list[str]) -> argparse.Namespace:
     demo_cmd.add_argument(
         "--replay",
         action="store_true",
-        help="recorded FakeModelAdapter path (no live model / Docker)",
+        help="force recorded FakeModelAdapter path (overrides SKILLFORGE_DEMO_MODE=live)",
     )
     return parser.parse_args(argv)
 
