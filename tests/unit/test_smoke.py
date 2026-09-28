@@ -19,7 +19,10 @@ def test_settings_defaults() -> None:
     assert settings.demo_mode == "replay"
     assert settings.sqlite_path == Path("data/skillforge.db")
     assert settings.model_api_key.get_secret_value() == ""
-    assert settings.cors_origins == ["http://localhost:5173"]
+    assert settings.cors_origins == [
+        "http://127.0.0.1:5173",
+        "http://localhost:5173",
+    ]
 
 
 def test_demo_mode_env_override(monkeypatch: pytest.MonkeyPatch) -> None:

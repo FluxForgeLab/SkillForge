@@ -25,6 +25,7 @@ from skillforge.models import (
     fake_adapter_from_script,
     load_fake_script,
 )
+from skillforge.models.errors import ModelInvocationError
 from skillforge.tracing import EventBus, SqliteTraceSink
 
 
@@ -166,6 +167,25 @@ async def test_openai_compatible_maps_request_response() -> None:
     assert response.usage.total_tokens == 18
 
     await client.aclose()
+
+
+async def test_openai_timeout_error_names_the_exception() -> None:
+    class _TimingOut:
+        async def post(self, *_args: object, **_kwargs: object) -> None:
+            raise httpx.ReadTimeout("")
+
+    adapter = OpenAICompatibleAdapter(
+        base_url="http://example.test/v1",
+        default_model="step-3.7-flash",
+        client=_TimingOut(),  # type: ignore[arg-type]
+    )
+    with pytest.raises(ModelInvocationError, match="ReadTimeout"):
+        await adapter.generate(
+            ModelRequest(
+                run_id="run_timeout",
+                messages=[ChatMessage(role="user", content="compile")],
+            ),
+        )
 
 
 def test_build_adapter_fake_and_openai() -> None:

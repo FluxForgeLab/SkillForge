@@ -28,12 +28,16 @@ class Settings(BaseSettings):
 
     api_host: str = "127.0.0.1"
     api_port: int = 8000
-    cors_origins: list[str] = ["http://localhost:5173"]
+    cors_origins: list[str] = [
+        "http://127.0.0.1:5173",
+        "http://localhost:5173",
+    ]
 
     model_adapter: ModelAdapterName = "fake"
     model_base_url: str = "http://127.0.0.1:8080/v1"
     model_api_key: SecretStr = SecretStr("")
     model_name: str = "step-3.7-flash"
+    model_timeout_seconds: float = 300.0
     transcript_path: str = ""
 
     max_steps: int = 20

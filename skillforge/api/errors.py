@@ -86,7 +86,9 @@ def register_exception_handlers(app: FastAPI) -> None:
 
     @app.exception_handler(SkillForgeError)
     async def skillforge_error_handler(_request: Request, exc: SkillForgeError) -> JSONResponse:
-        return _error_response(400, code="skillforge_error", message=str(exc))
+        message = str(exc).strip() or type(exc).__name__
+        logger.warning("SkillForge error: %s", message)
+        return _error_response(400, code="skillforge_error", message=message)
 
     @app.exception_handler(Exception)
     async def unhandled_exception_handler(_request: Request, exc: Exception) -> JSONResponse:

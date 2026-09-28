@@ -90,7 +90,8 @@ class OpenAICompatibleAdapter:
                 status_code=exc.response.status_code,
             ) from exc
         except httpx.HTTPError as exc:
-            raise ModelInvocationError(str(exc)) from exc
+            detail = str(exc).strip() or type(exc).__name__
+            raise ModelInvocationError(f"model request failed: {detail}") from exc
 
         return _parse_chat_response(response.json(), api_to_local)
 

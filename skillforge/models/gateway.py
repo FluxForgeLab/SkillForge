@@ -86,6 +86,7 @@ def build_adapter(settings: Settings) -> ModelAdapter:
             default_model=settings.model_name,
             default_temperature=settings.temperature,
             default_seed=settings.seed,
+            timeout=settings.model_timeout_seconds,
         )
     if name in ("stepfun_local", "stepfun_api"):
         raise NotImplementedError(
