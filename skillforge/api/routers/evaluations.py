@@ -16,7 +16,10 @@ from pydantic import BaseModel, ConfigDict, Field
 from skillforge.api.deps import get_settings_dep
 from skillforge.config import Settings
 from skillforge.db.connection import connection
-from skillforge.db.repositories.evaluation_runs import get_evaluation_run
+from skillforge.db.repositories.evaluation_runs import (
+    get_evaluation_run,
+    list_evaluation_runs_for_skill,
+)
 from skillforge.db.repositories.skill_versions import get_skill_version
 from skillforge.db.repositories.skills import get_skill
 from skillforge.domain.entities import EvaluationRun
@@ -206,6 +209,17 @@ def _load_evaluation_for_skill(
         return run
 
 
+def _list_evaluations_for_skill(
+    db_path: Path,
+    skill_id: str,
+) -> list[EvaluationRun] | None:
+    """Return runs for the skill, or None when the skill id is unknown."""
+    with connection(db_path) as conn:
+        if get_skill(conn, skill_id) is None:
+            return None
+        return list_evaluation_runs_for_skill(conn, skill_id)
+
+
 @router.post(
     "/{skill_id}/evaluate",
     response_model=EvaluateJobResponse,
@@ -238,6 +252,24 @@ async def start_evaluate(
         runner=runner,
     )
     return EvaluateJobResponse(job_id=job_id)
+
+
+@router.get(
+    "/{skill_id}/evaluations",
+    response_model=list[EvaluationRunResponse],
+)
+async def list_skill_evaluations(
+    skill_id: str,
+    settings: SettingsDep,
+) -> list[EvaluationRunResponse]:
+    runs = await asyncio.to_thread(
+        _list_evaluations_for_skill,
+        settings.sqlite_path,
+        skill_id,
+    )
+    if runs is None:
+        raise HTTPException(status_code=404, detail="skill not found")
+    return [_to_response(run) for run in runs]
 
 
 @router.get(

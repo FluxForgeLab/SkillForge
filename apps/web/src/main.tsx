@@ -6,6 +6,7 @@ import { BrowserRouter, Route, Routes } from 'react-router'
 import App from './App.tsx'
 import './index.css'
 import DemoPage from './pages/DemoPage.tsx'
+import EvaluationLabPage from './pages/EvaluationLabPage.tsx'
 import HomePage from './pages/HomePage.tsx'
 import SkillStudioEntry from './pages/SkillStudioEntry.tsx'
 import SkillStudioPage from './pages/SkillStudioPage.tsx'
@@ -28,6 +29,10 @@ createRoot(document.getElementById('root')!).render(
             <Route index element={<HomePage />} />
             <Route path="demo" element={<DemoPage />} />
             <Route path="skills" element={<SkillStudioEntry />} />
+            <Route
+              path="skills/:id/evaluations"
+              element={<EvaluationLabPage />}
+            />
             <Route path="skills/:id" element={<SkillStudioPage />} />
           </Route>
         </Routes>

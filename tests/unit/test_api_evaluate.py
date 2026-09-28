@@ -151,6 +151,83 @@ def test_unknown_skill_does_not_call_runner(tmp_path: Path) -> None:
     assert called == []
 
 
+def test_list_evaluations_for_skill_returns_seeded_runs(tmp_path: Path) -> None:
+    bus = EventBus()
+
+    async def fake_runner(**_kwargs) -> list[str]:
+        return []
+
+    client, db_path, _settings = _client(tmp_path, bus, fake_runner)
+    _seed(db_path)
+    now = datetime.now(UTC)
+    with connection(db_path) as conn:
+        insert_evaluation_run(
+            conn,
+            EvaluationRun(
+                id="eval_list_1",
+                skill_version_id="ver_eval",
+                baseline={"baseline": True},
+                metrics={
+                    "case_id": "backend_stopped",
+                    "passed": False,
+                    "latency_ms": 10,
+                    "policy_violations": 0,
+                    "tool_errors": 1,
+                    "tokens": 5,
+                },
+                status=EvaluationRunStatus.COMPLETED,
+                started_at=now,
+                finished_at=now,
+            ),
+        )
+        insert_evaluation_run(
+            conn,
+            EvaluationRun(
+                id="eval_list_2",
+                skill_version_id="ver_eval",
+                baseline={"baseline": False},
+                metrics={
+                    "case_id": "backend_stopped",
+                    "passed": True,
+                    "latency_ms": 20,
+                    "policy_violations": 0,
+                    "tool_errors": 0,
+                    "tokens": 8,
+                },
+                status=EvaluationRunStatus.COMPLETED,
+                started_at=now,
+                finished_at=now,
+            ),
+        )
+
+    with client:
+        response = client.get("/api/skills/skill_eval/evaluations")
+    assert response.status_code == 200
+    body = response.json()
+    assert len(body) == 2
+    ids = {row["id"] for row in body}
+    assert ids == {"eval_list_1", "eval_list_2"}
+    for row in body:
+        assert row["skill_version_id"] == "ver_eval"
+        assert "baseline" in row
+        assert "metrics" in row
+        assert "status" in row
+        assert "started_at" in row
+        assert "finished_at" in row
+
+
+def test_list_evaluations_unknown_skill_is_404(tmp_path: Path) -> None:
+    bus = EventBus()
+
+    async def fake_runner(**_kwargs) -> list[str]:
+        return []
+
+    client, _db, _settings = _client(tmp_path, bus, fake_runner)
+    with client:
+        response = client.get("/api/skills/skill_missing/evaluations")
+    assert response.status_code == 404
+
+
 def test_get_evaluation_for_other_skill_is_404(tmp_path: Path) -> None:
     bus = EventBus()
 

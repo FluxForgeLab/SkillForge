@@ -1,7 +1,7 @@
 import Editor from '@monaco-editor/react'
 import { useQuery } from '@tanstack/react-query'
 import { useMemo, useState } from 'react'
-import { useParams } from 'react-router'
+import { Link, useParams } from 'react-router'
 
 import { apiRequest } from '@/lib/api'
 import {
@@ -139,6 +139,14 @@ export default function SkillStudioPage() {
             ))}
           </select>
         </label>
+        {skillId ? (
+          <Link
+            className="text-sm underline underline-offset-4"
+            to={`/skills/${encodeURIComponent(skillId)}/evaluations`}
+          >
+            Evaluations
+          </Link>
+        ) : null}
       </header>
 
       {skillQuery.isError ? (
