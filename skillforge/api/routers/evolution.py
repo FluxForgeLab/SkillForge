@@ -73,6 +73,10 @@ class EvolveResponse(BaseModel):
     status: str
     parent_version_id: str
     gate: EvolutionGateReport
+    failure_class: str
+    symptom: str
+    evidence: list[str] = Field(default_factory=list)
+    source_support: list[str] = Field(default_factory=list)
 
 
 class ApproveRequest(BaseModel):
@@ -269,6 +273,10 @@ async def evolve_skill(
         status=final.status.value,
         parent_version_id=parent.id,
         gate=gate,
+        failure_class=str(failure.failure_class),
+        symptom=failure.symptom,
+        evidence=list(failure.evidence),
+        source_support=list(failure.source_support),
     )
 
 

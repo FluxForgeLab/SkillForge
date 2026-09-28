@@ -158,6 +158,10 @@ def test_evolve_creates_candidate_when_gate_passes(tmp_path: Path) -> None:
     assert body["status"] == "CANDIDATE"
     assert body["parent_version_id"] == parent.id
     assert body["gate"]["passed"] is True
+    assert body["failure_class"] == "missing_instruction"
+    assert body["symptom"] == "F3 still failing"
+    assert body["evidence"] == ["502"]
+    assert body["source_support"] == ["runbook.md#page=2"]
     created = registry.get_version(body["version_id"])
     assert created.status == SkillVersionStatus.CANDIDATE
     assert created.parent_version_id == parent.id
@@ -218,6 +222,10 @@ def test_evolve_stays_draft_when_gate_fails(tmp_path: Path) -> None:
     body = response.json()
     assert body["status"] == "DRAFT"
     assert body["gate"]["passed"] is False
+    assert body["failure_class"] == "missing_instruction"
+    assert body["symptom"] == "still broken"
+    assert body["evidence"] == ["502"]
+    assert body["source_support"] == []
     assert registry.get_version(body["version_id"]).status == SkillVersionStatus.DRAFT
 
 

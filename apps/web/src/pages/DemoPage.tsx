@@ -4,6 +4,13 @@ import { Benchmark } from '@/components/Benchmark'
 import type { BenchmarkData } from '@/components/benchmarkModel'
 import { LiveTrace } from '@/components/LiveTrace'
 import { PipelineStepper } from '@/components/PipelineStepper'
+import { SkillDiff } from '@/components/SkillDiff'
+import {
+  emptySkillDiffFailure,
+  failureFromEvolve,
+  type SkillDiffFailure,
+  type SkillDiffPayload,
+} from '@/components/skillDiffModel'
 import { Button } from '@/components/ui/button'
 import { useEvents, type TraceEventWire } from '@/hooks/useEvents'
 import { API_BASE, apiRequest, type ApiResult } from '@/lib/api'
@@ -57,6 +64,17 @@ type EvolveResponse = {
   version_id: string
   status: string
   parent_version_id: string
+  failure_class?: string
+  symptom?: string
+  evidence?: string[]
+  source_support?: string[]
+}
+
+type DiffApiResponse = {
+  version_id: string
+  parent_version_id: string | null
+  has_parent: boolean
+  diff: string
 }
 
 type HealthResponse = { status: string; service?: string }
@@ -120,6 +138,10 @@ export default function DemoPage() {
   )
   const [approver, setApprover] = useState('judge')
   const [evolveForm, setEvolveForm] = useState<EvolveFormState>(defaultEvolveForm)
+  const [skillDiff, setSkillDiff] = useState<SkillDiffPayload | null>(null)
+  const [skillDiffFailure, setSkillDiffFailure] = useState<SkillDiffFailure>(
+    emptySkillDiffFailure,
+  )
   const fileInputRef = useRef<HTMLInputElement>(null)
   const fileInputId = useId()
   const handledEvalJobs = useRef(new Set<string>())
@@ -507,11 +529,29 @@ export default function DemoPage() {
       pushLog(
         logFromResult('evolve', result, (data) => {
           const e = data as EvolveResponse
-          return `version=${e.version_id} status=${e.status}`
+          return `version=${e.version_id} status=${e.status} class=${e.failure_class ?? '—'}`
         }),
       )
       if (result.ok) {
         setVersionId(result.data.version_id)
+        setSkillDiffFailure(failureFromEvolve(result.data))
+        const diffResult = await apiRequest<DiffApiResponse>(
+          `/api/skills/${skillId}/versions/${result.data.version_id}/diff`,
+        )
+        pushLog(
+          logFromResult('diff', diffResult, (data) => {
+            const d = data as DiffApiResponse
+            return `has_parent=${d.has_parent} lines=${d.diff.split('\n').length}`
+          }),
+        )
+        if (diffResult.ok) {
+          setSkillDiff({
+            version_id: diffResult.data.version_id,
+            parent_version_id: diffResult.data.parent_version_id,
+            has_parent: diffResult.data.has_parent,
+            diff: diffResult.data.diff,
+          })
+        }
       }
     })
 
@@ -576,6 +616,39 @@ export default function DemoPage() {
   const onPrefillEvolve = () => {
     setEvolveForm((prev) => prefillEvolveFromEvents(events, prev))
   }
+
+  const onLoadDiff = () =>
+    void runAction('diff', async () => {
+      if (!skillId.trim() || !versionId.trim()) {
+        pushLog({
+          id: nextLogId(),
+          step: 'diff',
+          status: null,
+          detail: 'Enter skill_id and version_id',
+          at: new Date().toISOString(),
+        })
+        return
+      }
+      // Diff-only load: do not invent failure fields.
+      setSkillDiffFailure(emptySkillDiffFailure())
+      const result = await apiRequest<DiffApiResponse>(
+        `/api/skills/${skillId.trim()}/versions/${versionId.trim()}/diff`,
+      )
+      pushLog(
+        logFromResult('diff', result, (data) => {
+          const d = data as DiffApiResponse
+          return `has_parent=${d.has_parent} parent=${d.parent_version_id ?? 'none'}`
+        }),
+      )
+      if (result.ok) {
+        setSkillDiff({
+          version_id: result.data.version_id,
+          parent_version_id: result.data.parent_version_id,
+          has_parent: result.data.has_parent,
+          diff: result.data.diff,
+        })
+      }
+    })
 
   const healthLabel =
     apiHealth === 'online'
@@ -889,6 +962,34 @@ export default function DemoPage() {
             >
               Analyze &amp; Improve
             </Button>
+            <div className="mt-2 flex flex-col gap-2 border-t pt-2">
+              <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Skill Diff lookup
+              </label>
+              <input
+                className="h-8 rounded-md border bg-background px-2 font-mono text-xs"
+                value={skillId}
+                onChange={(e) => setSkillId(e.target.value)}
+                placeholder="skill_id"
+                aria-label="skill_id for diff"
+              />
+              <input
+                className="h-8 rounded-md border bg-background px-2 font-mono text-xs"
+                value={versionId}
+                onChange={(e) => setVersionId(e.target.value)}
+                placeholder="version_id"
+                aria-label="version_id for diff"
+              />
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                disabled={busy !== null}
+                onClick={onLoadDiff}
+              >
+                Load Diff
+              </Button>
+            </div>
           </div>
 
           <div className="flex flex-col gap-2">
@@ -984,6 +1085,12 @@ export default function DemoPage() {
 
         <Benchmark data={benchmark} className="rounded-md border p-3" />
       </div>
+
+      <SkillDiff
+        data={skillDiff}
+        failure={skillDiffFailure}
+        className="rounded-md border p-3"
+      />
     </div>
   )
 }
