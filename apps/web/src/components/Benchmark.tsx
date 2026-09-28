@@ -7,8 +7,10 @@ import {
 import { cn } from '@/lib/utils'
 
 export type BenchmarkProps = {
-  /** When omitted or empty cases, mock sample is shown. */
+  /** When omitted or empty cases, mock sample is shown unless placeholder is empty. */
   data?: BenchmarkData
+  /** `empty` shows no rates until a real evaluation payload arrives. */
+  placeholder?: 'mock' | 'empty'
   className?: string
 }
 
@@ -26,10 +28,29 @@ function PassFailMark({ passed }: { passed: boolean }) {
   )
 }
 
-export function Benchmark({ data, className }: BenchmarkProps) {
-  const source =
-    data !== undefined && data.cases.length > 0 ? data : MOCK_BENCHMARK
-  const usingMock = data === undefined || data.cases.length === 0
+export function Benchmark({
+  data,
+  placeholder = 'mock',
+  className,
+}: BenchmarkProps) {
+  const hasCases = data !== undefined && data.cases.length > 0
+  const usingMock = placeholder === 'mock' && !hasCases
+  const source = hasCases ? data : usingMock ? MOCK_BENCHMARK : undefined
+  if (!source) {
+    return (
+      <section
+        aria-label="Benchmark"
+        className={cn('flex flex-col gap-2', className)}
+      >
+        <h2 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+          Benchmark
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          No evaluation yet.
+        </p>
+      </section>
+    )
+  }
   const controlPct = formatSuccessPct(source.task_success_rate.control)
   const treatmentPct = formatSuccessPct(source.task_success_rate.treatment)
   const uplift = formatUpliftPp(source.skill_uplift_pp)

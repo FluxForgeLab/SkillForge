@@ -14,6 +14,8 @@ export type SkillDiffProps = {
   data?: SkillDiffPayload | null
   /** From EvolveResponse when present; otherwise empty evidence state. */
   failure?: SkillDiffFailure | null
+  /** `empty` hides the sample until a real diff is loaded. */
+  placeholder?: 'mock' | 'empty'
   className?: string
 }
 
@@ -26,9 +28,32 @@ const LINE_CLASS: Record<string, string> = {
   meta: 'italic text-muted-foreground',
 }
 
-export function SkillDiff({ data, failure, className }: SkillDiffProps) {
-  const usingMock = data == null
+export function SkillDiff({
+  data,
+  failure,
+  placeholder = 'mock',
+  className,
+}: SkillDiffProps) {
+  const usingMock = placeholder === 'mock' && data == null
+  if (!usingMock && data == null) {
+    return (
+      <section
+        aria-label="Skill Diff"
+        className={cn('flex flex-col gap-2', className)}
+      >
+        <h2 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+          Skill Diff
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          No diff yet. Failure reason appears only after Analyze &amp; Improve.
+        </p>
+      </section>
+    )
+  }
   const source = usingMock ? MOCK_SKILL_DIFF : data
+  if (source == null) {
+    return null
+  }
   const failurePanel =
     usingMock && !hasFailureContent(failure)
       ? MOCK_SKILL_DIFF_FAILURE

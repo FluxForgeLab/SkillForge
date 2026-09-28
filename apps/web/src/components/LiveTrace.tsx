@@ -9,13 +9,19 @@ import { cn } from '@/lib/utils'
 export type LiveTraceProps = {
   /** Live TraceEventWire stream (e.g. from useEvents). Empty → mock fallback. */
   events?: TraceEventWire[]
+  /** `empty` shows no rows until live events arrive. Default keeps the offline sample. */
+  placeholder?: 'mock' | 'empty'
   className?: string
 }
 
-export function LiveTrace({ events, className }: LiveTraceProps) {
-  const source =
-    events !== undefined && events.length > 0 ? events : MOCK_TRACE_EVENTS
-  const usingMock = events === undefined || events.length === 0
+export function LiveTrace({
+  events,
+  placeholder = 'mock',
+  className,
+}: LiveTraceProps) {
+  const usingMock =
+    placeholder === 'mock' && (events === undefined || events.length === 0)
+  const source = usingMock ? MOCK_TRACE_EVENTS : (events ?? [])
   const rows = source
     .map(toLiveTraceRow)
     .filter((row): row is NonNullable<typeof row> => row !== null)

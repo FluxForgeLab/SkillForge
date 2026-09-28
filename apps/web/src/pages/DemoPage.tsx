@@ -130,7 +130,7 @@ export default function DemoPage() {
     'Recover nginx upstream and backend from common outages',
   )
   const [triggersText, setTriggersText] = useState(
-    '502 Bad Gateway\nnginx upstream\nbackend stopped',
+    'HTTP 502\nbackend unavailable\nhealth check failed',
   )
   const [faultId, setFaultId] = useState<FaultId>('backend_stopped')
   const [evalJobId, setEvalJobId] = useState<string | null>(null)
@@ -1088,16 +1088,29 @@ export default function DemoPage() {
           </ul>
         </section>
 
-        <PipelineStepper events={events} className="rounded-md border p-3" />
+        <PipelineStepper
+          events={events}
+          placeholder="empty"
+          className="rounded-md border p-3"
+        />
 
-        <LiveTrace events={events} className="rounded-md border p-3" />
+        <LiveTrace
+          events={events}
+          placeholder="empty"
+          className="rounded-md border p-3"
+        />
 
-        <Benchmark data={benchmark} className="rounded-md border p-3" />
+        <Benchmark
+          data={benchmark}
+          placeholder="empty"
+          className="rounded-md border p-3"
+        />
       </div>
 
       <SkillDiff
         data={skillDiff}
         failure={skillDiffFailure}
+        placeholder="empty"
         className="rounded-md border p-3"
       />
     </div>

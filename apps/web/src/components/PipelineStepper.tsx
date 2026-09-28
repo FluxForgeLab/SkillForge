@@ -11,6 +11,8 @@ import { cn } from '@/lib/utils'
 export type PipelineStepperProps = {
   /** Live TraceEventWire stream (e.g. from useEvents). No pipeline events → idle mock. */
   events?: TraceEventWire[]
+  /** `empty` keeps every step pending until a real PipelineState event arrives. */
+  placeholder?: 'mock' | 'empty'
   className?: string
 }
 
@@ -38,10 +40,15 @@ function connectorTone(
   return 'bg-muted-foreground/25'
 }
 
-export function PipelineStepper({ events, className }: PipelineStepperProps) {
+export function PipelineStepper({
+  events,
+  placeholder = 'mock',
+  className,
+}: PipelineStepperProps) {
   const livePipeline =
     events !== undefined ? events.filter(isPipelineWorkflowEvent) : []
-  const usingMock = events === undefined || livePipeline.length === 0
+  const usingMock =
+    placeholder === 'mock' && (events === undefined || livePipeline.length === 0)
   const source = usingMock ? MOCK_PIPELINE_EVENTS : livePipeline
   const { statuses, failed } = derivePipelineStepperState(source)
 
@@ -57,9 +64,11 @@ export function PipelineStepper({ events, className }: PipelineStepperProps) {
         <span className="text-xs text-muted-foreground">
           {usingMock
             ? 'idle mock'
-            : failed
-              ? 'failed'
-              : `${livePipeline.length} pipeline event(s)`}
+            : livePipeline.length === 0
+              ? 'no pipeline events'
+              : failed
+                ? 'failed'
+                : `${livePipeline.length} pipeline event(s)`}
         </span>
       </div>
       <p className="text-xs text-muted-foreground">
