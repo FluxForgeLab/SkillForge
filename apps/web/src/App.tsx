@@ -1,11 +1,33 @@
-import { Button } from '@/components/ui/button'
+import { NavLink, Outlet } from 'react-router'
 
 export default function App() {
   return (
-    <main className="flex min-h-svh flex-col items-center justify-center gap-4">
-      <h1 className="text-3xl font-semibold">SkillForge</h1>
-      <p className="text-muted-foreground">Web console scaffold</p>
-      <Button type="button">Hello</Button>
-    </main>
+    <div className="flex min-h-svh flex-col bg-background text-foreground">
+      <nav className="flex items-center gap-4 border-b px-6 py-3 text-sm">
+        <span className="font-semibold tracking-tight">SkillForge</span>
+        <NavLink
+          to="/"
+          end
+          className={({ isActive }) =>
+            isActive
+              ? 'text-foreground'
+              : 'text-muted-foreground hover:text-foreground'
+          }
+        >
+          Home
+        </NavLink>
+        <NavLink
+          to="/demo"
+          className={({ isActive }) =>
+            isActive
+              ? 'text-foreground'
+              : 'text-muted-foreground hover:text-foreground'
+          }
+        >
+          Demo
+        </NavLink>
+      </nav>
+      <Outlet />
+    </div>
   )
 }
