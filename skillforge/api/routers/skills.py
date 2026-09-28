@@ -70,6 +70,7 @@ class VersionResponse(BaseModel):
     version: str
     status: str
     artifact_path: str | None
+    parent_version_id: str | None = None
 
 
 class ValidateResponse(BaseModel):
@@ -194,6 +195,7 @@ async def list_skill_version_details(skill_id: str, settings: SettingsDep) -> li
             version=version.version,
             status=version.status.value,
             artifact_path=version.artifact_path,
+            parent_version_id=version.parent_version_id,
         )
         for version in versions
     ]

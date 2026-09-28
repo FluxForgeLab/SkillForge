@@ -15,9 +15,11 @@ from skillforge.db import initialize_database
 from skillforge.db.connection import connection
 from skillforge.db.repositories.knowledge_units import insert_knowledge_unit
 from skillforge.db.repositories.projects import insert_project
+from skillforge.db.repositories.skill_versions import insert_skill_version
 from skillforge.db.repositories.source_documents import insert_source_document
-from skillforge.domain.entities import KnowledgeUnit, Project, SourceDocument
+from skillforge.domain.entities import KnowledgeUnit, Project, SkillVersion, SourceDocument
 from skillforge.domain.enums import KnowledgeUnitType
+from skillforge.domain.state_machines import SkillVersionStatus
 from skillforge.models.adapters.fake import FakeModelAdapter
 from skillforge.models.gateway import ModelGateway
 from skillforge.models.types import ModelResponse
@@ -54,10 +56,47 @@ def test_compile_then_read_and_validate(tmp_path: Path) -> None:
     versions = client.get(f"/api/skills/{skill_id}/versions")
     assert versions.status_code == 200
     assert versions.json()[0]["id"] == body["version_id"]
+    assert versions.json()[0]["parent_version_id"] is None
 
     validated = client.post(f"/api/skills/{skill_id}/validate")
     assert validated.status_code == 200
     assert validated.json()["passed"] is True
+
+
+def test_list_versions_includes_parent_version_id(tmp_path: Path) -> None:
+    """C9.9: VersionResponse projects stored parent_version_id (no schema change)."""
+    client, gateway = _client(tmp_path)
+    client.app.dependency_overrides[get_compile_gateway] = lambda: gateway
+    compiled = client.post(
+        f"/api/projects/{_PROJECT}/skills/compile",
+        json={
+            "name": "service-recovery",
+            "description": "Diagnose and recover the edge service.",
+            "triggers": ["backend unavailable"],
+        },
+    )
+    assert compiled.status_code == 201
+    skill_id = compiled.json()["skill_id"]
+    parent_id = compiled.json()["version_id"]
+
+    child = SkillVersion(
+        id="ver_child",
+        skill_id=skill_id,
+        version="0.2.0",
+        parent_version_id=parent_id,
+        status=SkillVersionStatus.CANDIDATE,
+        artifact_path=None,
+        manifest_hash=None,
+        created_at=datetime(2026, 1, 2, tzinfo=UTC),
+    )
+    with connection(tmp_path / "api.sqlite") as conn:
+        insert_skill_version(conn, child)
+
+    versions = client.get(f"/api/skills/{skill_id}/versions")
+    assert versions.status_code == 200
+    by_id = {row["id"]: row for row in versions.json()}
+    assert by_id[parent_id]["parent_version_id"] is None
+    assert by_id["ver_child"]["parent_version_id"] == parent_id
 
 
 def test_read_skill_version_file_happy_path(tmp_path: Path) -> None:

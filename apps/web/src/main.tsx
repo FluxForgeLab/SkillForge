@@ -7,6 +7,7 @@ import App from './App.tsx'
 import './index.css'
 import DemoPage from './pages/DemoPage.tsx'
 import EvaluationLabPage from './pages/EvaluationLabPage.tsx'
+import EvolutionTimelinePage from './pages/EvolutionTimelinePage.tsx'
 import HomePage from './pages/HomePage.tsx'
 import SkillStudioEntry from './pages/SkillStudioEntry.tsx'
 import SkillStudioPage from './pages/SkillStudioPage.tsx'
@@ -32,6 +33,10 @@ createRoot(document.getElementById('root')!).render(
             <Route
               path="skills/:id/evaluations"
               element={<EvaluationLabPage />}
+            />
+            <Route
+              path="skills/:id/timeline"
+              element={<EvolutionTimelinePage />}
             />
             <Route path="skills/:id" element={<SkillStudioPage />} />
           </Route>

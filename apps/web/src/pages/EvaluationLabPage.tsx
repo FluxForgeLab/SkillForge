@@ -64,12 +64,20 @@ export default function EvaluationLabPage() {
           </p>
         </div>
         {skillId ? (
-          <Link
-            className="text-sm underline underline-offset-4"
-            to={`/skills/${encodeURIComponent(skillId)}`}
-          >
-            Skill Studio
-          </Link>
+          <div className="flex flex-wrap gap-3 text-sm">
+            <Link
+              className="underline underline-offset-4"
+              to={`/skills/${encodeURIComponent(skillId)}`}
+            >
+              Skill Studio
+            </Link>
+            <Link
+              className="underline underline-offset-4"
+              to={`/skills/${encodeURIComponent(skillId)}/timeline`}
+            >
+              Timeline
+            </Link>
+          </div>
         ) : null}
       </header>
 

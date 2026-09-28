@@ -6,7 +6,7 @@ export default function SkillStudioEntry() {
   const navigate = useNavigate()
   const [draftId, setDraftId] = useState('')
 
-  function open(pathSuffix: '' | '/evaluations') {
+  function open(pathSuffix: '' | '/evaluations' | '/timeline') {
     const next = draftId.trim()
     if (next) {
       void navigate(`/skills/${encodeURIComponent(next)}${pathSuffix}`)
@@ -18,7 +18,7 @@ export default function SkillStudioEntry() {
       <h1 className="text-xl font-semibold tracking-tight">Skill Studio</h1>
       <p className="text-sm text-muted-foreground">
         Open a skill by id (from compile / demo). Studio for SKILL.md; Evaluation
-        Lab for case matrix and stored metrics.
+        Lab for case matrix; Timeline for version chain and deltas.
       </p>
       <form
         className="flex flex-col gap-2"
@@ -46,6 +46,13 @@ export default function SkillStudioEntry() {
             onClick={() => open('/evaluations')}
           >
             Open Evaluation Lab
+          </button>
+          <button
+            type="button"
+            className="rounded-md border px-3 py-2 text-sm hover:bg-muted"
+            onClick={() => open('/timeline')}
+          >
+            Open Timeline
           </button>
         </div>
       </form>

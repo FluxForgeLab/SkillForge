@@ -13,12 +13,17 @@ export default function App() {
   const onEvaluations = /\/skills\/[^/]+\/evaluations\/?$/.test(
     location.pathname,
   )
+  const onTimeline = /\/skills\/[^/]+\/timeline\/?$/.test(location.pathname)
   const evaluationsTo =
     skillId && skillId.length > 0
       ? `/skills/${encodeURIComponent(skillId)}/evaluations`
       : '/skills'
+  const timelineTo =
+    skillId && skillId.length > 0
+      ? `/skills/${encodeURIComponent(skillId)}/timeline`
+      : '/skills'
   const studioActive =
-    location.pathname.startsWith('/skills') && !onEvaluations
+    location.pathname.startsWith('/skills') && !onEvaluations && !onTimeline
 
   return (
     <div className="flex min-h-svh flex-col bg-background text-foreground">
@@ -38,6 +43,9 @@ export default function App() {
           className={() => navClass(onEvaluations)}
         >
           Evaluations
+        </NavLink>
+        <NavLink to={timelineTo} className={() => navClass(onTimeline)}>
+          Timeline
         </NavLink>
       </nav>
       <Outlet />
