@@ -14,7 +14,7 @@
 
 | # | 问题 | 影响 | 本计划的处理 |
 |---|---|---|---|
-| R1 | **模型内存预算过紧。** Step 3.7 Flash GGUF Q4_K_S ≈ 111.5 GB，DGX Spark 统一内存 128 GB，还要留 KV cache、OS、Docker、API、前端。 | 现场可能 OOM 或吞吐极低（demo 单次 agent run 可能要数分钟）。 | Day 1 在 DGX 上做 spike 测实际 tokens/s 与常驻内存；`ModelGateway` 从第一天起就是 OpenAI-compatible，本地开发用云端 API；准备 `StepFunAPIAdapter` 做 fallback；Judge Mode 提供"预计算 Benchmark + 现场单次 live run"的 replay 模式（C8.4）。 |
+| R1 | **模型内存预算过紧。** 架构文档 §13 的 Step 3.7 Flash GGUF Q4_K_S ≈ 111.5 GB，DGX Spark 统一内存 128 GB，还要留 KV cache、OS、Docker、API、前端。 | 现场可能 OOM 或吞吐极低（demo 单次 agent run 可能要数分钟）。 | 不再部署 Step 3.7 Flash。Phase 10 改用 DGX Spark 官方 vLLM 手册中的 Agent Ready 千问，失败再换同手册中的 NVIDIA 模型（见 §0.7）。`ModelGateway` 保持 OpenAI-compatible；本地 Windows 开发继续用云端 API。Judge Mode 仍用「预计算 Benchmark + 现场单次 live run」（C8.4）。 |
 | R2 | **Agent Loop 本身没有定义。** 架构文档提到 `LocalHarnessAdapter / OpenCodeAdapter`，但 "Without Skill" 基线到底是什么 agent、用什么工具集、多少步预算，没有说明。这是隐藏的最大工程量。 | A/B 对比的公平性和可解释性全靠它。 | 明确 Control 与 Treatment 使用**同一模型、同一工具集、同一步数/时间预算**，唯一差异是 system prompt 中是否注入 SKILL.md。自研一个最小 ReAct tool-calling loop（C3.6），不引入 agent framework。 |
 | R3 | **Docker 操作与 "禁止模型接触 docker.sock" 冲突。** Agent 要重启 ops-lab 容器、reload nginx，但 §21 禁止 docker.sock 进沙箱。 | 不解决就会在 Day 4 卡住。 | 拆成两个执行面：(a) `Sandbox` 只跑生成的脚本与只读 shell；(b) `OpsLabToolAdapter` 运行在控制面，以白名单方式暴露 `docker.inspect / docker.logs / docker.restart / nginx.test / nginx.reload / nginx.read_config / nginx.write_config`，只允许作用于 ops-lab compose project 内的容器。（C3.4、C3.5） |
 | R4 | **两套状态机混在一起。** §5.3 是 pipeline 状态（INGESTED→…→PUBLISHED），§9 是 SkillVersion 状态（DRAFT/CANDIDATE/…）。 | 实现时容易混淆。 | 分开：`PipelineRun.state` 与 `SkillVersion.status` 是两个枚举、两个状态机（C2.2、C8.1）。 |
@@ -105,6 +105,27 @@ C5 表格仍是当时的任务说明。下面是代码里已经生效的约定�
 
 **检索 trace。** `retrieval_query` 是对设计文档 §19 的补充，保留这个枚举。payload 是 `backend`、`mode_used`、`k`、`query_len`、`hit_ids`。stage 是 `knowledge`。
 
+### 0.7 Phase 10 模型选择（已拍板，覆盖架构文档 §13）
+
+架构文档 §13 的主路径是 llama.cpp + Step 3.7 Flash。该选择被本节取代。推理服务改为 vLLM 的 OpenAI 兼容接口，业务层仍只走 `ModelGateway`。
+
+**首选。** `nvidia/Qwen3.6-35B-A3B-NVFP4`。依据是 [NVIDIA/dgx-spark-playbooks](https://github.com/NVIDIA/dgx-spark-playbooks/blob/main/nvidia/vllm/README.md) 的 “Run Agent Ready Qwen3.6 35B Model with vLLM”（手册 2026-06-12 更新记入该配方）。启动沿用手册中的 `--tool-call-parser qwen3_xml`、`--enable-auto-tool-choice`、`--reasoning-parser qwen3`。镜像用手册给出的 arm64 + CUDA vLLM 镜像，不用 x86-only 二进制，也不用未合并的 llama.cpp 补丁。演示上下文先收到 32K，不照抄配方里的 262144。`gpu-memory-utilization` 以 C10.0 实测为准，默认不超过官方示例的 0.4。
+
+**第一回退。** 千问未通过下面四条时，同一套 vLLM 配方改测 `nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-NVFP4`（手册支持矩阵中的 NVIDIA 模型；若该句柄只有 FP8 变体，用矩阵里实际列出的 Nano 量化）。
+
+**最后选项。** Nano 也不合格时才考虑 `nvidia/NVIDIA-Nemotron-3-Super-120B-A12B-NVFP4`。它和 Step 3.7 Flash 一样接近 128 GB 上限，不是默认回退。
+
+**通过线（C10.0，四条都要）。**
+
+1. 容器在 DGX Spark（aarch64）上能起来。
+2. 一次 `docker.inspect` 以 OpenAI `tool_calls` 返回，现有适配器能把点号工具名映射回来。工具名仍只在适配器边界把 `.` 换成 `_`。
+3. 单流解码 ≥ 10 tok/s，且单步延迟能放进现场演示。
+4. API、网页和 ops-lab 同时在跑时不 OOM。
+
+**适配器。** 若 `tool_calls` 已是 OpenAI 格式，继续用 `OpenAICompatibleAdapter`，不新增 `StepFunLocalAdapter`。云端回退保持现有 Kimi / Moonshot。仓库默认温度仍是 `0`；只有 Kimi 覆盖为 `1`（§0.4）。Qwen / Nemotron 不沿用 `temperature=1`。vLLM 的 reasoning 字段不进入 Live Trace。`GET /api/model/status` 从 vLLM `/metrics` 填 tokens/s 和内存；测不到保持 null，不编造。
+
+**不选。** 社区的 Qwen3.8-Flash-Next（依赖未合并 llama.cpp 与磁盘卸载）不作为本阶段路径。支持矩阵里的 Qwen3-8B / 14B / 32B 不是 Agent Ready 配方，只在 35B-A3B 与两档 Nemotron 都失败时才重新讨论。
+
 ---
 
 ## 1. 目标仓库结构（对架构文档 §17 的简化）
@@ -116,7 +137,7 @@ SkillForge/
 ├── .cursor/                     # 开发 harness（rules / skills）
 ├── .gitignore  .editorconfig  .env.example
 ├── pyproject.toml               # 单一 Python 项目（uv + ruff + pytest）
-├── docker-compose.yml           # 全栈：api + web (+ llama.cpp profile)
+├── docker-compose.yml           # 全栈：api + web (+ vLLM dgx profile)
 ├── justfile                     # 统一开发命令（或 scripts/dev.ps1）
 │
 ├── skillforge/                  # 唯一的 Python 包
@@ -124,7 +145,7 @@ SkillForge/
 │   ├── domain/                  # pydantic 领域模型 + 状态机枚举
 │   ├── db/                      # schema.sql（普通表，不含 FTS）、connection、repositories
 │   ├── tracing/                 # TraceEvent、EventBus、sqlite sink
-│   ├── models/                  # ModelGateway + adapters (openai_compatible / stepfun_local / stepfun_api / fake)
+│   ├── models/                  # ModelGateway + adapters (openai_compatible / fake；DGX 上的 vLLM 走 openai_compatible)
 │   ├── ingestion/               # 上传、解析、chunk
 │   ├── knowledge/               # KnowledgeExtractor
 │   │   └── retrieval/           # 检索端口（见 docs/retrieval-layer.md）
@@ -309,18 +330,20 @@ SkillForge/
 | C9.11 | `feat(web): Knowledge Lab (lite)` **[P1]** | 文档列表、KU 列表、点击 KU 定位页码 | 联调 |
 | C9.12 | `feat(web): Dashboard` **[P1]** | 统计卡片 | 联调 |
 
-### Phase 10 — DGX Spark / NVIDIA 集成（Day 8；C10.1 的 spike 提前到 Day 1）
+### Phase 10 — DGX Spark / NVIDIA 集成（Day 8）
+
+模型选择见 §0.7。主路径是官方 Agent Ready 千问；失败再换 Nemotron Nano。不部署 Step 3.7 Flash。
 
 | # | Commit | 内容 | 完成标准 |
 |---|---|---|---|
-| C10.0 | `spike(deploy): measure Step 3.7 Flash on DGX Spark` **（Day 1 执行）** | llama.cpp 起模型；记录常驻内存、tokens/s、并发 1 的单次 agent step 延迟；结论写入 `docs/deployment.md` | 有数据；决定 live/replay 策略 |
-| C10.1 | `feat(deploy): llama.cpp compose profile for DGX Spark` | `docker-compose.yml` `profiles: [dgx]`；arm64 + CUDA 镜像；模型下载脚本；ctx/threads 参数 | DGX 上起得来 |
-| C10.2 | `feat(models): StepFunLocalAdapter with tool-calling and metrics` | 针对 llama.cpp server 的 tool-call 格式、stop、`/metrics` 采集 tokens/s；`GET /api/model/status` | 与 C9.10 联调 |
-| C10.3 | `feat(models): StepFunAPIAdapter fallback` | 云端 API 适配；settings 一键切换 | 切换后 demo 仍通 |
+| C10.0 | `spike(deploy): measure official Qwen3.6 35B on DGX Spark` | 按手册 Agent Ready 配方起 `nvidia/Qwen3.6-35B-A3B-NVFP4`。记录常驻内存、单流 tokens/s、一次 `docker.inspect` 的延迟，以及 `tool_calls` 是否为 OpenAI 格式。未过 §0.7 四条则同一配方改测 Nemotron Nano；两者都失败才考虑 Nemotron Super 120B。结论与选定模型写入 `docs/deployment.md` | 有数据；写明选定模型和未选中者的失败原因；决定 live/replay |
+| C10.1 | `feat(deploy): vLLM compose profile for DGX Spark` | `docker-compose.yml` `profiles: [dgx]`；手册中的 arm64 + CUDA vLLM 镜像；下载 C10.0 选定的 HF 权重；演示上下文 32K；显存占用以实测为准且默认不超过 0.4 | DGX 上 `/v1/chat/completions` 可调用 |
+| C10.2 | `feat(models): wire local vLLM and fill model status metrics` | `tool_calls` 已是 OpenAI 格式时继续用 `OpenAICompatibleAdapter`，不新增 StepFun 适配器。Settings 指向 vLLM 的 `base_url` 与选定模型名。从 `/metrics` 填 `GET /api/model/status` 的 tokens/s 与内存；测不到保持 null。reasoning 不进 Live Trace | 与 C9.10 联调；DGX 上一次工具调用走通 |
+| C10.3 | `feat(models): cloud fallback switch` | 云端回退保持现有 Kimi / Moonshot。本地 vLLM 与云端用 Settings 切换。不把 Kimi 的 `temperature=1` 写成 Qwen/Nemotron 默认。不实现 `StepFunAPIAdapter` | 切换后 demo 仍通 |
 | C10.4 | `feat(evaluator): NVIDIA SkillEvaluator adapter` **[P1]** | 接口 + CLI 包装 + mock；Tier 1/2/3 结果并入 BENCHMARK.md | mock 通；真实工具可用则接 |
 | C10.5 | `feat(compiler): NVIDIA Agent Skills convention checks` **[P1]** | 静态校验增加 NVIDIA skills 目录/frontmatter 约定 | golden 通过 |
 | C10.6 | `spike(sandbox): OpenShellSandbox adapter skeleton` **[P1]** | 实现接口、feature flag 关闭；文档记录现场稳定性结论 | 不影响主路径 |
-| C10.7 | `feat(deploy): full-stack compose and deployment.md` | api + web + lab 在 DGX 一键起 | `docker compose --profile dgx up` 可演示 |
+| C10.7 | `feat(deploy): full-stack compose and deployment.md` | api + web + lab + 选定 vLLM 模型在 DGX 一键起。`deployment.md` 含选定模型、回退条件和上下文/显存参数 | `docker compose --profile dgx up` 可演示 |
 
 ### Phase 11 — Delivery（Day 9，禁止改架构）
 
@@ -339,7 +362,7 @@ SkillForge/
 | # | Commit | 内容 | 完成标准 |
 |---|---|---|---|
 | C12.0 | `spike(knowledge): lancedb on DGX Spark and embedding model budget` | 在 DGX（aarch64）上 `uv sync --extra lancedb` 验证 wheel 可用；候选 embedding 模型（bge-small / nomic-embed 量化 / NeMo Retriever 端点）各自的常驻内存与 CPU 推理延迟；结论写入 `docs/retrieval-layer.md` §9 | 有数据；选定 embedder 方案；模型总内存仍在 R1 预算内 |
-| C12.1 | `feat(knowledge): OpenAICompatibleEmbedder` | `embedder.py` 增加实现：调用 `/v1/embeddings`（llama.cpp 或 NeMo Retriever 兼容端点），批量、超时、`dimension` 自检；`Settings.embedder="openai_compatible"` 时由 factory 注入 | 单测（httpx mock）；`Indexer` 在 embedder 非 Null 时填充 `IndexDocument.vector` |
+| C12.1 | `feat(knowledge): OpenAICompatibleEmbedder` | `embedder.py` 增加实现：调用 `/v1/embeddings`（Phase 10 的 vLLM，或 NeMo Retriever 兼容端点），批量、超时、`dimension` 自检；`Settings.embedder="openai_compatible"` 时由 factory 注入 | 单测（httpx mock）；`Indexer` 在 embedder 非 Null 时填充 `IndexDocument.vector` |
 | C12.2 | `feat(knowledge): LanceDbIndex backend with keyword and vector modes` | `backends/lancedb.py`：表 `data/index/lancedb/documents`，schema 由 `IndexDocument` 派生（vector 列维度来自 embedder）；`keyword` 走 Lance 内建 FTS，`vector` 走 ANN；`delete(project_id, document_id)` 用过滤删除；score 归一化；`capabilities={"keyword","vector"}`；加入契约测试 parametrize | 契约测试对 `lancedb` 全绿（在 CI 中以 `-m lancedb` 单独跑，依赖 extra） |
 | C12.3 | `feat(knowledge): hybrid mode with RRF fusion` | `LanceDbIndex` 支持 `hybrid`（keyword + vector 各取 2k 后 RRF 融合）；契约测试增加 hybrid 用例（结果集 ⊇ keyword top-1） | 全绿 |
 | C12.4 | `feat(cli): index rebuild across backends` | `skillforge index rebuild --project <id> [--backend lancedb] [--all-projects]`；`skillforge index stats` 显示后端、文档数、向量维度 | 切换后端 = 改 `SKILLFORGE_RETRIEVAL_BACKEND` + rebuild，命令幂等 |
@@ -356,7 +379,7 @@ C0.* → C1.* → C2.* → C3.1 ─┬→ C3.2-3.11 → C4.* ──────�
                             │                                  ├→ C7.* → C8.* → C9.5(联调) → C10.7 → C11.*
                             └→ C5.* → C6.* ────────────────────┘
 C9.1-9.4（组件用 mock 数据）可与 C4-C7 并行
-C10.0 在 Day 1 执行；C10.1-10.3 可在 Day 3 起并行
+C10.0 在 DGX 上先于 C10.1 执行；C10.1–C10.3 使用 C10.0 选定的模型
 ```
 
 两人分工时：A 走 Runtime/Evaluator/Evolution 主线（C3→C4→C7），B 走 Knowledge/Compiler（C5→C6）+ 前端组件（C9.1-9.4）。C3.1 golden skill 两人一起写，它是双方的契约。
@@ -374,7 +397,7 @@ C10.0 在 Day 1 执行；C10.1-10.3 可在 Day 3 起并行
 | 5 | C5.6–C5.9、C6.* | 上传 runbook → 自动编译出 skill（DoD 1–4） |
 | 6 | C7.*、C8.* | v0.1 失败 F3 → v0.2 通过回归（DoD 8–12），headless 15 步全通 |
 | 7 | C9.* | Judge Mode 跑通 15 步（DoD 13–15） |
-| 8 | C10.* | 在 DGX Spark 上以 Step 3.7 Flash 跑通 |
+| 8 | C10.* | 在 DGX Spark 上以 §0.7 选定的千问或 Nemotron 跑通 |
 | 9 | C11.* | 排练、文档、视频 |
 
 ---
@@ -383,7 +406,7 @@ C10.0 在 Day 1 执行；C10.1-10.3 可在 Day 3 起并行
 
 | 风险 | 触发信号 | 预案 |
 |---|---|---|
-| 模型太慢/OOM（R1） | C10.0 测得 < 10 tok/s 或起不来 | 切 IQ4_XS 或更小 ctx；demo 用 replay + 1 条 live；极端情况 StepFunAPIAdapter |
+| 模型太慢/OOM（R1） | C10.0 千问未过 §0.7 四条 | 同一 vLLM 配方改测 Nemotron Nano；仍失败才考虑 Super 120B。demo 仍可用 replay + 1 条 live，云端回退是现有 Kimi |
 | 真实模型编译质量差（C6.10） | uplift ≤ 0 | 增强模板约束、减少 LLM 自由度；demo 用录制响应保证可复现，README 诚实说明 |
 | Agent 在 Control arm 也能解 F2 | Control 成功率过高，uplift 不明显 | 调整 F2 为需要 `nginx -t` 的变体；或把 F2 归入 F3 类 |
 | Docker Desktop（Windows）与 DGX（Linux/arm64）行为差异 | 集成测试仅本地通过 | Day 3 起每日在 DGX 上跑一次 `pytest -m integration` |
