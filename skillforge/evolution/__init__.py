@@ -2,5 +2,11 @@
 
 from skillforge.evolution.analyzer import FailureAnalyzer
 from skillforge.evolution.evidence import enrich_source_support, query_text
+from skillforge.evolution.patcher import SkillPatcher
 
-__all__ = ["FailureAnalyzer", "enrich_source_support", "query_text"]
+__all__ = [
+    "FailureAnalyzer",
+    "SkillPatcher",
+    "enrich_source_support",
+    "query_text",
+]
