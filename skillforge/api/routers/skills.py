@@ -12,7 +12,11 @@ from pydantic import BaseModel, ConfigDict, Field
 from skillforge.api.deps import get_settings_dep
 from skillforge.compiler.evals import render_evals
 from skillforge.compiler.package import package_skill
-from skillforge.compiler.passes import TaskScope, compile_skill_spec
+from skillforge.compiler.passes import (
+    NoMatchingKnowledgeError,
+    TaskScope,
+    compile_skill_spec,
+)
 from skillforge.compiler.scripts import render_scripts
 from skillforge.compiler.skill_md import render_skill_markdown, source_map_json
 from skillforge.compiler.validate import validate_skill_dir
@@ -131,14 +135,17 @@ async def compile_project_skill(
         sink=sink,
         bus=bus,
     )
-    compiled = await compile_skill_spec(
-        settings.sqlite_path,
-        project_id,
-        TaskScope(name=body.name, description=body.description, triggers=body.triggers),
-        gateway,
-        retriever=retriever,
-        settings=settings,
-    )
+    try:
+        compiled = await compile_skill_spec(
+            settings.sqlite_path,
+            project_id,
+            TaskScope(name=body.name, description=body.description, triggers=body.triggers),
+            gateway,
+            retriever=retriever,
+            settings=settings,
+        )
+    except NoMatchingKnowledgeError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
     markdown = await render_skill_markdown(
         settings.sqlite_path,
         compiled.spec,

@@ -54,6 +54,15 @@ class CompiledSpec(BaseModel):
     selected_unit_ids: list[str]
 
 
+class NoMatchingKnowledgeError(Exception):
+    """Scope triggers matched no stored knowledge-unit trigger."""
+
+    def __init__(self, triggers: list[str]) -> None:
+        self.triggers = list(triggers)
+        shown = ", ".join(triggers) if triggers else "(none)"
+        super().__init__(f"no knowledge units match triggers: {shown}")
+
+
 async def compile_skill_spec(
     db_path: Path,
     project_id: str,
@@ -68,6 +77,8 @@ async def compile_skill_spec(
         units = list_knowledge_units_by_project(conn, project_id)
     eligible = [unit for unit in units if _eligible(unit, scope)]
     selected = await _rank(eligible, scope, project_id, retriever)
+    if not selected:
+        raise NoMatchingKnowledgeError(list(scope.triggers))
     draft = await generate_structured(
         gateway,
         SkillSpec,

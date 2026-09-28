@@ -7,6 +7,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from skillforge.compiler import TaskScope, compile_skill_spec
+from skillforge.compiler.passes import NoMatchingKnowledgeError
 from skillforge.config import Settings
 from skillforge.db.connection import connection
 from skillforge.db.init import initialize_database
@@ -102,6 +103,30 @@ async def test_matching_diagnostic_rule_stays_selected(tmp_path: Path) -> None:
     )
     assert "ku_04_health" in compiled.selected_unit_ids
     assert "ku_03_appendix" not in compiled.selected_unit_ids
+
+
+async def test_unmatched_triggers_do_not_call_the_model(tmp_path: Path) -> None:
+    db_path, settings, retriever = await _world(tmp_path, _units())
+    remembered = _Remember(FakeModelAdapter([_draft()]))
+    scope = TaskScope(
+        name="service-recovery",
+        description="Diagnose and recover containerized web services.",
+        triggers=["502 Bad Gateway", "nginx upstream", "backend stopped"],
+    )
+    try:
+        await compile_skill_spec(
+            db_path,
+            _PROJECT,
+            scope,
+            _gateway(remembered, settings),
+            retriever=retriever,
+            settings=settings,
+        )
+    except NoMatchingKnowledgeError as exc:
+        assert "502 Bad Gateway" in str(exc)
+    else:
+        raise AssertionError("expected NoMatchingKnowledgeError")
+    assert remembered.requests == []
 
 
 def _scope() -> TaskScope:
