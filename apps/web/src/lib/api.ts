@@ -25,26 +25,68 @@ export class ApiError extends Error {
   }
 }
 
+function resolveUrl(path: string): string {
+  return path.startsWith('http')
+    ? path
+    : `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`
+}
+
+/** Build headers; never force JSON Content-Type onto FormData (browser sets multipart boundary). */
+export function buildApiHeaders(init?: RequestInit): Headers {
+  const headers = new Headers(init?.headers)
+  if (!headers.has('Accept')) {
+    headers.set('Accept', 'application/json')
+  }
+  const body = init?.body
+  const isFormData = typeof FormData !== 'undefined' && body instanceof FormData
+  if (body && !isFormData && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json')
+  }
+  return headers
+}
+
+export type ApiSuccess<T> = { ok: true; status: number; data: T }
+export type ApiFailure = { ok: false; status: number; body: string }
+export type ApiResult<T> = ApiSuccess<T> | ApiFailure
+
+/** Low-level request that always returns HTTP status (success or failure). */
+export async function apiRequest<T>(
+  path: string,
+  init?: RequestInit,
+): Promise<ApiResult<T>> {
+  const response = await fetch(resolveUrl(path), {
+    ...init,
+    headers: buildApiHeaders(init),
+  })
+  if (!response.ok) {
+    return { ok: false, status: response.status, body: await response.text() }
+  }
+  if (response.status === 204) {
+    return { ok: true, status: response.status, data: undefined as T }
+  }
+  return {
+    ok: true,
+    status: response.status,
+    data: (await response.json()) as T,
+  }
+}
+
 export async function apiFetch<T>(
   path: string,
   init?: RequestInit,
 ): Promise<T> {
-  const url = path.startsWith('http')
-    ? path
-    : `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`
-  const response = await fetch(url, {
-    ...init,
-    headers: {
-      Accept: 'application/json',
-      ...(init?.body ? { 'Content-Type': 'application/json' } : {}),
-      ...init?.headers,
-    },
-  })
-  if (!response.ok) {
-    throw new ApiError(response.status, await response.text())
+  const result = await apiRequest<T>(path, init)
+  if (!result.ok) {
+    throw new ApiError(result.status, result.body)
   }
-  if (response.status === 204) {
-    return undefined as T
-  }
-  return (await response.json()) as T
+  return result.data
+}
+
+/** Multipart upload helper — omits JSON Content-Type so the browser sets the boundary. */
+export async function apiUploadForm<T>(
+  path: string,
+  formData: FormData,
+  init?: Omit<RequestInit, 'body'>,
+): Promise<T> {
+  return apiFetch<T>(path, { ...init, method: init?.method ?? 'POST', body: formData })
 }
