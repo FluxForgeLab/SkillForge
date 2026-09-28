@@ -117,6 +117,8 @@ ops-lab 的 `nginx:alpine` 和 `python:3.12-slim` 经 `docker.m.daocloud.io` 拉
 
 `SKILLFORGE_MODEL_PROFILE=local_vllm` 指向 `http://127.0.0.1:8001/v1` 和千问，温度强制为 0。`kimi` 指向 `https://api.moonshot.cn/v1` 和 `kimi-k3`，温度强制为 1。`custom` 沿用原来的字段，默认温度仍是 0。StepFun 适配器没有实现。
 
+`SKILLFORGE_SANDBOX_BACKEND` 默认 `docker`。2026-09-28 在这台 aarch64 机器上 `command -v openshell` 没有结果。`OpenShellSandbox` 只在显式改成 `openshell` 时被选中，并且在二进制不存在时直接失败，不进入主路径。
+
 ```bash
 docker rm -f skillforge-vllm
 docker compose --profile dgx up -d

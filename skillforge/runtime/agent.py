@@ -10,7 +10,7 @@ from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict
 
-from skillforge.config import Settings
+from skillforge.config import Settings, get_settings
 from skillforge.domain.errors import PolicyViolation
 from skillforge.models.gateway import ModelGateway
 from skillforge.models.types import ChatMessage, ModelRequest, ToolCall
@@ -68,7 +68,7 @@ class LocalHarness:
         sandbox = (
             self._sandbox
             if self._sandbox is not None
-            else _docker_sandbox(run_id, self._sink, self._bus)
+            else _sandbox_for(run_id, self._sink, self._bus)
         )
         started = time.perf_counter()
         try:
@@ -216,7 +216,11 @@ class LocalHarness:
         )
 
 
-def _docker_sandbox(run_id: str, sink: TraceSink | None, bus: EventBus | None) -> Sandbox:
+def _sandbox_for(run_id: str, sink: TraceSink | None, bus: EventBus | None) -> Sandbox:
+    if get_settings().sandbox_backend == "openshell":
+        from skillforge.sandbox.openshell import OpenShellSandbox
+
+        return OpenShellSandbox()
     from skillforge.sandbox.docker import DockerSandbox
 
     return DockerSandbox(run_id=run_id, sink=sink, bus=bus)
