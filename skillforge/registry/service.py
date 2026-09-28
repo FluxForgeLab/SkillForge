@@ -29,6 +29,7 @@ from skillforge.registry.errors import (
     SkillNotFoundError,
     SkillVersionNotFoundError,
 )
+from skillforge.registry.manifest import skill_key_from_name
 from skillforge.registry.store import ArtifactStore
 
 
@@ -38,6 +39,7 @@ class SkillRegistry:
         db_path: Path,
         *,
         generated_root: Path | None = None,
+        published_root: Path | None = None,
         path_prefix: str | None = None,
         settings: Settings | None = None,
     ) -> None:
@@ -48,6 +50,26 @@ class SkillRegistry:
             generated_root if generated_root is not None else resolved_settings.skills_generated_dir
         )
         self._store = ArtifactStore(root, path_prefix=prefix)
+        self._published_root = (
+            published_root if published_root is not None else resolved_settings.skills_published_dir
+        )
+
+    @property
+    def db_path(self) -> Path:
+        return self._db_path
+
+    @property
+    def published_root(self) -> Path:
+        return self._published_root
+
+    def artifact_dir(self, version_id: str) -> Path:
+        """Filesystem directory for a version's generated artifacts."""
+        version = self.get_version(version_id)
+        with connection(self._db_path) as conn:
+            skill = get_skill(conn, version.skill_id)
+        if skill is None:
+            raise SkillNotFoundError(version.skill_id)
+        return self._store.version_dir(skill_key_from_name(skill.name), version.version)
 
     def create_skill(
         self,

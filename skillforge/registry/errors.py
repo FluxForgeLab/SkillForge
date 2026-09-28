@@ -39,3 +39,11 @@ class SkillVersionNotFoundError(RegistryError):
     def __init__(self, version_id: str) -> None:
         self.version_id = version_id
         super().__init__(f"skill version not found: {version_id!r}")
+
+
+class MissingApproverError(RegistryError):
+    """approve() requires a non-empty approver string."""
+
+    def __init__(self, version_id: str) -> None:
+        self.version_id = version_id
+        super().__init__(f"approver required to approve skill version {version_id!r}")

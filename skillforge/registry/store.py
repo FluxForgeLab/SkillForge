@@ -21,6 +21,9 @@ class ArtifactStore:
         self._root = generated_root
         self._path_prefix = path_prefix
 
+    def version_dir(self, skill_key: str, version: str) -> Path:
+        return self._root / skill_key / version
+
     def write_version(
         self,
         *,
@@ -31,7 +34,7 @@ class ArtifactStore:
         files: Mapping[str, bytes],
     ) -> tuple[str, str]:
         skill_key = skill_key_from_name(skill_name)
-        version_dir = self._root / skill_key / version
+        version_dir = self.version_dir(skill_key, version)
         version_dir.mkdir(parents=True, exist_ok=True)
 
         entries: list[ManifestFileEntry] = []
