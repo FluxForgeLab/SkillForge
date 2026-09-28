@@ -123,7 +123,7 @@ class LocalHarness:
                     run_id=run_id,
                     messages=messages,
                     tools=tools,
-                    temperature=self._settings.temperature,
+                    temperature=self._settings.resolved_model().temperature,
                     seed=self._settings.seed,
                     stage="runtime",
                 )

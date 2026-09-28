@@ -115,6 +115,8 @@ ops-lab 的 `nginx:alpine` 和 `python:3.12-slim` 经 `docker.m.daocloud.io` 拉
 
 这次测量里 vLLM 占 `127.0.0.1:8000`，临时 API 改到 `8010`，避免和本机开发默认的 API 端口冲突。仓库根目录 `docker-compose.yml` 的 `dgx` profile 把同一条命令的宿主机端口改到 `127.0.0.1:8001`，容器内仍是 8000，这样 SkillForge API 可以继续用 `127.0.0.1:8000`。网页 `127.0.0.1:5173`，ops-lab `8088`。推理服务不要绑到公网转发端口。权重目录用 `SKILLFORGE_VLLM_MODEL_DIR` 覆盖，默认是上面的本机路径。
 
+`SKILLFORGE_MODEL_PROFILE=local_vllm` 指向 `http://127.0.0.1:8001/v1` 和千问，温度强制为 0。`kimi` 指向 `https://api.moonshot.cn/v1` 和 `kimi-k3`，温度强制为 1。`custom` 沿用原来的字段，默认温度仍是 0。StepFun 适配器没有实现。
+
 ```bash
 docker rm -f skillforge-vllm
 docker compose --profile dgx up -d

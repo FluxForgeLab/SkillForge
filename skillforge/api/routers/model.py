@@ -35,14 +35,15 @@ async def model_status(settings: SettingsDep) -> ModelStatusResponse:
     process_resident_memory_bytes is the API process, not the weights.
     """
     tokens_per_second = None
-    if settings.model_adapter == "openai_compatible":
+    resolved = settings.resolved_model()
+    if resolved.adapter == "openai_compatible":
         tokens_per_second = await read_vllm_tokens_per_second(
-            settings.model_base_url,
-            settings.model_name,
+            resolved.base_url,
+            resolved.name,
         )
     return ModelStatusResponse(
-        model=settings.model_name,
-        backend=settings.model_adapter,
+        model=resolved.name,
+        backend=resolved.adapter,
         tokens_per_second=tokens_per_second,
         memory_bytes=None,
     )

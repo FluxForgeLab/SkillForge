@@ -13,6 +13,7 @@ def test_package_version() -> None:
 def test_settings_defaults() -> None:
     settings = Settings(_env_file=None)
     assert settings.model_adapter == "fake"
+    assert settings.model_profile == "custom"
     assert settings.temperature == 0.0
     assert settings.opslab_project == "skillforge-lab"
     assert settings.opslab_base_url == "http://127.0.0.1:8088"

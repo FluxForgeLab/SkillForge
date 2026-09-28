@@ -268,6 +268,8 @@ def test_build_adapter_fake_and_openai() -> None:
 def test_build_adapter_stepfun_not_implemented() -> None:
     with pytest.raises(NotImplementedError):
         build_adapter(Settings(_env_file=None, model_adapter="stepfun_local"))
+    with pytest.raises(NotImplementedError):
+        build_adapter(Settings(_env_file=None, model_adapter="stepfun_api"))
 
 
 def test_load_fake_script_and_adapter() -> None:

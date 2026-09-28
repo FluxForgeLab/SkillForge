@@ -71,7 +71,8 @@ class ModelGateway:
 
 
 def build_adapter(settings: Settings) -> ModelAdapter:
-    name = settings.model_adapter
+    resolved = settings.resolved_model()
+    name = resolved.adapter
     if name == "fake":
         return FakeModelAdapter(
             default=ModelResponse(
@@ -81,10 +82,10 @@ def build_adapter(settings: Settings) -> ModelAdapter:
         )
     if name == "openai_compatible":
         return OpenAICompatibleAdapter(
-            base_url=settings.model_base_url,
-            api_key=settings.model_api_key.get_secret_value(),
-            default_model=settings.model_name,
-            default_temperature=settings.temperature,
+            base_url=resolved.base_url,
+            api_key=resolved.api_key,
+            default_model=resolved.name,
+            default_temperature=resolved.temperature,
             default_seed=settings.seed,
             timeout=settings.model_timeout_seconds,
         )
