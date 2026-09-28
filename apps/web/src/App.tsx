@@ -26,6 +26,17 @@ export default function App() {
         >
           Demo
         </NavLink>
+        <NavLink
+          to="/skills"
+          className={({ isActive }) =>
+            isActive
+              ? 'text-foreground'
+              : 'text-muted-foreground hover:text-foreground'
+          }
+          end={false}
+        >
+          Studio
+        </NavLink>
       </nav>
       <Outlet />
     </div>

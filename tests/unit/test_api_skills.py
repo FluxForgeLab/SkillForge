@@ -60,6 +60,61 @@ def test_compile_then_read_and_validate(tmp_path: Path) -> None:
     assert validated.json()["passed"] is True
 
 
+def test_read_skill_version_file_happy_path(tmp_path: Path) -> None:
+    client, gateway = _client(tmp_path)
+    client.app.dependency_overrides[get_compile_gateway] = lambda: gateway
+    compiled = client.post(
+        f"/api/projects/{_PROJECT}/skills/compile",
+        json={
+            "name": "service-recovery",
+            "description": "Diagnose and recover the edge service.",
+            "triggers": ["backend unavailable"],
+        },
+    )
+    assert compiled.status_code == 201
+    skill_id = compiled.json()["skill_id"]
+    version_id = compiled.json()["version_id"]
+
+    response = client.get(
+        f"/api/skills/{skill_id}/versions/{version_id}/file",
+        params={"path": "SKILL.md"},
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["path"] == "SKILL.md"
+    assert payload["text"].startswith("---")
+    assert "service-recovery" in payload["text"]
+
+
+def test_read_skill_version_file_rejects_path_traversal(tmp_path: Path) -> None:
+    client, gateway = _client(tmp_path)
+    client.app.dependency_overrides[get_compile_gateway] = lambda: gateway
+    compiled = client.post(
+        f"/api/projects/{_PROJECT}/skills/compile",
+        json={
+            "name": "service-recovery",
+            "description": "Diagnose and recover the edge service.",
+            "triggers": ["backend unavailable"],
+        },
+    )
+    assert compiled.status_code == 201
+    skill_id = compiled.json()["skill_id"]
+    version_id = compiled.json()["version_id"]
+
+    blocked = client.get(
+        f"/api/skills/{skill_id}/versions/{version_id}/file",
+        params={"path": "../SKILL.md"},
+    )
+    assert blocked.status_code == 400
+    assert blocked.json()["error"]["message"] == "invalid path"
+
+    absolute = client.get(
+        f"/api/skills/{skill_id}/versions/{version_id}/file",
+        params={"path": "/etc/passwd"},
+    )
+    assert absolute.status_code == 400
+
+
 def test_unknown_project_and_skill_are_not_found(tmp_path: Path) -> None:
     client, _gateway = _client(tmp_path)
     missing = client.post(
@@ -72,6 +127,13 @@ def test_unknown_project_and_skill_are_not_found(tmp_path: Path) -> None:
     )
     assert missing.status_code == 404
     assert client.post("/api/skills/missing/validate").status_code == 404
+    assert (
+        client.get(
+            "/api/skills/missing/versions/missing/file",
+            params={"path": "SKILL.md"},
+        ).status_code
+        == 404
+    )
 
 
 def _client(tmp_path: Path) -> tuple[TestClient, ModelGateway]:

@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 import tempfile
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from pydantic import BaseModel, ConfigDict, Field
 
 from skillforge.api.deps import get_settings_dep
@@ -22,9 +22,11 @@ from skillforge.db.repositories.knowledge_units import list_knowledge_units_by_p
 from skillforge.db.repositories.projects import get_project
 from skillforge.db.repositories.skill_versions import get_skill_version, list_skill_versions
 from skillforge.db.repositories.skills import get_skill
+from skillforge.domain.entities import SkillVersion
 from skillforge.knowledge.retrieval.factory import build_embedder, build_index
 from skillforge.knowledge.retrieval.retriever import Retriever
 from skillforge.models.gateway import ModelGateway, build_adapter
+from skillforge.registry.errors import SkillVersionNotFoundError
 from skillforge.registry.service import SkillRegistry
 from skillforge.tracing.bus import EventBus
 from skillforge.tracing.sink import SqliteTraceSink
@@ -75,6 +77,13 @@ class ValidateResponse(BaseModel):
 
     passed: bool
     errors: list[str]
+
+
+class VersionFileResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    path: str
+    text: str
 
 
 def get_compile_gateway(request: Request, settings: SettingsDep) -> ModelGateway:
@@ -204,6 +213,29 @@ async def validate_skill(
     return ValidateResponse(passed=result.passed, errors=result.errors)
 
 
+@router.get(
+    "/skills/{skill_id}/versions/{version_id}/file",
+    response_model=VersionFileResponse,
+)
+async def read_skill_version_file(
+    skill_id: str,
+    version_id: str,
+    settings: SettingsDep,
+    path: Annotated[str, Query(min_length=1)],
+) -> VersionFileResponse:
+    """Read a single text file from a version artifact directory (read-only)."""
+    version = _require_skill_version(settings, skill_id, version_id)
+    registry = _registry(settings)
+    artifact_dir = registry.artifact_dir(version.id)
+    target = _resolve_version_file(artifact_dir, path)
+    if not target.is_file():
+        raise HTTPException(status_code=404, detail="file not found")
+    return VersionFileResponse(
+        path=PurePosixPath(path.replace("\\", "/")).as_posix(),
+        text=target.read_text(encoding="utf-8"),
+    )
+
+
 def _require_project(settings: Settings, project_id: str) -> None:
     with connection(settings.sqlite_path) as conn:
         if get_project(conn, project_id) is None:
@@ -248,3 +280,45 @@ def _artifact_dir(settings: Settings, skill_id: str) -> Path:
     if version is None or not version.artifact_path:
         raise HTTPException(status_code=409, detail="skill version has no artifact path")
     return Path(version.artifact_path)
+
+
+def _registry(settings: Settings) -> SkillRegistry:
+    return SkillRegistry(
+        settings.sqlite_path,
+        generated_root=settings.skills_generated_dir,
+        published_root=settings.skills_published_dir,
+        settings=settings,
+    )
+
+
+def _require_skill_version(settings: Settings, skill_id: str, version_id: str) -> SkillVersion:
+    with connection(settings.sqlite_path) as conn:
+        if get_skill(conn, skill_id) is None:
+            raise HTTPException(status_code=404, detail="skill not found")
+    registry = _registry(settings)
+    try:
+        version = registry.get_version(version_id)
+    except SkillVersionNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    if version.skill_id != skill_id:
+        raise HTTPException(status_code=404, detail="skill version not found")
+    return version
+
+
+def _resolve_version_file(artifact_dir: Path, rel_path: str) -> Path:
+    """Resolve a relative artifact path; reject traversal and absolute paths."""
+    normalized = rel_path.replace("\\", "/")
+    posix = PurePosixPath(normalized)
+    if (
+        not normalized
+        or normalized.startswith("/")
+        or posix.is_absolute()
+        or ".." in posix.parts
+        or posix.parts == ()
+    ):
+        raise HTTPException(status_code=400, detail="invalid path")
+    root = artifact_dir.resolve()
+    target = (root.joinpath(*posix.parts)).resolve()
+    if not target.is_relative_to(root):
+        raise HTTPException(status_code=400, detail="invalid path")
+    return target

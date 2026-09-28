@@ -7,6 +7,8 @@ import App from './App.tsx'
 import './index.css'
 import DemoPage from './pages/DemoPage.tsx'
 import HomePage from './pages/HomePage.tsx'
+import SkillStudioEntry from './pages/SkillStudioEntry.tsx'
+import SkillStudioPage from './pages/SkillStudioPage.tsx'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -25,6 +27,8 @@ createRoot(document.getElementById('root')!).render(
           <Route element={<App />}>
             <Route index element={<HomePage />} />
             <Route path="demo" element={<DemoPage />} />
+            <Route path="skills" element={<SkillStudioEntry />} />
+            <Route path="skills/:id" element={<SkillStudioPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
