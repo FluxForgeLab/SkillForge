@@ -8,24 +8,29 @@ from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict
 
+from skillforge.db.connection import connection
+from skillforge.db.repositories.agent_runs import AgentRunRecord, insert_agent_run
 from skillforge.domain.entities import EvaluationRun, TraceEvent
 from skillforge.evaluator.cache import replay_trials, store_trial
 from skillforge.evaluator.cases import LoadedEvalCase
 from skillforge.evaluator.runner import _SETTLE_SEC, InjectFn, ResetFn, VerifyFn, run_case
 from skillforge.runtime.agent import AgentRuntime
-from skillforge.tracing.sink import TraceSink
+from skillforge.tracing.sink import SqliteTraceSink, TraceSink
 
 HarnessFactory = Callable[[str, TraceSink], AgentRuntime]
 
 
 class MemorySink:
-    """In-memory trace sink for one suite trial."""
+    """In-memory trace sink for one suite trial. Optionally mirrors events to SQLite."""
 
-    def __init__(self) -> None:
+    def __init__(self, persist: TraceSink | None = None) -> None:
         self.events: list[TraceEvent] = []
+        self._persist = persist
 
     async def write(self, event: TraceEvent) -> None:
         self.events.append(event)
+        if self._persist is not None:
+            await self._persist.write(event)
 
 
 class ArmSummary(BaseModel):
@@ -114,7 +119,7 @@ async def run_suite(
         for index in range(repeats):
             for baseline, arm in ((True, "control"), (False, "treatment")):
                 run_id = f"{prefix}_{case.case.id}_{arm}_{index}"
-                sink = MemorySink()
+                sink = MemorySink(persist=SqliteTraceSink(db_path))
                 harness = harness_factory(run_id, sink)
                 record = await run_case(
                     case,
@@ -133,6 +138,7 @@ async def run_suite(
                     evals_dir=skill_path,
                 )
                 runs.append(record)
+                _store_agent_run(db_path, record)
                 if version_hash is not None and model is not None:
                     store_trial(
                         db_path,
@@ -145,6 +151,23 @@ async def run_suite(
                         status=record.status.value,
                     )
     return summarize(runs, skill_version_id=skill_version_id, repeats=repeats)
+
+
+def _store_agent_run(db_path: Path, record: EvaluationRun) -> None:
+    """Let GET /api/runs/{id}/events load the trial the evaluator just stored."""
+    metrics = record.metrics
+    agent = AgentRunRecord(
+        id=record.id,
+        status=str(metrics.get("agent_status") or record.status.value),
+        final_content=None,
+        steps=int(metrics.get("steps") or 0),
+        tool_errors=int(metrics.get("tool_errors") or 0),
+        tokens=int(metrics.get("tokens") or 0),
+        latency_ms=int(metrics.get("latency_ms") or 0),
+        policy_violations=int(metrics.get("policy_violations") or 0),
+    )
+    with connection(db_path) as conn:
+        insert_agent_run(conn, agent)
 
 
 def _arm_summary(runs: Sequence[EvaluationRun], *, baseline: bool, label: str) -> ArmSummary:

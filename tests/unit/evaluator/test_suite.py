@@ -9,6 +9,7 @@ import pytest
 
 from skillforge.db.connection import connection
 from skillforge.db.init import initialize_database
+from skillforge.db.repositories.agent_runs import get_agent_run
 from skillforge.db.repositories.evaluation_runs import get_evaluation_run
 from skillforge.db.repositories.projects import insert_project
 from skillforge.db.repositories.skill_versions import insert_skill_version
@@ -99,9 +100,13 @@ async def test_suite_runs_control_then_treatment(tmp_path: Path) -> None:
     assert report.treatment.success_rate == 1
     with connection(db_path) as conn:
         stored = get_evaluation_run(conn, seen[0][0])
+        agent = get_agent_run(conn, seen[0][0])
     assert stored is not None
     assert stored.baseline == {"baseline": True}
     assert stored.skill_version_id == version_id
+    assert agent is not None
+    assert agent.id == seen[0][0]
+    assert agent.steps == 1
 
 
 async def test_repeats_below_one_raises(tmp_path: Path) -> None:
