@@ -90,7 +90,7 @@ vLLM 自己的启动日志（统一内存记账，不能和下面的 `free` 相�
 
 模型就绪后，以及 API、静态网页、ops-lab 同时在跑时，`free -h` 都是 used 56Gi、available 63Gi、swap 2.1Gi / 15Gi。buff/cache 从启动前的 98Gi 降到约 40Gi。swap 从 25Mi 升到 2.1Gi，发生在模型加载期间，栈加上去之后没有再涨。
 
-`/metrics` 的 `process_resident_memory_bytes` 是 `2172506112`（约 2.02GiB），这是 vLLM API 进程，不是引擎。同一次抓取里没有 GPU 显存 gauge。tokens/s 和内存若不能从 `/metrics` 读出稳定值，接口应保持 null。
+`/metrics` 的 `process_resident_memory_bytes` 在测量当时是 `2172506112`（约 2.02GiB），这是 vLLM API 进程，不是引擎。文本指标里没有模型显存 gauge，`kv_cache_memory_bytes` 标签值是 `None`。`GET /api/model/status` 在 `openai_compatible` 时只把 `vllm:request_time_per_output_token_seconds` 的 count/sum 填进 `tokens_per_second`（进程启动后的累计均值）。没有样本或抓取失败时为 null。`memory_bytes` 保持 null，不用 API 进程 RSS 冒充模型内存。
 
 同时在跑的测量进程：SkillForge API（`SKILLFORGE_MODEL_ADAPTER=fake`，`127.0.0.1:8010`）RSS 约 65MiB；网页是生产构建的 `http.server`（`127.0.0.1:5173`）RSS 约 19MiB。ops-lab 三个容器 healthy / running。测量结束后停掉了临时 API 和静态网页。vLLM 与 `skillforge-lab` 留在机器上。
 

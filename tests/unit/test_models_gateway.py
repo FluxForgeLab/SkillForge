@@ -26,6 +26,7 @@ from skillforge.models import (
     load_fake_script,
 )
 from skillforge.models.errors import ModelInvocationError
+from skillforge.models.types import response_trace_payload
 from skillforge.tracing import EventBus, SqliteTraceSink
 
 
@@ -166,6 +167,74 @@ async def test_openai_compatible_maps_request_response() -> None:
     assert response.tool_calls[0].name == "docker.inspect"
     assert response.usage.total_tokens == 18
 
+    await client.aclose()
+
+
+@pytest.mark.asyncio
+async def test_openai_reasoning_stays_out_of_the_trace() -> None:
+    def handler(_request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            json={
+                "model": "nvidia/Qwen3.6-35B-A3B-NVFP4",
+                "choices": [
+                    {
+                        "finish_reason": "tool_calls",
+                        "message": {
+                            "content": None,
+                            "reasoning": "hidden chain of thought",
+                            "tool_calls": [
+                                {
+                                    "id": "call_qwen",
+                                    "type": "function",
+                                    "function": {
+                                        "name": "docker_inspect",
+                                        "arguments": '{"service":"nginx"}',
+                                    },
+                                },
+                            ],
+                        },
+                    }
+                ],
+                "usage": {"prompt_tokens": 4, "completion_tokens": 8, "total_tokens": 12},
+            },
+        )
+
+    client = httpx.AsyncClient(
+        base_url="http://example.test/v1",
+        transport=httpx.MockTransport(handler),
+    )
+    adapter = OpenAICompatibleAdapter(
+        base_url="http://example.test/v1",
+        default_model="nvidia/Qwen3.6-35B-A3B-NVFP4",
+        default_temperature=0.0,
+        client=client,
+    )
+    sink = None
+    bus = EventBus()
+    captured: list[dict[str, object]] = []
+
+    async def remember(event) -> None:
+        if event.output is not None:
+            captured.append(event.output)
+
+    bus.subscribe(remember)
+    gateway = ModelGateway(adapter, bus=bus, sink=sink)
+    response = await gateway.generate(
+        ModelRequest(
+            run_id="run_reason",
+            messages=[ChatMessage(role="user", content="Inspect nginx.")],
+            tools=[ToolDefinition(name="docker.inspect", parameters={"type": "object"})],
+        ),
+    )
+
+    assert response.content is None
+    assert response.tool_calls[0].name == "docker.inspect"
+    payload = response_trace_payload(response)
+    assert "reasoning" not in payload
+    assert "hidden chain of thought" not in json.dumps(payload)
+    assert captured
+    assert "hidden chain of thought" not in json.dumps(captured)
     await client.aclose()
 
 

@@ -1,4 +1,4 @@
-"""Model / DGX runtime status (settings snapshot; metrics filled in C10.2)."""
+"""Model / DGX runtime status."""
 
 from __future__ import annotations
 
@@ -9,6 +9,7 @@ from pydantic import BaseModel, ConfigDict
 
 from skillforge.api.deps import get_settings_dep
 from skillforge.config import Settings
+from skillforge.models.vllm_metrics import read_vllm_tokens_per_second
 
 router = APIRouter(prefix="/model", tags=["model"])
 
@@ -16,7 +17,7 @@ SettingsDep = Annotated[Settings, Depends(get_settings_dep)]
 
 
 class ModelStatusResponse(BaseModel):
-    """Configured model identity; tokens/s and memory are null until measured."""
+    """Configured model identity. Rates come from vLLM /metrics or stay null."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -28,10 +29,20 @@ class ModelStatusResponse(BaseModel):
 
 @router.get("/status", response_model=ModelStatusResponse)
 async def model_status(settings: SettingsDep) -> ModelStatusResponse:
-    """Return current Settings model identity only — no secrets, no invented metrics."""
+    """Return Settings identity. tokens/s is filled only from a vLLM histogram.
+
+    memory_bytes stays null: the vLLM text format has no model-memory gauge.
+    process_resident_memory_bytes is the API process, not the weights.
+    """
+    tokens_per_second = None
+    if settings.model_adapter == "openai_compatible":
+        tokens_per_second = await read_vllm_tokens_per_second(
+            settings.model_base_url,
+            settings.model_name,
+        )
     return ModelStatusResponse(
         model=settings.model_name,
         backend=settings.model_adapter,
-        tokens_per_second=None,
+        tokens_per_second=tokens_per_second,
         memory_bytes=None,
     )
