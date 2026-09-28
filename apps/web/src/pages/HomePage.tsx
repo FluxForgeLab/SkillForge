@@ -4,6 +4,7 @@ import { Benchmark } from '@/components/Benchmark'
 import { LiveTrace } from '@/components/LiveTrace'
 import { PipelineStepper } from '@/components/PipelineStepper'
 import { useEvents } from '@/hooks/useEvents'
+import { wsStatusLabel } from '@/lib/labels'
 
 export default function HomePage() {
   const { events, status, error } = useEvents()
@@ -13,13 +14,13 @@ export default function HomePage() {
       <header className="flex flex-col gap-2">
         <h1 className="text-2xl font-semibold tracking-tight">SkillForge</h1>
         <p className="text-sm text-muted-foreground">
-          Live event feed from <code className="text-foreground">/api/events</code>
-          . Status: <span className="text-foreground">{status}</span>
+          来自 <code className="text-foreground">/api/events</code> 的实时事件。状态：
+          <span className="text-foreground">{wsStatusLabel(status)}</span>
           {error ? <span className="text-destructive"> — {error}</span> : null}
         </p>
         <p className="text-sm">
           <Link className="underline underline-offset-4" to="/demo">
-            Demo (placeholder)
+            打开演示
           </Link>
         </p>
       </header>

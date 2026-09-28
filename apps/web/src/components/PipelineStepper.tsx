@@ -54,30 +54,29 @@ export function PipelineStepper({
 
   return (
     <section
-      aria-label="Skill Build Pipeline"
-      className={cn('flex flex-col gap-2', className)}
+      aria-label="技能构建流水线"
+      className={cn('flex flex-col gap-2 rounded-md border bg-card p-3', className)}
     >
       <div className="flex items-baseline justify-between gap-2">
         <h2 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-          Skill Build Pipeline
+          技能构建流水线
         </h2>
         <span className="text-xs text-muted-foreground">
           {usingMock
-            ? 'idle mock'
+            ? '示例（空闲）'
             : livePipeline.length === 0
-              ? 'no pipeline events'
+              ? '尚无流程事件'
               : failed
-                ? 'failed'
-                : `${livePipeline.length} pipeline event(s)`}
+                ? '失败'
+                : `${livePipeline.length} 条流程事件`}
         </span>
       </div>
       <p className="text-xs text-muted-foreground">
-        Parse → Extract → Spec → Skill → Tests → Validate — advances on{' '}
-        <code className="text-foreground">workflow_started</code> PipelineState
-        events.
+        解析 → 抽取 → 规格 → 技能 → 测试 → 校验，随{' '}
+        <code className="text-foreground">workflow_started</code> 中的流程状态推进。
       </p>
 
-      <ol className="flex flex-wrap items-center gap-y-3 rounded-md border px-3 py-4 sm:flex-nowrap sm:justify-between">
+      <ol className="flex flex-wrap items-center gap-y-3 rounded-md bg-muted/70 px-3 py-4 sm:flex-nowrap sm:justify-between">
         {PIPELINE_STEPS.map((label, index) => {
           const status = statuses[index]
           const isLast = index === PIPELINE_STEPS.length - 1
@@ -114,7 +113,15 @@ export function PipelineStepper({
                 >
                   {label}
                 </span>
-                <span className="sr-only">{status}</span>
+                <span className="sr-only">
+                  {status === 'pending'
+                    ? '等待'
+                    : status === 'active'
+                      ? '进行中'
+                      : status === 'complete'
+                        ? '完成'
+                        : '失败'}
+                </span>
               </div>
               {!isLast ? (
                 <div

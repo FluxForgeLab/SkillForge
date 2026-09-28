@@ -28,32 +28,31 @@ export function LiveTrace({
 
   return (
     <section
-      aria-label="Live Trace"
-      className={cn('flex flex-col gap-2', className)}
+      aria-label="实时轨迹"
+      className={cn('flex flex-col gap-2 rounded-md border bg-card', className)}
     >
       <div className="flex items-baseline justify-between gap-2">
         <h2 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-          Live Trace
+          实时轨迹
         </h2>
         <span className="text-xs text-muted-foreground">
-          {usingMock ? 'mock sample' : `${rows.length} live event(s)`}
+          {usingMock ? '示例数据' : `${rows.length} 条实时事件`}
         </span>
       </div>
       <p className="text-xs text-muted-foreground">
-        Action / Tool / Input / Output / Evidence / Verification — no model
-        chain-of-thought.
+        动作 / 工具 / 输入 / 输出 / 证据 / 校验 — 不展示模型思维链。
       </p>
       <div className="overflow-x-auto rounded-md border">
         <table className="w-full min-w-[48rem] border-collapse text-left text-sm">
           <thead className="border-b bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
             <tr>
-              <th className="px-3 py-2 font-medium">Time</th>
-              <th className="px-3 py-2 font-medium">Action</th>
-              <th className="px-3 py-2 font-medium">Tool</th>
-              <th className="px-3 py-2 font-medium">Input</th>
-              <th className="px-3 py-2 font-medium">Output</th>
-              <th className="px-3 py-2 font-medium">Evidence</th>
-              <th className="px-3 py-2 font-medium">Verification</th>
+              <th className="px-3 py-2 font-medium">时间</th>
+              <th className="px-3 py-2 font-medium">动作</th>
+              <th className="px-3 py-2 font-medium">工具</th>
+              <th className="px-3 py-2 font-medium">输入</th>
+              <th className="px-3 py-2 font-medium">输出</th>
+              <th className="px-3 py-2 font-medium">证据</th>
+              <th className="px-3 py-2 font-medium">校验</th>
             </tr>
           </thead>
           <tbody className="divide-y font-mono text-xs">
@@ -82,7 +81,11 @@ export function LiveTrace({
                     row.verification === 'FAIL' && 'text-destructive',
                   )}
                 >
-                  {row.verification ?? '—'}
+                  {row.verification === 'PASS'
+                    ? '通过'
+                    : row.verification === 'FAIL'
+                      ? '失败'
+                      : (row.verification ?? '—')}
                 </td>
               </tr>
             ))}

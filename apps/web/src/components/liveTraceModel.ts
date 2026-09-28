@@ -30,7 +30,7 @@ export const MOCK_TRACE_EVENTS: TraceEventWire[] = [
     timestamp: '2026-09-28T12:00:00.000Z',
     stage: 'runtime',
     name: 'service_recovery',
-    input: { task: 'Restore nginx upstream after 502' },
+    input: { task: '502 之后恢复 nginx 上游' },
     output: {},
     duration_ms: null,
   },
@@ -67,7 +67,7 @@ export const MOCK_TRACE_EVENTS: TraceEventWire[] = [
     output: {
       hits: [
         {
-          title: 'Appendix B: upstream mismatch',
+          title: '附录 B：上游不匹配',
           source_ref: 'runbook.md#L31',
           score: 0.91,
         },

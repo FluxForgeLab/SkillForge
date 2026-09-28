@@ -129,10 +129,10 @@ export function formatSuccessRate(rate: number): string {
 }
 
 export function formatMeanLatency(ms: number): string {
-  return `${Math.round(ms)} ms`
+  return `${Math.round(ms)} 毫秒`
 }
 
 export function formatUpliftPp(pp: number): string {
   const sign = pp > 0 ? '+' : ''
-  return `${sign}${pp.toFixed(1)} pp`
+  return `${sign}${pp.toFixed(1)} 百分点`
 }

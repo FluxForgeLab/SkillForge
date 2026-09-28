@@ -38,14 +38,14 @@ export function SkillDiff({
   if (!usingMock && data == null) {
     return (
       <section
-        aria-label="Skill Diff"
-        className={cn('flex flex-col gap-2', className)}
+        aria-label="技能差异"
+        className={cn('flex flex-col gap-2 rounded-md border bg-card p-3', className)}
       >
         <h2 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-          Skill Diff
+          技能差异
         </h2>
         <p className="text-sm text-muted-foreground">
-          No diff yet. Failure reason appears only after Analyze &amp; Improve.
+          尚无差异。失败原因只在「分析并改进」之后出现。
         </p>
       </section>
     )
@@ -63,25 +63,23 @@ export function SkillDiff({
 
   return (
     <section
-      aria-label="Skill Diff"
-      className={cn('flex flex-col gap-4', className)}
+      aria-label="技能差异"
+      className={cn('flex flex-col gap-4 rounded-md border bg-card p-3', className)}
     >
       <div className="flex items-baseline justify-between gap-2">
         <h2 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-          Skill Diff
+          技能差异
         </h2>
         <span className="text-xs text-muted-foreground">
           {usingMock
-            ? 'mock sample'
+            ? '示例数据'
             : source.has_parent
-              ? 'v(n-1) → v(n)'
-              : 'no parent'}
+              ? '上一版 → 当前版'
+              : '无父版本'}
         </span>
       </div>
       <p className="text-xs text-muted-foreground">
-        Unified diff between parent and candidate skill artifacts. Failure
-        class, symptom, evidence, and source_support come from evolve when
-        available — never invented.
+        父版本与候选版本制品的统一差异。失败类别、症状、证据和出处只来自改进接口，不会编造。
       </p>
 
       <div className="grid gap-3 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
@@ -89,13 +87,13 @@ export function SkillDiff({
           <div className="flex flex-wrap gap-x-3 gap-y-1 font-mono text-xs text-muted-foreground">
             {source.version_id ? (
               <span>
-                version{' '}
+                版本{' '}
                 <span className="text-foreground">{source.version_id}</span>
               </span>
             ) : null}
             {source.parent_version_id ? (
               <span>
-                parent{' '}
+                父版本{' '}
                 <span className="text-foreground">
                   {source.parent_version_id}
                 </span>
@@ -103,14 +101,14 @@ export function SkillDiff({
             ) : null}
           </div>
           <pre
-            aria-label="Unified diff"
+            aria-label="统一差异"
             className="max-h-80 overflow-auto rounded-md border bg-muted/20 p-0 font-mono text-xs leading-5"
           >
             {lines.length === 0 ? (
               <div className="px-3 py-4 text-muted-foreground">
                 {source.has_parent
-                  ? 'Empty diff (no text changes)'
-                  : 'No parent version — nothing to diff'}
+                  ? '差异为空（文本没有变化）'
+                  : '没有父版本，无法比较'}
               </div>
             ) : (
               <code className="block">
@@ -131,23 +129,22 @@ export function SkillDiff({
         </div>
 
         <aside
-          aria-label="Failure reason"
+          aria-label="失败原因"
           className="flex flex-col gap-3 rounded-md border p-3"
         >
           <h3 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Failure reason
+            失败原因
           </h3>
           {!showFailure ? (
             <p className="text-sm text-muted-foreground">
-              No failure fields from the API. Load a version after evolve, or
-              empty evidence state when only the diff endpoint was called.
+              接口没有返回失败字段。请在改进之后加载版本；只拉取差异时这里保持空白。
             </p>
           ) : (
             <>
               <dl className="grid gap-2 text-sm">
                 <div>
                   <dt className="text-xs uppercase tracking-wide text-muted-foreground">
-                    Class
+                    类别
                   </dt>
                   <dd className="font-mono text-sm">
                     {failurePanel.failure_class ?? '—'}
@@ -155,20 +152,20 @@ export function SkillDiff({
                 </div>
                 <div>
                   <dt className="text-xs uppercase tracking-wide text-muted-foreground">
-                    Symptom
+                    症状
                   </dt>
                   <dd className="text-sm">{failurePanel.symptom ?? '—'}</dd>
                 </div>
               </dl>
               <EvidenceList
-                label="Evidence"
+                label="证据"
                 items={failurePanel.evidence}
-                empty="No evidence"
+                empty="无证据"
               />
               <EvidenceList
-                label="Source support"
+                label="出处"
                 items={failurePanel.source_support}
-                empty="No source_support"
+                empty="无出处"
               />
             </>
           )}

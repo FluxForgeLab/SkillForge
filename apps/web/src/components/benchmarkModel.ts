@@ -38,7 +38,7 @@ export const MOCK_BENCHMARK: BenchmarkData = {
   cases: [
     {
       case_id: 'eval_backend_stopped',
-      name: 'backend process stopped',
+      name: '后端进程已停止',
       control_passed: true,
       treatment_passed: true,
       control_success_rate: 1,
@@ -47,7 +47,7 @@ export const MOCK_BENCHMARK: BenchmarkData = {
     },
     {
       case_id: 'eval_nginx_wrong_upstream',
-      name: 'nginx wrong upstream',
+      name: 'nginx 上游端口错误',
       control_passed: false,
       treatment_passed: true,
       control_success_rate: 0,
@@ -56,7 +56,7 @@ export const MOCK_BENCHMARK: BenchmarkData = {
     },
     {
       case_id: 'eval_nginx_bad_config_reload',
-      name: 'nginx bad config reload',
+      name: 'nginx 错误配置重载',
       control_passed: false,
       treatment_passed: false,
       control_success_rate: 0,
@@ -72,5 +72,5 @@ export function formatSuccessPct(rate: number): string {
 
 export function formatUpliftPp(pp: number): string {
   const sign = pp > 0 ? '+' : ''
-  return `${sign}${pp.toFixed(1)} pp`
+  return `${sign}${pp.toFixed(1)} 百分点`
 }

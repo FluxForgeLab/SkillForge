@@ -12,14 +12,14 @@ export function formatNullableMetric(
   value: number | null | undefined,
 ): string {
   if (value === null || value === undefined) {
-    return 'not measured'
+    return '未测量'
   }
   return String(value)
 }
 
 export function formatMemoryBytes(value: number | null | undefined): string {
   if (value === null || value === undefined) {
-    return 'not measured'
+    return '未测量'
   }
   if (value >= 1_073_741_824) {
     return `${(value / 1_073_741_824).toFixed(1)} GiB`

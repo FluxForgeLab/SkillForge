@@ -2,6 +2,7 @@ import { useQueries, useQuery } from '@tanstack/react-query'
 import { Link, useParams } from 'react-router'
 
 import { apiRequest } from '@/lib/api'
+import { skillStatusLabel } from '@/lib/labels'
 import { cn } from '@/lib/utils'
 import type { EvaluationRunWire } from '@/pages/evaluationLabModel'
 import {
@@ -80,7 +81,7 @@ export default function EvolutionTimelinePage() {
       <header className="flex flex-wrap items-center gap-3">
         <div className="min-w-0 flex-1">
           <h1 className="truncate text-xl font-semibold tracking-tight">
-            Evolution Timeline
+            演进时间线
           </h1>
           <p className="truncate font-mono text-xs text-muted-foreground">
             {skillId || '—'}
@@ -92,20 +93,20 @@ export default function EvolutionTimelinePage() {
               className="underline underline-offset-4"
               to={`/skills/${encodeURIComponent(skillId)}`}
             >
-              Skill Studio
+              技能工作室
             </Link>
             <Link
               className="underline underline-offset-4"
               to={`/skills/${encodeURIComponent(skillId)}/evaluations`}
             >
-              Evaluations
+              评测
             </Link>
           </div>
         ) : null}
       </header>
 
       {loading ? (
-        <p className="text-sm text-muted-foreground">Loading timeline…</p>
+        <p className="text-sm text-muted-foreground">正在加载时间线…</p>
       ) : null}
       {versionsQuery.isError ? (
         <p className="text-sm text-destructive">
@@ -120,24 +121,23 @@ export default function EvolutionTimelinePage() {
 
       {empty ? (
         <section
-          aria-label="Empty timeline"
+          aria-label="空时间线"
           className="rounded-md border border-dashed px-4 py-10 text-center"
         >
-          <p className="text-sm font-medium">No versions yet</p>
+          <p className="text-sm font-medium">还没有版本</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Compile a skill first. Timeline shows stored version chain, approver
-            file, and evaluation deltas — nothing is invented.
+            先编译一个技能。时间线只展示已保存的版本链、批准人和评测差值，不会编造内容。
           </p>
           <p className="mt-3 text-sm">
             <Link className="underline underline-offset-4" to="/demo">
-              Open Demo
+              打开演示
             </Link>
           </p>
         </section>
       ) : null}
 
       {ordered.length > 0 ? (
-        <ol aria-label="Version chain" className="flex flex-col gap-0">
+        <ol aria-label="版本链" className="flex flex-col gap-0">
           {ordered.map((version, index) => {
             const delta = benchmarkDeltaPp(
               runs,
@@ -160,13 +160,13 @@ export default function EvolutionTimelinePage() {
                     />
                   ) : null}
                 </div>
-                <div className="min-w-0 flex-1 rounded-md border px-4 py-3">
+                <div className="min-w-0 flex-1 rounded-md border bg-card px-4 py-3">
                   <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                     <h2 className="font-mono text-base font-semibold">
                       {version.version}
                     </h2>
                     <span className="text-xs uppercase tracking-wide text-muted-foreground">
-                      {version.status}
+                      {skillStatusLabel(version.status)}
                     </span>
                     <span className="font-mono text-xs text-muted-foreground">
                       {version.id}
@@ -176,7 +176,7 @@ export default function EvolutionTimelinePage() {
                   <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
                     <div>
                       <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                        Approver
+                        批准人
                       </dt>
                       <dd className="mt-0.5">
                         {approverQueries[index]?.isLoading ? (
@@ -185,14 +185,14 @@ export default function EvolutionTimelinePage() {
                           approver.name
                         ) : (
                           <span className="text-muted-foreground">
-                            Not approved yet (no approver.txt)
+                            尚未批准（没有 approver.txt）
                           </span>
                         )}
                       </dd>
                     </div>
                     <div>
                       <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                        Benchmark delta
+                        评测差值
                       </dt>
                       <dd
                         className={cn(
@@ -208,8 +208,8 @@ export default function EvolutionTimelinePage() {
                         {delta === null ? (
                           <span className="text-muted-foreground">
                             {version.parent_version_id
-                              ? 'No stored treatment runs for delta'
-                              : 'Root version (no parent)'}
+                              ? '没有可用于比较的实验组记录'
+                              : '根版本（没有父版本）'}
                           </span>
                         ) : (
                           formatBenchmarkDeltaPp(delta)
@@ -218,10 +218,10 @@ export default function EvolutionTimelinePage() {
                     </div>
                     <div className="sm:col-span-2">
                       <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                        Reason
+                        原因
                       </dt>
                       <dd className="mt-0.5 text-muted-foreground">
-                        Not stored
+                        未存储
                       </dd>
                     </div>
                   </dl>

@@ -15,6 +15,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { useEvents, type TraceEventWire } from '@/hooks/useEvents'
 import { API_BASE, apiRequest, type ApiResult } from '@/lib/api'
+import { demoStepLabel, skillStatusLabel, wsStatusLabel } from '@/lib/labels'
 import {
   FAULT_IDS,
   buildBenchmarkFromRuns,
@@ -119,7 +120,7 @@ export default function DemoPage() {
   const [projectId, setProjectId] = useState('')
   const [projectName, setProjectName] = useState('service-recovery-demo')
   const [projectDescription, setProjectDescription] = useState(
-    'Judge Mode live demo project',
+    '现场演示项目',
   )
   const [sources, setSources] = useState<SourceResponse[]>([])
   const [knowledgeCount, setKnowledgeCount] = useState<number | null>(null)
@@ -127,7 +128,7 @@ export default function DemoPage() {
   const [versionId, setVersionId] = useState('')
   const [skillName, setSkillName] = useState('service-recovery')
   const [skillDescription, setSkillDescription] = useState(
-    'Recover nginx upstream and backend from common outages',
+    '从常见故障中恢复 nginx 上游和后端',
   )
   const [triggersText, setTriggersText] = useState(
     'HTTP 502\nbackend unavailable\nhealth check failed',
@@ -197,7 +198,7 @@ export default function DemoPage() {
           id: nextLogId(),
           step: 'evaluate',
           status: null,
-          detail: `evaluation_completed failed job=${jobKey}: ${shortBody(err)}`,
+          detail: `评测失败 job=${jobKey}：${shortBody(err)}`,
           at: new Date().toISOString(),
         })
       })
@@ -228,7 +229,7 @@ export default function DemoPage() {
             id: nextLogId(),
             step: 'evaluate',
             status: result.status,
-            detail: `fetch run ${runId}: ${shortBody(result.body)}`,
+            detail: `读取运行 ${runId}：${shortBody(result.body)}`,
             at: new Date().toISOString(),
           })
         }
@@ -238,7 +239,7 @@ export default function DemoPage() {
         id: nextLogId(),
         step: 'evaluate',
         status: null,
-        detail: `evaluation_completed job=${jobKey} run_ids=${runIds.join(',')}`,
+        detail: `评测完成 job=${jobKey} run_ids=${runIds.join(',')}`,
         at: new Date().toISOString(),
       })
       const data = buildBenchmarkFromRuns(runs)
@@ -289,7 +290,7 @@ export default function DemoPage() {
       pushLog(
         logFromResult('create', result, (data) => {
           const p = data as ProjectResponse
-          return `project ${p.id}`
+          return `项目 ${p.id}`
         }),
       )
       if (result.ok) {
@@ -306,7 +307,7 @@ export default function DemoPage() {
           id: nextLogId(),
           step: 'upload',
           status: null,
-          detail: 'Create a project first',
+          detail: '请先创建项目',
           at: new Date().toISOString(),
         })
         return
@@ -317,7 +318,7 @@ export default function DemoPage() {
           id: nextLogId(),
           step: 'upload',
           status: null,
-          detail: 'Choose a file first',
+          detail: '请先选择文件',
           at: new Date().toISOString(),
         })
         return
@@ -346,7 +347,7 @@ export default function DemoPage() {
           id: nextLogId(),
           step: 'extract',
           status: null,
-          detail: 'Create a project first',
+          detail: '请先创建项目',
           at: new Date().toISOString(),
         })
         return
@@ -359,7 +360,7 @@ export default function DemoPage() {
         logFromResult(
           'extract',
           result,
-          (data) => `${(data as KnowledgeResponse[]).length} knowledge unit(s)`,
+          (data) => `${(data as KnowledgeResponse[]).length} 条知识单元`,
         ),
       )
       if (result.ok) {
@@ -374,7 +375,7 @@ export default function DemoPage() {
           id: nextLogId(),
           step: 'compile',
           status: null,
-          detail: 'Create a project first',
+          detail: '请先创建项目',
           at: new Date().toISOString(),
         })
         return
@@ -397,7 +398,7 @@ export default function DemoPage() {
       pushLog(
         logFromResult('compile', result, (data) => {
           const c = data as CompileResponse
-          return `skill=${c.skill_id} version=${c.version_id} status=${c.status}`
+          return `技能=${c.skill_id} 版本=${c.version_id} 状态=${skillStatusLabel(c.status)}`
         }),
       )
       if (result.ok) {
@@ -419,7 +420,7 @@ export default function DemoPage() {
         logFromResult(
           'inject',
           result,
-          (data) => `fault ${(data as { fault_id: string }).fault_id}`,
+          (data) => `故障 ${(data as { fault_id: string }).fault_id}`,
         ),
       )
     })
@@ -433,7 +434,10 @@ export default function DemoPage() {
         logFromResult(
           'reset',
           result,
-          (data) => (data as { status: string }).status,
+          (data) => {
+            const status = (data as { status: string }).status
+            return status === 'reset' ? '已复位' : status
+          },
         ),
       )
     })
@@ -445,7 +449,7 @@ export default function DemoPage() {
           id: nextLogId(),
           step: 'evaluate',
           status: null,
-          detail: 'Compile a skill first',
+          detail: '请先编译技能',
           at: new Date().toISOString(),
         })
         return
@@ -460,7 +464,7 @@ export default function DemoPage() {
       pushLog(
         logFromResult('evaluate', result, (data) => {
           const j = data as EvaluateJobResponse
-          return `202 accepted job_id=${j.job_id} (await evaluation_completed)`
+          return `已接受 job_id=${j.job_id}（等待评测完成）`
         }),
       )
       if (result.ok) {
@@ -475,7 +479,7 @@ export default function DemoPage() {
           id: nextLogId(),
           step: 'evolve',
           status: null,
-          detail: 'Compile a skill first',
+          detail: '请先编译技能',
           at: new Date().toISOString(),
         })
         return
@@ -494,7 +498,7 @@ export default function DemoPage() {
           id: nextLogId(),
           step: 'evolve',
           status: null,
-          detail: `Invalid JSON: ${err instanceof Error ? err.message : String(err)}`,
+          detail: `JSON 无效：${err instanceof Error ? err.message : String(err)}`,
           at: new Date().toISOString(),
         })
         return
@@ -504,7 +508,7 @@ export default function DemoPage() {
           id: nextLogId(),
           step: 'evolve',
           status: null,
-          detail: 'run_id is required',
+          detail: '必须填写 run_id',
           at: new Date().toISOString(),
         })
         return
@@ -530,7 +534,7 @@ export default function DemoPage() {
       pushLog(
         logFromResult('evolve', result, (data) => {
           const e = data as EvolveResponse
-          return `version=${e.version_id} status=${e.status} class=${e.failure_class ?? '—'}`
+          return `版本=${e.version_id} 状态=${skillStatusLabel(e.status)} 类别=${e.failure_class ?? '—'}`
         }),
       )
       if (result.ok) {
@@ -542,7 +546,7 @@ export default function DemoPage() {
         pushLog(
           logFromResult('diff', diffResult, (data) => {
             const d = data as DiffApiResponse
-            return `has_parent=${d.has_parent} lines=${d.diff.split('\n').length}`
+            return `有父版本=${d.has_parent} 行数=${d.diff.split('\n').length}`
           }),
         )
         if (diffResult.ok) {
@@ -563,7 +567,7 @@ export default function DemoPage() {
           id: nextLogId(),
           step: 'approve',
           status: null,
-          detail: 'Need skill_id and version_id',
+          detail: '需要 skill_id 和 version_id',
           at: new Date().toISOString(),
         })
         return
@@ -580,7 +584,7 @@ export default function DemoPage() {
           'approve',
           result,
           (data) =>
-            `version=${(data as { version_id: string }).version_id} status=${(data as { status: string }).status}`,
+            `版本=${(data as { version_id: string }).version_id} 状态=${skillStatusLabel((data as { status: string }).status)}`,
         ),
       )
     })
@@ -592,7 +596,7 @@ export default function DemoPage() {
           id: nextLogId(),
           step: 'publish',
           status: null,
-          detail: 'Need skill_id and version_id',
+          detail: '需要 skill_id 和 version_id',
           at: new Date().toISOString(),
         })
         return
@@ -609,7 +613,7 @@ export default function DemoPage() {
           'publish',
           result,
           (data) =>
-            `status=${(data as { status: string }).status} path=${(data as { published_path: string }).published_path}`,
+            `状态=${skillStatusLabel((data as { status: string }).status)} 路径=${(data as { published_path: string }).published_path}`,
         ),
       )
     })
@@ -625,7 +629,7 @@ export default function DemoPage() {
           id: nextLogId(),
           step: 'diff',
           status: null,
-          detail: 'Enter skill_id and version_id',
+          detail: '请填写 skill_id 和 version_id',
           at: new Date().toISOString(),
         })
         return
@@ -638,7 +642,7 @@ export default function DemoPage() {
       pushLog(
         logFromResult('diff', result, (data) => {
           const d = data as DiffApiResponse
-          return `has_parent=${d.has_parent} parent=${d.parent_version_id ?? 'none'}`
+          return `有父版本=${d.has_parent} 父版本=${d.parent_version_id ?? '无'}`
         }),
       )
       if (result.ok) {
@@ -653,10 +657,10 @@ export default function DemoPage() {
 
   const healthLabel =
     apiHealth === 'online'
-      ? 'Online'
+      ? '在线'
       : apiHealth === 'offline'
-        ? 'Offline'
-        : 'Checking…'
+        ? '离线'
+        : '检查中…'
   const healthDot =
     apiHealth === 'online'
       ? 'bg-emerald-600'
@@ -668,11 +672,11 @@ export default function DemoPage() {
     <div className="mx-auto flex w-full max-w-[90rem] flex-col gap-4 p-4 sm:p-6">
       <header className="flex flex-wrap items-center justify-between gap-3 border-b pb-4">
         <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">
-          SkillForge — Live Demo
+          SkillForge — 现场演示
         </h1>
         <div className="flex flex-wrap items-center gap-2">
           <div
-            className="flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm"
+            className="flex items-center gap-2 rounded-md border bg-card px-3 py-1.5 text-sm"
             title={`GET ${API_BASE}/health`}
           >
             <span
@@ -689,21 +693,21 @@ export default function DemoPage() {
       <DgxRuntimePanel variant="section" />
 
       <p className="text-xs text-muted-foreground">
-        WS <code className="text-foreground">/api/events</code>:{' '}
-        <span className="text-foreground">{wsStatus}</span>
+        WS <code className="text-foreground">/api/events</code>：
+        <span className="text-foreground">{wsStatusLabel(wsStatus)}</span>
         {wsError ? (
           <span className="text-destructive"> — {wsError}</span>
         ) : null}
         {evalJobId ? (
           <span>
             {' '}
-            · pending eval job <code className="text-foreground">{evalJobId}</code>
+            · 评测任务进行中 <code className="text-foreground">{evalJobId}</code>
           </span>
         ) : null}
         {skillId ? (
           <span>
             {' '}
-            · skill <code className="text-foreground">{skillId}</code>
+            · 技能 <code className="text-foreground">{skillId}</code>
             {versionId ? (
               <>
                 {' '}
@@ -715,25 +719,25 @@ export default function DemoPage() {
       </p>
 
       <section
-        aria-label="Judge Mode controls"
-        className="flex flex-col gap-3 rounded-md border p-3"
+        aria-label="演示操作"
+        className="flex flex-col gap-3 rounded-md border bg-card p-3"
       >
         <div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-3">
           <div className="flex flex-col gap-2">
             <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Project
+              项目
             </label>
             <input
               className="h-8 rounded-md border bg-background px-2 text-sm"
               value={projectName}
               onChange={(e) => setProjectName(e.target.value)}
-              placeholder="name"
+              placeholder="名称"
             />
             <input
               className="h-8 rounded-md border bg-background px-2 text-sm"
               value={projectDescription}
               onChange={(e) => setProjectDescription(e.target.value)}
-              placeholder="description"
+              placeholder="描述"
             />
             <div className="flex flex-wrap gap-2">
               <Button
@@ -742,7 +746,7 @@ export default function DemoPage() {
                 disabled={busy !== null}
                 onClick={onCreateProject}
               >
-                Create project
+                创建项目
               </Button>
               {projectId ? (
                 <span className="self-center font-mono text-xs text-muted-foreground">
@@ -757,7 +761,7 @@ export default function DemoPage() {
               className="text-xs font-medium uppercase tracking-wide text-muted-foreground"
               htmlFor={fileInputId}
             >
-              Upload source
+              上传原文
             </label>
             <input
               id={fileInputId}
@@ -773,7 +777,7 @@ export default function DemoPage() {
                 disabled={busy !== null}
                 onClick={onUpload}
               >
-                Upload
+                上传
               </Button>
               <Button
                 type="button"
@@ -782,32 +786,32 @@ export default function DemoPage() {
                 disabled={busy !== null}
                 onClick={onExtract}
               >
-                Extract
+                抽取
               </Button>
             </div>
           </div>
 
           <div className="flex flex-col gap-2">
             <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Compile skill
+              编译技能
             </label>
             <input
               className="h-8 rounded-md border bg-background px-2 text-sm"
               value={skillName}
               onChange={(e) => setSkillName(e.target.value)}
-              placeholder="skill name"
+              placeholder="技能名称"
             />
             <input
               className="h-8 rounded-md border bg-background px-2 text-sm"
               value={skillDescription}
               onChange={(e) => setSkillDescription(e.target.value)}
-              placeholder="description"
+              placeholder="描述"
             />
             <textarea
               className="min-h-[4.5rem] rounded-md border bg-background px-2 py-1 font-mono text-xs"
               value={triggersText}
               onChange={(e) => setTriggersText(e.target.value)}
-              placeholder="triggers (one per line)"
+              placeholder="触发词（每行一条，需与原文一致）"
             />
             <Button
               type="button"
@@ -815,7 +819,7 @@ export default function DemoPage() {
               disabled={busy !== null}
               onClick={onCompile}
             >
-              Compile
+              编译
             </Button>
           </div>
         </div>
@@ -823,7 +827,7 @@ export default function DemoPage() {
         <div className="flex flex-wrap items-end gap-2 border-t pt-3">
           <div className="flex flex-col gap-1">
             <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Fault
+              故障
             </label>
             <select
               className="h-8 rounded-md border bg-background px-2 text-sm"
@@ -832,7 +836,12 @@ export default function DemoPage() {
             >
               {FAULT_IDS.map((id) => (
                 <option key={id} value={id}>
-                  {id}
+                  {id === 'backend_stopped'
+                    ? '后端已停止'
+                    : id === 'nginx_wrong_upstream'
+                      ? '上游端口错误'
+                      : '错误配置导致重载失败'}
+                  （{id}）
                 </option>
               ))}
             </select>
@@ -844,7 +853,7 @@ export default function DemoPage() {
             disabled={busy !== null}
             onClick={onInject}
           >
-            Inject Fault
+            注入故障
           </Button>
           <Button
             type="button"
@@ -853,7 +862,7 @@ export default function DemoPage() {
             disabled={busy !== null}
             onClick={onReset}
           >
-            Reset lab
+            复位实验环境
           </Button>
           <Button
             type="button"
@@ -861,11 +870,11 @@ export default function DemoPage() {
             disabled={busy !== null}
             onClick={onEvaluate}
           >
-            Evaluate
+            评测
           </Button>
           <div className="flex flex-col gap-1">
             <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Approver
+              批准人
             </label>
             <input
               className="h-8 w-32 rounded-md border bg-background px-2 text-sm"
@@ -880,7 +889,7 @@ export default function DemoPage() {
             disabled={busy !== null}
             onClick={onApprove}
           >
-            Approve
+            批准
           </Button>
           <Button
             type="button"
@@ -889,7 +898,7 @@ export default function DemoPage() {
             disabled={busy !== null}
             onClick={onPublish}
           >
-            Publish
+            发布
           </Button>
         </div>
 
@@ -897,7 +906,7 @@ export default function DemoPage() {
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between gap-2">
               <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Analyze &amp; Improve (EvolveRequest)
+                分析并改进
               </label>
               <Button
                 type="button"
@@ -905,7 +914,7 @@ export default function DemoPage() {
                 variant="ghost"
                 onClick={onPrefillEvolve}
               >
-                Prefill from trace
+                从轨迹预填
               </Button>
             </div>
             <div className="grid grid-cols-2 gap-2">
@@ -915,7 +924,7 @@ export default function DemoPage() {
                 onChange={(e) =>
                   setEvolveForm((p) => ({ ...p, version: e.target.value }))
                 }
-                placeholder="version"
+                placeholder="版本号"
               />
               <input
                 className="h-8 rounded-md border bg-background px-2 font-mono text-xs"
@@ -925,8 +934,8 @@ export default function DemoPage() {
                 }
                 placeholder={
                   suggestedRunId
-                    ? `run_id (e.g. ${suggestedRunId})`
-                    : 'run_id (editable)'
+                    ? `run_id（例如 ${suggestedRunId}）`
+                    : 'run_id（可编辑）'
                 }
               />
             </div>
@@ -939,7 +948,7 @@ export default function DemoPage() {
                   assertionJson: e.target.value,
                 }))
               }
-              aria-label="assertion JSON"
+              aria-label="断言 JSON"
             />
             <textarea
               className="min-h-[3.5rem] rounded-md border bg-background px-2 py-1 font-mono text-xs"
@@ -950,7 +959,7 @@ export default function DemoPage() {
                   verifierJson: e.target.value,
                 }))
               }
-              aria-label="verifier JSON"
+              aria-label="校验器 JSON"
             />
             <textarea
               className="min-h-[2.5rem] rounded-md border bg-background px-2 py-1 font-mono text-xs"
@@ -961,7 +970,7 @@ export default function DemoPage() {
                   sourceMapUpdatesJson: e.target.value,
                 }))
               }
-              aria-label="source_map_updates JSON"
+              aria-label="source_map 更新 JSON"
             />
             <Button
               type="button"
@@ -969,25 +978,25 @@ export default function DemoPage() {
               disabled={busy !== null}
               onClick={onEvolve}
             >
-              Analyze &amp; Improve
+              分析并改进
             </Button>
             <div className="mt-2 flex flex-col gap-2 border-t pt-2">
               <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Skill Diff lookup
+                查找技能差异
               </label>
               <input
                 className="h-8 rounded-md border bg-background px-2 font-mono text-xs"
                 value={skillId}
                 onChange={(e) => setSkillId(e.target.value)}
                 placeholder="skill_id"
-                aria-label="skill_id for diff"
+                aria-label="用于差异的 skill_id"
               />
               <input
                 className="h-8 rounded-md border bg-background px-2 font-mono text-xs"
                 value={versionId}
                 onChange={(e) => setVersionId(e.target.value)}
                 placeholder="version_id"
-                aria-label="version_id for diff"
+                aria-label="用于差异的 version_id"
               />
               <Button
                 type="button"
@@ -996,19 +1005,19 @@ export default function DemoPage() {
                 disabled={busy !== null}
                 onClick={onLoadDiff}
               >
-                Load Diff
+                加载差异
               </Button>
             </div>
           </div>
 
           <div className="flex flex-col gap-2">
             <h2 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Step log
+              步骤记录
             </h2>
             <ul className="max-h-64 overflow-y-auto rounded-md border font-mono text-xs">
               {stepLog.length === 0 ? (
                 <li className="px-3 py-2 text-muted-foreground">
-                  No API calls yet
+                  还没有接口调用
                 </li>
               ) : (
                 stepLog.map((entry) => (
@@ -1019,7 +1028,7 @@ export default function DemoPage() {
                     <span className="text-muted-foreground">
                       {entry.at.slice(11, 19)}
                     </span>{' '}
-                    <span className="font-sans font-medium">{entry.step}</span>{' '}
+                    <span className="font-sans font-medium">{demoStepLabel(entry.step)}</span>{' '}
                     {entry.status !== null ? (
                       <span
                         className={
@@ -1041,7 +1050,7 @@ export default function DemoPage() {
               )}
             </ul>
             {busy ? (
-              <p className="text-xs text-muted-foreground">Busy: {busy}…</p>
+              <p className="text-xs text-muted-foreground">进行中：{demoStepLabel(busy)}…</p>
             ) : null}
           </div>
         </div>
@@ -1050,31 +1059,30 @@ export default function DemoPage() {
       {/* Four zones — architecture §10.1 */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <section
-          aria-label="Source Knowledge"
-          className="flex flex-col gap-2 rounded-md border p-3"
+          aria-label="原文与知识"
+          className="flex flex-col gap-2 rounded-md border bg-card p-3"
         >
           <h2 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-            Source Knowledge
+            原文与知识
           </h2>
           <p className="text-xs text-muted-foreground">
-            Uploaded runbooks and extracted knowledge units for the active
-            project.
+            当前项目已上传的操作手册，以及抽取出的知识单元。
           </p>
           {projectId ? (
             <p className="font-mono text-xs text-muted-foreground">
-              project {projectId}
+              项目 {projectId}
               {knowledgeCount !== null
-                ? ` · ${knowledgeCount} KU(s)`
+                ? ` · ${knowledgeCount} 条知识单元`
                 : null}
             </p>
           ) : (
             <p className="text-sm text-muted-foreground">
-              Create a project and upload a source to populate this zone.
+              先创建项目并上传原文，这里才会有内容。
             </p>
           )}
-          <ul className="divide-y rounded-md border text-sm">
+          <ul className="divide-y rounded-md border bg-card text-sm">
             {sources.length === 0 ? (
-              <li className="px-3 py-2 text-muted-foreground">No sources yet</li>
+              <li className="px-3 py-2 text-muted-foreground">还没有原文</li>
             ) : (
               sources.map((s) => (
                 <li key={s.id} className="px-3 py-2">
@@ -1088,30 +1096,17 @@ export default function DemoPage() {
           </ul>
         </section>
 
-        <PipelineStepper
-          events={events}
-          placeholder="empty"
-          className="rounded-md border p-3"
-        />
+        <PipelineStepper events={events} placeholder="empty" />
 
-        <LiveTrace
-          events={events}
-          placeholder="empty"
-          className="rounded-md border p-3"
-        />
+        <LiveTrace events={events} placeholder="empty" />
 
-        <Benchmark
-          data={benchmark}
-          placeholder="empty"
-          className="rounded-md border p-3"
-        />
+        <Benchmark data={benchmark} placeholder="empty" />
       </div>
 
       <SkillDiff
         data={skillDiff}
         failure={skillDiffFailure}
         placeholder="empty"
-        className="rounded-md border p-3"
       />
     </div>
   )

@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router'
 
 import { apiRequest } from '@/lib/api'
+import { skillStatusLabel } from '@/lib/labels'
 import {
   parseSkillFrontmatter,
   parseSourceMapEvidence,
@@ -110,7 +111,7 @@ export default function SkillStudioPage() {
       <header className="flex flex-wrap items-center gap-3">
         <div className="min-w-0 flex-1">
           <h1 className="truncate text-xl font-semibold tracking-tight">
-            Skill Studio
+            技能工作室
             {skillQuery.data ? (
               <span className="ml-2 text-base font-normal text-muted-foreground">
                 {skillQuery.data.name}
@@ -120,12 +121,12 @@ export default function SkillStudioPage() {
           <p className="truncate font-mono text-xs text-muted-foreground">
             {skillId}
             {skillQuery.data?.status
-              ? ` · ${skillQuery.data.status}`
+              ? ` · ${skillStatusLabel(skillQuery.data.status)}`
               : null}
           </p>
         </div>
         <label className="flex items-center gap-2 text-sm">
-          <span className="text-muted-foreground">Version</span>
+          <span className="text-muted-foreground">版本</span>
           <select
             className="rounded-md border bg-background px-2 py-1.5 font-mono text-sm"
             value={versionId}
@@ -134,7 +135,7 @@ export default function SkillStudioPage() {
           >
             {versions.map((version) => (
               <option key={version.id} value={version.id}>
-                {version.version} ({version.status})
+                {version.version}（{skillStatusLabel(version.status)}）
               </option>
             ))}
           </select>
@@ -145,13 +146,13 @@ export default function SkillStudioPage() {
               className="underline underline-offset-4"
               to={`/skills/${encodeURIComponent(skillId)}/evaluations`}
             >
-              Evaluations
+              评测
             </Link>
             <Link
               className="underline underline-offset-4"
               to={`/skills/${encodeURIComponent(skillId)}/timeline`}
             >
-              Timeline
+              时间线
             </Link>
           </div>
         ) : null}
@@ -159,22 +160,22 @@ export default function SkillStudioPage() {
 
       {skillQuery.isError ? (
         <p className="text-sm text-destructive">
-          Failed to load skill: {(skillQuery.error as Error).message}
+          技能加载失败：{(skillQuery.error as Error).message}
         </p>
       ) : null}
 
       <div className="grid min-h-[70vh] flex-1 grid-cols-1 gap-3 lg:grid-cols-[220px_minmax(0,1fr)_240px]">
-        <aside className="flex min-h-0 flex-col overflow-hidden rounded-md border">
-          <h2 className="border-b px-3 py-2 text-sm font-medium">Evidence</h2>
+        <aside className="flex min-h-0 flex-col overflow-hidden rounded-md border bg-card">
+          <h2 className="border-b px-3 py-2 text-sm font-medium">证据</h2>
           <div className="min-h-0 flex-1 overflow-auto p-2 text-xs">
             {sourceMapQuery.isLoading ? (
-              <p className="text-muted-foreground">Loading source-map…</p>
+              <p className="text-muted-foreground">正在加载 source-map…</p>
             ) : sourceMapQuery.isError ? (
               <p className="text-destructive">
                 {(sourceMapQuery.error as Error).message}
               </p>
             ) : evidence.length === 0 ? (
-              <p className="text-muted-foreground">No evidence entries.</p>
+              <p className="text-muted-foreground">没有证据条目。</p>
             ) : (
               <ul className="flex flex-col gap-2">
                 {evidence.map((row) => (
@@ -192,7 +193,7 @@ export default function SkillStudioPage() {
                       {row.sha256 || '—'}
                     </div>
                     <div className="text-muted-foreground">
-                      page {row.page ?? '—'} · line {row.lineStart ?? '—'}
+                      第 {row.page ?? '—'} 页 · 第 {row.lineStart ?? '—'} 行
                     </div>
                   </li>
                 ))}
@@ -201,11 +202,11 @@ export default function SkillStudioPage() {
           </div>
         </aside>
 
-        <section className="flex min-h-[320px] flex-col overflow-hidden rounded-md border">
+        <section className="flex min-h-[320px] flex-col overflow-hidden rounded-md border bg-card">
           <h2 className="border-b px-3 py-2 text-sm font-medium">SKILL.md</h2>
           <div className="min-h-0 flex-1">
             {skillMdQuery.isLoading ? (
-              <p className="p-3 text-sm text-muted-foreground">Loading…</p>
+              <p className="p-3 text-sm text-muted-foreground">加载中…</p>
             ) : skillMdQuery.isError ? (
               <p className="p-3 text-sm text-destructive">
                 {(skillMdQuery.error as Error).message}
@@ -231,17 +232,17 @@ export default function SkillStudioPage() {
           </div>
         </section>
 
-        <aside className="flex min-h-0 flex-col overflow-hidden rounded-md border">
+        <aside className="flex min-h-0 flex-col overflow-hidden rounded-md border bg-card">
           <h2 className="border-b px-3 py-2 text-sm font-medium">SkillSpec</h2>
           <dl className="min-h-0 flex-1 space-y-3 overflow-auto p-3 text-sm">
-            <SpecField label="name" value={spec.name} />
-            <SpecField label="description" value={spec.description} />
+            <SpecField label="名称" value={spec.name} />
+            <SpecField label="描述" value={spec.description} />
             <SpecField
-              label="triggers"
+              label="触发词"
               value={spec.triggers.length ? spec.triggers.join(', ') : null}
             />
             <SpecField
-              label="tools"
+              label="工具"
               value={spec.tools.length ? spec.tools.join(', ') : null}
             />
           </dl>

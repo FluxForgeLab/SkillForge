@@ -50,10 +50,10 @@ async function loadDashboardCounts(): Promise<DashboardCounts> {
 }
 
 const CARDS: { key: keyof DashboardCounts; label: string }[] = [
-  { key: 'projects', label: 'Projects' },
-  { key: 'documents', label: 'Documents' },
-  { key: 'knowledgeUnits', label: 'Knowledge units' },
-  { key: 'skills', label: 'Skills' },
+  { key: 'projects', label: '项目' },
+  { key: 'documents', label: '文档' },
+  { key: 'knowledgeUnits', label: '知识单元' },
+  { key: 'skills', label: '技能' },
 ]
 
 /** Live count cards from projects / sources / knowledge / skills APIs (C9.12). */
@@ -67,29 +67,28 @@ export default function DashboardPage() {
     <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-4 p-4 sm:p-6">
       <header className="border-b pb-4">
         <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">
-          Dashboard
+          总览
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Counts from live API endpoints. Empty lists show 0; fetch failures
-          show an error.
+          数字来自实时接口。列表为空时显示 0；请求失败时显示错误。
         </p>
       </header>
 
       {countsQuery.isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading dashboard…</p>
+        <p className="text-sm text-muted-foreground">正在加载总览…</p>
       ) : countsQuery.isError ? (
         <p className="text-sm text-destructive" role="alert">
-          Failed to load dashboard:{' '}
+          总览加载失败：
           {countsQuery.error instanceof Error
             ? countsQuery.error.message
-            : 'unknown error'}
+            : '未知错误'}
         </p>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {CARDS.map((card) => (
             <div
               key={card.key}
-              className="flex flex-col gap-1 border-b border-border pb-3"
+              className="flex flex-col gap-1 rounded-md border bg-card px-4 py-4"
             >
               <span className="text-sm text-muted-foreground">{card.label}</span>
               <span className="text-3xl font-semibold tabular-nums tracking-tight">

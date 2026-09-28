@@ -57,7 +57,7 @@ export default function EvaluationLabPage() {
       <header className="flex flex-wrap items-center gap-3">
         <div className="min-w-0 flex-1">
           <h1 className="truncate text-xl font-semibold tracking-tight">
-            Evaluation Lab
+            评测
           </h1>
           <p className="truncate font-mono text-xs text-muted-foreground">
             {skillId || '—'}
@@ -69,20 +69,20 @@ export default function EvaluationLabPage() {
               className="underline underline-offset-4"
               to={`/skills/${encodeURIComponent(skillId)}`}
             >
-              Skill Studio
+              技能工作室
             </Link>
             <Link
               className="underline underline-offset-4"
               to={`/skills/${encodeURIComponent(skillId)}/timeline`}
             >
-              Timeline
+              时间线
             </Link>
           </div>
         ) : null}
       </header>
 
       {listQuery.isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading evaluations…</p>
+        <p className="text-sm text-muted-foreground">正在加载评测…</p>
       ) : null}
       {listQuery.isError ? (
         <p className="text-sm text-destructive">
@@ -92,48 +92,47 @@ export default function EvaluationLabPage() {
 
       {empty ? (
         <section
-          aria-label="Empty evaluations"
+          aria-label="空评测"
           className="rounded-md border border-dashed px-4 py-10 text-center"
         >
-          <p className="text-sm font-medium">No evaluation runs yet</p>
+          <p className="text-sm font-medium">还没有评测记录</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Run Evaluate from Demo, then return here. Figures stay empty until
-            stored metrics exist — nothing is invented.
+            先在演示页运行评测，再回到这里。没有已保存的指标时数字保持空白，不会编造。
           </p>
           <p className="mt-3 text-sm">
             <Link className="underline underline-offset-4" to="/demo">
-              Open Demo
+              打开演示
             </Link>
           </p>
         </section>
       ) : null}
 
       {figures ? (
-        <section aria-label="Evaluation figures" className="flex flex-col gap-3">
+        <section aria-label="评测指标" className="flex flex-col gap-3">
           <h2 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-            Figures
+            指标
           </h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             <FigureCard
-              label="Success rate"
+              label="成功率"
               value={formatSuccessRate(figures.successRate)}
             />
             <FigureCard
-              label="Policy violations"
+              label="策略违规"
               value={String(figures.policyViolationSum)}
             />
             <FigureCard
-              label="Mean latency"
+              label="平均延迟"
               value={formatMeanLatency(figures.meanLatencyMs)}
             />
             <FigureCard
-              label="Tool errors"
+              label="工具错误"
               value={String(figures.toolErrorSum)}
             />
-            <FigureCard label="Tokens" value={String(figures.tokenSum)} />
+            <FigureCard label="Token" value={String(figures.tokenSum)} />
             {figures.upliftPp !== null ? (
               <FigureCard
-                label="Uplift"
+                label="提升"
                 value={formatUpliftPp(figures.upliftPp)}
                 emphasize={figures.upliftPp > 0}
               />
@@ -143,22 +142,21 @@ export default function EvaluationLabPage() {
       ) : null}
 
       {matrixRows.length > 0 ? (
-        <section aria-label="Case matrix" className="flex flex-col gap-2">
+        <section aria-label="用例矩阵" className="flex flex-col gap-2">
           <h2 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-            Case matrix
+            用例矩阵
           </h2>
           <p className="text-xs text-muted-foreground">
-            Click a row to load stored trace events (Action / Tool / Input /
-            Output / Evidence / Verification — no CoT).
+            点击一行加载已保存的轨迹（动作 / 工具 / 输入 / 输出 / 证据 / 校验，不含思维链）。
           </p>
           <div className="overflow-x-auto rounded-md border">
             <table className="w-full min-w-[36rem] border-collapse text-left text-sm">
               <thead className="border-b bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
                 <tr>
-                  <th className="px-3 py-2 font-medium">Case</th>
-                  <th className="px-3 py-2 font-medium">Arm</th>
-                  <th className="px-3 py-2 font-medium">Passed</th>
-                  <th className="px-3 py-2 font-medium">Run</th>
+                  <th className="px-3 py-2 font-medium">用例</th>
+                  <th className="px-3 py-2 font-medium">分组</th>
+                  <th className="px-3 py-2 font-medium">结果</th>
+                  <th className="px-3 py-2 font-medium">运行</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -184,7 +182,9 @@ export default function EvaluationLabPage() {
                       <td className="px-3 py-2 font-mono text-xs">
                         {row.caseId}
                       </td>
-                      <td className="px-3 py-2 capitalize">{row.arm}</td>
+                      <td className="px-3 py-2">
+                        {row.arm === 'control' ? '无技能' : '有技能'}
+                      </td>
                       <td
                         className={cn(
                           'px-3 py-2 font-medium',
@@ -193,7 +193,7 @@ export default function EvaluationLabPage() {
                             : 'text-destructive',
                         )}
                       >
-                        {row.passed ? 'pass' : 'fail'}
+                        {row.passed ? '通过' : '失败'}
                       </td>
                       <td className="px-3 py-2 font-mono text-xs text-muted-foreground">
                         {row.runId}
@@ -208,12 +208,12 @@ export default function EvaluationLabPage() {
       ) : null}
 
       {selectedRunId ? (
-        <section aria-label="Run trace" className="flex flex-col gap-2">
+        <section aria-label="运行轨迹" className="flex flex-col gap-2">
           <h2 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-            Trace
+            轨迹
           </h2>
           {eventsQuery.isLoading ? (
-            <p className="text-sm text-muted-foreground">Loading events…</p>
+            <p className="text-sm text-muted-foreground">正在加载事件…</p>
           ) : null}
           {eventsQuery.isError ? (
             <p className="text-sm text-destructive">
@@ -222,14 +222,11 @@ export default function EvaluationLabPage() {
           ) : null}
           {eventsQuery.isSuccess && eventsQuery.data.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              No stored events for this run.
+              这次运行没有已保存的事件。
             </p>
           ) : null}
           {eventsQuery.isSuccess && eventsQuery.data.length > 0 ? (
-            <LiveTrace
-              events={eventsQuery.data}
-              className="rounded-md border p-3"
-            />
+            <LiveTrace events={eventsQuery.data} />
           ) : null}
         </section>
       ) : null}

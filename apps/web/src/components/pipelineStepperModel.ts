@@ -2,12 +2,12 @@ import type { TraceEventWire } from '@/hooks/useEvents'
 
 /** UI step labels for the Skill Build Pipeline (architecture §10.1 / demo script). */
 export const PIPELINE_STEPS = [
-  'Parse',
-  'Extract',
-  'Spec',
-  'Skill',
-  'Tests',
-  'Validate',
+  '解析',
+  '抽取',
+  '规格',
+  '技能',
+  '测试',
+  '校验',
 ] as const
 
 export type PipelineStepLabel = (typeof PIPELINE_STEPS)[number]

@@ -123,5 +123,5 @@ export function orderVersionChain(versions: VersionWire[]): VersionWire[] {
 
 export function formatBenchmarkDeltaPp(pp: number): string {
   const sign = pp > 0 ? '+' : ''
-  return `${sign}${pp.toFixed(1)} pp`
+  return `${sign}${pp.toFixed(1)} 百分点`
 }

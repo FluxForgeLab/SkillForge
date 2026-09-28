@@ -17,7 +17,7 @@ export type BenchmarkProps = {
 function PassFailMark({ passed }: { passed: boolean }) {
   return (
     <span
-      aria-label={passed ? 'pass' : 'fail'}
+      aria-label={passed ? '通过' : '失败'}
       className={cn(
         'font-sans text-lg font-semibold',
         passed ? 'text-emerald-700' : 'text-destructive',
@@ -39,14 +39,14 @@ export function Benchmark({
   if (!source) {
     return (
       <section
-        aria-label="Benchmark"
-        className={cn('flex flex-col gap-2', className)}
-      >
+      aria-label="评测对照"
+        className={cn('flex flex-col gap-2 rounded-md border bg-card p-3', className)}
+    >
         <h2 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-          Benchmark
+          评测对照
         </h2>
         <p className="text-sm text-muted-foreground">
-          No evaluation yet.
+          尚无评测结果。
         </p>
       </section>
     )
@@ -58,43 +58,43 @@ export function Benchmark({
 
   return (
     <section
-      aria-label="Benchmark"
-      className={cn('flex flex-col gap-4', className)}
+      aria-label="评测对照"
+      className={cn('flex flex-col gap-4 rounded-md border bg-card p-3', className)}
     >
       <div className="flex items-baseline justify-between gap-2">
         <h2 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-          Benchmark
+          评测对照
         </h2>
         <span className="text-xs text-muted-foreground">
-          {usingMock ? 'mock sample' : `${source.cases.length} case(s)`}
+          {usingMock ? '示例数据' : `${source.cases.length} 个用例`}
         </span>
       </div>
       <p className="text-xs text-muted-foreground">
-        Without Skill vs With Skill — success rates and Skill Uplift (pp).
+        无技能与有技能的成功率，以及技能提升（百分点）。
       </p>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <div className="rounded-md border px-4 py-5">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Without Skill
+            无技能
           </p>
           <p className="mt-2 text-4xl font-semibold tracking-tight tabular-nums">
             {controlPct}
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">control success</p>
+          <p className="mt-1 text-xs text-muted-foreground">对照成功率</p>
         </div>
         <div className="rounded-md border px-4 py-5">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            With Skill
+            有技能
           </p>
           <p className="mt-2 text-4xl font-semibold tracking-tight tabular-nums">
             {treatmentPct}
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">treatment success</p>
+          <p className="mt-1 text-xs text-muted-foreground">实验成功率</p>
         </div>
         <div className="rounded-md border px-4 py-5">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Skill Uplift
+            技能提升
           </p>
           <p
             className={cn(
@@ -106,7 +106,7 @@ export function Benchmark({
             {uplift}
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
-            percentage points
+            相对对照组
           </p>
         </div>
       </div>
@@ -115,10 +115,10 @@ export function Benchmark({
         <table className="w-full min-w-[28rem] border-collapse text-left text-sm">
           <thead className="border-b bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
             <tr>
-              <th className="px-3 py-2 font-medium">Case</th>
-              <th className="px-3 py-2 font-medium">Without Skill</th>
-              <th className="px-3 py-2 font-medium">With Skill</th>
-              <th className="px-3 py-2 font-medium">Uplift</th>
+              <th className="px-3 py-2 font-medium">用例</th>
+              <th className="px-3 py-2 font-medium">无技能</th>
+              <th className="px-3 py-2 font-medium">有技能</th>
+              <th className="px-3 py-2 font-medium">提升</th>
             </tr>
           </thead>
           <tbody className="divide-y">

@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
 import { apiFetch } from '@/lib/api'
+import { knowledgeTypeLabel } from '@/lib/labels'
 import { cn } from '@/lib/utils'
 import {
   documentFilename,
@@ -51,35 +52,34 @@ export default function KnowledgeLabPage() {
     <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-4 p-4 sm:p-6">
       <header className="border-b pb-4">
         <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">
-          Knowledge Lab
+          知识库
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Documents and knowledge units for a project. Click a unit to see its
-          stored source location (page or line).
+          查看项目里的文档和知识单元。点击一条单元，显示已保存的页码或行号。
         </p>
       </header>
 
       {projectsQuery.isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading projects…</p>
+        <p className="text-sm text-muted-foreground">正在加载项目…</p>
       ) : projectsQuery.isError ? (
         <p className="text-sm text-destructive">
-          Failed to load projects:{' '}
+          项目加载失败：
           {projectsQuery.error instanceof Error
             ? projectsQuery.error.message
-            : 'unknown error'}
+            : '未知错误'}
         </p>
       ) : projects.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No projects yet.</p>
+        <p className="text-sm text-muted-foreground">还没有项目。</p>
       ) : (
         <>
           <label className="flex max-w-md flex-col gap-1 text-sm">
-            <span className="font-medium">Project</span>
+            <span className="font-medium">项目</span>
             <select
               className="rounded-md border bg-background px-3 py-2"
               value={projectId}
               onChange={(event) => onProjectChange(event.target.value)}
             >
-              <option value="">Select a project…</option>
+              <option value="">选择项目…</option>
               {projects.map((project) => (
                 <option key={project.id} value={project.id}>
                   {project.name}
@@ -90,26 +90,26 @@ export default function KnowledgeLabPage() {
 
           {!projectId ? (
             <p className="text-sm text-muted-foreground">
-              Choose a project to list documents and knowledge units.
+              先选择一个项目，再列出文档和知识单元。
             </p>
           ) : (
             <div className="grid gap-4 md:grid-cols-2">
               <section className="flex flex-col gap-2">
                 <h2 className="text-sm font-semibold tracking-tight">
-                  Documents
+                  文档
                 </h2>
                 {sourcesQuery.isLoading ? (
-                  <p className="text-sm text-muted-foreground">Loading…</p>
+                  <p className="text-sm text-muted-foreground">加载中…</p>
                 ) : sourcesQuery.isError ? (
                   <p className="text-sm text-destructive">
-                    Failed to load documents.
+                    文档加载失败。
                   </p>
                 ) : sources.length === 0 ? (
                   <p className="text-sm text-muted-foreground">
-                    No documents for this project.
+                    这个项目还没有文档。
                   </p>
                 ) : (
-                  <ul className="divide-y rounded-md border text-sm">
+                  <ul className="divide-y rounded-md border bg-card text-sm">
                     {sources.map((source) => (
                       <li key={source.id} className="px-3 py-2">
                         <div className="font-medium">{source.filename}</div>
@@ -124,20 +124,20 @@ export default function KnowledgeLabPage() {
 
               <section className="flex flex-col gap-2">
                 <h2 className="text-sm font-semibold tracking-tight">
-                  Knowledge units
+                  知识单元
                 </h2>
                 {knowledgeQuery.isLoading ? (
-                  <p className="text-sm text-muted-foreground">Loading…</p>
+                  <p className="text-sm text-muted-foreground">加载中…</p>
                 ) : knowledgeQuery.isError ? (
                   <p className="text-sm text-destructive">
-                    Failed to load knowledge units.
+                    知识单元加载失败。
                   </p>
                 ) : units.length === 0 ? (
                   <p className="text-sm text-muted-foreground">
-                    No knowledge units for this project.
+                    这个项目还没有知识单元。
                   </p>
                 ) : (
-                  <ul className="divide-y rounded-md border text-sm">
+                  <ul className="divide-y rounded-md border bg-card text-sm">
                     {units.map((unit) => (
                       <li key={unit.id}>
                         <button
@@ -152,9 +152,9 @@ export default function KnowledgeLabPage() {
                             {unit.title || unit.id}
                           </span>
                           <span className="text-xs text-muted-foreground">
-                            {unit.type}
+                            {knowledgeTypeLabel(unit.type)}
                             {unit.confidence != null
-                              ? ` · conf ${unit.confidence.toFixed(2)}`
+                              ? ` · 置信度 ${unit.confidence.toFixed(2)}`
                               : ''}
                           </span>
                         </button>
@@ -186,23 +186,23 @@ function SelectedKuDetail({
   const location = formatKuLocation(unit.source_location)
 
   return (
-    <section className="rounded-md border p-4 text-sm">
-      <h2 className="font-semibold tracking-tight">Selected unit</h2>
+    <section className="rounded-md border bg-card p-4 text-sm">
+      <h2 className="font-semibold tracking-tight">选中的单元</h2>
       <dl className="mt-2 grid gap-2 sm:grid-cols-2">
         <div>
-          <dt className="text-xs text-muted-foreground">Title</dt>
+          <dt className="text-xs text-muted-foreground">标题</dt>
           <dd>{unit.title || '—'}</dd>
         </div>
         <div>
-          <dt className="text-xs text-muted-foreground">Type</dt>
-          <dd>{unit.type}</dd>
+          <dt className="text-xs text-muted-foreground">类型</dt>
+          <dd>{knowledgeTypeLabel(unit.type)}</dd>
         </div>
         <div>
-          <dt className="text-xs text-muted-foreground">Document</dt>
+          <dt className="text-xs text-muted-foreground">文档</dt>
           <dd>{filename}</dd>
         </div>
         <div>
-          <dt className="text-xs text-muted-foreground">Location</dt>
+          <dt className="text-xs text-muted-foreground">位置</dt>
           <dd>{location}</dd>
         </div>
       </dl>

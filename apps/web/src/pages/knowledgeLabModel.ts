@@ -51,13 +51,13 @@ export function formatKuLocation(
   location: SourceLocationWire | null | undefined,
 ): string {
   if (!location) {
-    return 'location not stored'
+    return '未记录位置'
   }
   if (location.page != null) {
-    return `page ${location.page}`
+    return `第 ${location.page} 页`
   }
   if (location.line_start != null) {
-    return `line ${location.line_start}`
+    return `第 ${location.line_start} 行`
   }
-  return 'location not stored'
+  return '未记录位置'
 }

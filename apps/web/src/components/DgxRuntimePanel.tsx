@@ -69,7 +69,7 @@ export function DgxRuntimePanel({
         {state.kind === 'loading' ? (
           <span className="text-muted-foreground">…</span>
         ) : state.kind === 'error' ? (
-          <span className="text-destructive">offline</span>
+          <span className="text-destructive">离线</span>
         ) : (
           <>
             <span className="font-medium">{state.data.model}</span>
@@ -77,11 +77,11 @@ export function DgxRuntimePanel({
             <span>{state.data.backend}</span>
             <span className="text-muted-foreground">·</span>
             <span className="text-muted-foreground">
-              {formatNullableMetric(state.data.tokens_per_second)} tok/s
+              {formatNullableMetric(state.data.tokens_per_second)} token/秒
             </span>
             <span className="text-muted-foreground">·</span>
             <span className="text-muted-foreground">
-              mem {formatMemoryBytes(state.data.memory_bytes)}
+              内存 {formatMemoryBytes(state.data.memory_bytes)}
             </span>
           </>
         )}
@@ -91,38 +91,38 @@ export function DgxRuntimePanel({
 
   return (
     <section
-      aria-label="DGX Runtime"
-      className={cn('flex flex-col gap-3 rounded-md border p-3', className)}
+      aria-label="DGX 运行时"
+      className={cn('flex flex-col gap-3 rounded-md border bg-card p-3', className)}
     >
       <div className="flex items-baseline justify-between gap-2">
         <h2 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-          DGX Runtime
+          DGX 运行时
         </h2>
         <span className="text-xs text-muted-foreground">
           GET /api/model/status
         </span>
       </div>
       {state.kind === 'loading' ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
+        <p className="text-sm text-muted-foreground">加载中…</p>
       ) : state.kind === 'error' ? (
         <p className="text-sm text-destructive">{state.detail}</p>
       ) : (
         <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Model
+              模型
             </dt>
             <dd className="mt-1 text-sm font-medium">{state.data.model}</dd>
           </div>
           <div>
             <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Backend
+              后端
             </dt>
             <dd className="mt-1 text-sm font-medium">{state.data.backend}</dd>
           </div>
           <div>
             <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Tokens/s
+              Token/秒
             </dt>
             <dd className="mt-1 text-sm font-medium tabular-nums">
               {formatNullableMetric(state.data.tokens_per_second)}
@@ -130,7 +130,7 @@ export function DgxRuntimePanel({
           </div>
           <div>
             <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Memory
+              内存
             </dt>
             <dd className="mt-1 text-sm font-medium tabular-nums">
               {formatMemoryBytes(state.data.memory_bytes)}
