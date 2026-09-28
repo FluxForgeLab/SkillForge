@@ -1,0 +1,96 @@
+{
+  "run_id": "run_demo_f3",
+  "project_id": "proj_runbook",
+  "case_ids": {
+    "f1": "eval_backend_stopped",
+    "f2": "eval_nginx_wrong_upstream",
+    "f3": "eval_nginx_bad_config_reload"
+  },
+  "verifier": {
+    "http_status": 502,
+    "backend_running": true,
+    "nginx_running": true,
+    "health_ok": false,
+    "db_reachable": true
+  },
+  "assertion": {
+    "passed": false,
+    "mismatches": [
+      {"field": "http_status", "expected": 200, "actual": 502},
+      {"field": "health_ok", "expected": true, "actual": false}
+    ],
+    "forbidden_hits": []
+  },
+  "failure_draft": {
+    "class": "missing_instruction",
+    "symptom": "502 upstream nginx -t",
+    "failed_assertion": "http_status expected 200 got 502",
+    "evidence": [
+      "nginx: [emerg] unknown directive \"this_is_not_valid_nginx\" in /etc/nginx/nginx.conf:12",
+      "Bad Gateway"
+    ],
+    "suspected_skill_gap": "No instruction to run nginx -t before reload when config is invalid"
+  },
+  "patch_meta": {
+    "summary": "Add nginx -t before reload when config is invalid",
+    "evidence_refs": ["doc_runbook#page=31"],
+    "new_instruction_id": "ins_08",
+    "new_instruction_line": "ins_08 When nginx.reload fails or the config may be invalid, run nginx.test (nginx -t); remove invalid directives such as this_is_not_valid_nginx; fix upstream to server backend:8080; then reload only after the test passes.",
+    "insert_after_prefix": "ins_06 If the upstream line is not"
+  },
+  "source_map_updates": {
+    "ins_08": {
+      "knowledge_unit_id": "ku_appendix_b",
+      "document": "doc_runbook",
+      "sha256": "fixture-appendix-b",
+      "line_start": 31
+    }
+  },
+  "events": [
+    {
+      "id": "evt_tool_call_docker.restart",
+      "type": "tool_call",
+      "name": "docker.restart",
+      "input": {"service": "backend"},
+      "output": {}
+    },
+    {
+      "id": "evt_tool_result_docker.restart",
+      "type": "tool_result",
+      "name": "docker.restart",
+      "input": {},
+      "output": {"ok": true, "service": "backend"}
+    },
+    {
+      "id": "evt_tool_call_nginx.reload",
+      "type": "tool_call",
+      "name": "nginx.reload",
+      "input": {},
+      "output": {}
+    },
+    {
+      "id": "evt_tool_result_nginx.reload",
+      "type": "tool_result",
+      "name": "nginx.reload",
+      "input": {},
+      "output": {
+        "ok": false,
+        "stderr": "nginx: [emerg] unknown directive \"this_is_not_valid_nginx\" in /etc/nginx/nginx.conf:12"
+      }
+    },
+    {
+      "id": "evt_tool_call_http.get",
+      "type": "tool_call",
+      "name": "http.get",
+      "input": {"url": "http://localhost:8088/health"},
+      "output": {}
+    },
+    {
+      "id": "evt_tool_result_http.get",
+      "type": "tool_result",
+      "name": "http.get",
+      "input": {},
+      "output": {"status": 502, "body": "Bad Gateway"}
+    }
+  ]
+}

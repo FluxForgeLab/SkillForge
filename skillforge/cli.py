@@ -1,4 +1,4 @@
-"""Debug CLI. `run` injects a lab fault; `eval --replay` reads the eval cache."""
+"""Debug CLI. `run` / `eval --replay` / `index rebuild` / `demo`."""
 
 from __future__ import annotations
 
@@ -8,8 +8,9 @@ import json
 import subprocess
 import sys
 import tempfile
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from pathlib import Path
+from typing import Any
 
 import yaml
 
@@ -18,6 +19,7 @@ from skillforge.db.connection import connection
 from skillforge.db.init import initialize_database
 from skillforge.db.repositories.agent_runs import AgentRunRecord, insert_agent_run
 from skillforge.db.repositories.projects import get_project
+from skillforge.demo.dod import run_dod_demo
 from skillforge.domain.entities import TraceEvent
 from skillforge.domain.enums import TraceEventType
 from skillforge.evaluator.cache import replay_trials
@@ -32,6 +34,8 @@ from skillforge.tracing.bus import EventBus
 from skillforge.tracing.sink import FanOutSink, SqliteTraceSink, TraceSink
 
 Inject = Callable[[str], None]
+Reset = Callable[[], None]
+Verify = Callable[[], Mapping[str, Any]]
 
 
 class ListSink:
@@ -51,6 +55,8 @@ def main(
     argv: list[str] | None = None,
     *,
     inject: Inject | None = None,
+    reset: Reset | None = None,
+    verify: Verify | None = None,
     harness: AgentRuntime | None = None,
     sink: TraceSink | None = None,
 ) -> int:
@@ -64,7 +70,32 @@ def main(
         return _eval_replay(parsed)
     if parsed.command == "index":
         return _index_rebuild(parsed)
+    if parsed.command == "demo":
+        return _demo(parsed, inject=inject, reset=reset, verify=verify, sink=sink)
     return _run(parsed, inject=inject, harness=harness, sink=sink)
+
+
+def _demo(
+    parsed: argparse.Namespace,
+    *,
+    inject: Inject | None,
+    reset: Reset | None,
+    verify: Verify | None,
+    sink: TraceSink | None,
+) -> int:
+    try:
+        return run_dod_demo(
+            replay=bool(parsed.replay),
+            repo_root=_repo_root(),
+            settings=get_settings(),
+            inject=inject,
+            reset=reset,
+            verify=verify,
+            sink=sink,
+        )
+    except Exception as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
 
 
 def _index_rebuild(parsed: argparse.Namespace) -> int:
@@ -196,6 +227,12 @@ def _parse(argv: list[str]) -> argparse.Namespace:
     index_sub = index_cmd.add_subparsers(dest="index_command", required=True)
     rebuild = index_sub.add_parser("rebuild")
     rebuild.add_argument("--project", required=True)
+    demo_cmd = sub.add_parser("demo")
+    demo_cmd.add_argument(
+        "--replay",
+        action="store_true",
+        help="recorded FakeModelAdapter path (no live model / Docker)",
+    )
     return parser.parse_args(argv)
 
 
