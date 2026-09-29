@@ -49,6 +49,29 @@ class JobRunner:
     def get(self, job_id: str) -> Job | None:
         return self._jobs.get(job_id)
 
+    def begin(self, job_id: str) -> Job:
+        """Record a job that FastAPI BackgroundTasks will run, so GET can see it."""
+        if job_id in self._jobs:
+            raise ValueError(f"job id already exists: {job_id}")
+        job = Job(id=job_id, status=JobStatus.RUNNING)
+        self._jobs[job_id] = job
+        return job
+
+    def finish(self, job_id: str, *, result: Any = None, error: str | None = None) -> None:
+        job = self._jobs.get(job_id)
+        if job is None or job.status in (
+            JobStatus.COMPLETED,
+            JobStatus.FAILED,
+            JobStatus.CANCELLED,
+        ):
+            return
+        if error is None:
+            job.status = JobStatus.COMPLETED
+            job.result = result
+            return
+        job.status = JobStatus.FAILED
+        job.error = error
+
     def submit(
         self,
         fn: Callable[[], Awaitable[Any]],

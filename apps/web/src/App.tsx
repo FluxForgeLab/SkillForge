@@ -1,5 +1,7 @@
 import { NavLink, Outlet, useLocation, useMatch } from 'react-router'
 
+import { readRememberedSkillId } from '@/pages/demoSession'
+
 function navClass(isActive: boolean): string {
   return isActive
     ? 'bg-sidebar-accent text-sidebar-accent-foreground'
@@ -9,7 +11,7 @@ function navClass(isActive: boolean): string {
 export default function App() {
   const location = useLocation()
   const skillMatch = useMatch('/skills/:id/*')
-  const skillId = skillMatch?.params.id
+  const skillId = skillMatch?.params.id || readRememberedSkillId()
   const onEvaluations = /\/skills\/[^/]+\/evaluations\/?$/.test(
     location.pathname,
   )

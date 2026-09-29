@@ -222,3 +222,26 @@ export function shortBody(body: string, max = 180): string {
   }
   return `${trimmed.slice(0, max)}…`
 }
+
+/** Prefer the API error sentence over the raw JSON body. */
+export function apiErrorDetail(body: string, max = 240): string {
+  const trimmed = body.trim()
+  try {
+    const parsed: unknown = JSON.parse(trimmed)
+    if (
+      typeof parsed === 'object' &&
+      parsed !== null &&
+      'error' in parsed &&
+      typeof parsed.error === 'object' &&
+      parsed.error !== null &&
+      'message' in parsed.error &&
+      typeof parsed.error.message === 'string' &&
+      parsed.error.message.trim()
+    ) {
+      return shortBody(parsed.error.message, max)
+    }
+  } catch {
+    // Response body is not JSON.
+  }
+  return shortBody(trimmed, max)
+}

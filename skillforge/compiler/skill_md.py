@@ -19,8 +19,11 @@ from skillforge.models.structured import generate_structured
 from skillforge.models.types import ChatMessage
 
 _SYSTEM = (
-    "Write one short instruction sentence per item. "
-    "Cite only a knowledge_unit_id from the list. Do not invent instruction ids."
+    "Cite only a knowledge_unit_id from the list. Do not invent instruction ids. "
+    "Procedure steps already stored on a unit are copied as instructions. "
+    "Add a prohibition for each safety constraint that is not already a step. "
+    "When a unit has no steps, write one operational sentence from its title and trigger, "
+    "including the tool and the health URL when the unit states them."
 )
 
 
@@ -72,7 +75,7 @@ async def render_skill_markdown(
         stage="compiler",
         settings=settings,
     )
-    kept = _kept(batch.instructions, selected)
+    kept = _materialize(batch.instructions, selected)
     numbered = _number(kept)
     source_map = _source_map(db_path, numbered, selected)
     return SkillMarkdown(skill_md=_document(spec, numbered), source_map=source_map)
@@ -91,19 +94,61 @@ def _load_selected(
     return [found[unit_id] for unit_id in selected_unit_ids if unit_id in found]
 
 
-def _kept(
+def _materialize(
     drafts: list[InstructionDraft],
     selected: list[KnowledgeUnit],
 ) -> list[InstructionDraft]:
+    """Use each unit's own steps and safety lines, then model text only for gaps."""
     allowed = {unit.id for unit in selected}
+    covered: set[tuple[str, str]] = set()
     kept: list[InstructionDraft] = []
+    for unit in selected:
+        steps = _lines(unit.content.get("steps"))
+        if steps:
+            covered.add((unit.id, "procedure"))
+        for step in steps:
+            kept.append(
+                InstructionDraft(
+                    knowledge_unit_id=unit.id,
+                    text=step,
+                    kind="procedure",
+                )
+            )
+        for constraint in _lines(unit.content.get("safety_constraints")):
+            key = (unit.id, constraint.casefold())
+            if key in covered:
+                continue
+            covered.add(key)
+            kept.append(
+                InstructionDraft(
+                    knowledge_unit_id=unit.id,
+                    text=constraint,
+                    kind="prohibition",
+                )
+            )
     for draft in drafts:
-        if draft.knowledge_unit_id not in allowed:
+        text = draft.text.strip()
+        if draft.knowledge_unit_id not in allowed or not text:
             continue
-        if not draft.text.strip():
+        if draft.kind != "prohibition" and (draft.knowledge_unit_id, "procedure") in covered:
             continue
-        kept.append(draft)
+        key = (draft.knowledge_unit_id, text.casefold())
+        if key in covered:
+            continue
+        covered.add(key)
+        kept.append(draft.model_copy(update={"text": text}))
     return kept
+
+
+def _lines(value: object) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    lines: list[str] = []
+    for item in value:
+        text = str(item).strip()
+        if text:
+            lines.append(text)
+    return lines
 
 
 def _number(drafts: list[InstructionDraft]) -> list[tuple[str, InstructionDraft]]:
@@ -215,6 +260,10 @@ def _prompt(selected: list[KnowledgeUnit]) -> str:
     for unit in selected:
         title = str(unit.content.get("title") or "").strip()
         lines.append(f"- {unit.id}: {title}")
+        for step in _lines(unit.content.get("steps")):
+            lines.append(f"  step: {step}")
+        for constraint in _lines(unit.content.get("safety_constraints")):
+            lines.append(f"  safety: {constraint}")
     return "\n".join(lines)
 
 

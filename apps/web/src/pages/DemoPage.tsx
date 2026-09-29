@@ -18,6 +18,7 @@ import { API_BASE, apiRequest, type ApiResult } from '@/lib/api'
 import { demoStepLabel, skillStatusLabel, wsStatusLabel } from '@/lib/labels'
 import {
   FAULT_IDS,
+  apiErrorDetail,
   buildBenchmarkFromRuns,
   defaultEvolveForm,
   prefillEvolveFromEvents,
@@ -27,6 +28,7 @@ import {
   type FaultId,
   type StepLogEntry,
 } from '@/pages/demoJudgeModel'
+import { loadDemoSession, saveDemoSession } from '@/pages/demoSession'
 
 type ProjectResponse = {
   id: string
@@ -60,6 +62,13 @@ type CompileResponse = {
 }
 
 type EvaluateJobResponse = { job_id: string }
+
+type EvalJobWire = {
+  id: string
+  status: string
+  error: string | null
+  result: unknown
+}
 
 type EvolveResponse = {
   skill_id: string
@@ -106,51 +115,104 @@ function logFromResult(
     id: nextLogId(),
     step,
     status: result.status,
-    detail: shortBody(result.body),
+      detail: apiErrorDetail(result.body),
     at,
   }
 }
 
 export default function DemoPage() {
-  const { events, status: wsStatus, error: wsError } = useEvents(200)
+  const [restored] = useState(loadDemoSession)
+  const { events, status: wsStatus, error: wsError } = useEvents(
+    200,
+    restored.events,
+  )
   const [apiHealth, setApiHealth] = useState<ApiHealth>('checking')
-  const [stepLog, setStepLog] = useState<StepLogEntry[]>([])
+  const [stepLog, setStepLog] = useState<StepLogEntry[]>(restored.stepLog)
   const [busy, setBusy] = useState<string | null>(null)
 
-  const [projectId, setProjectId] = useState('')
-  const [projectName, setProjectName] = useState('service-recovery-demo')
+  const [projectId, setProjectId] = useState(restored.projectId)
+  const [projectName, setProjectName] = useState(restored.projectName)
   const [projectDescription, setProjectDescription] = useState(
-    '现场演示项目',
+    restored.projectDescription,
   )
-  const [sources, setSources] = useState<SourceResponse[]>([])
-  const [knowledgeCount, setKnowledgeCount] = useState<number | null>(null)
-  const [skillId, setSkillId] = useState('')
-  const [versionId, setVersionId] = useState('')
-  const [skillName, setSkillName] = useState('service-recovery')
+  const [sources, setSources] = useState<SourceResponse[]>(restored.sources)
+  const [knowledgeCount, setKnowledgeCount] = useState<number | null>(
+    restored.knowledgeCount,
+  )
+  const [skillId, setSkillId] = useState(restored.skillId)
+  const [versionId, setVersionId] = useState(restored.versionId)
+  const [skillName, setSkillName] = useState(restored.skillName)
   const [skillDescription, setSkillDescription] = useState(
-    '从常见故障中恢复 nginx 上游和后端',
+    restored.skillDescription,
   )
-  const [triggersText, setTriggersText] = useState(
-    'HTTP 502\nbackend unavailable\nhealth check failed',
-  )
-  const [faultId, setFaultId] = useState<FaultId>('backend_stopped')
-  const [evalJobId, setEvalJobId] = useState<string | null>(null)
+  const [triggersText, setTriggersText] = useState(restored.triggersText)
+  const [faultId, setFaultId] = useState<FaultId>(restored.faultId)
+  const [evalJobId, setEvalJobId] = useState<string | null>(restored.evalJobId)
   const [benchmark, setBenchmark] = useState<BenchmarkData | undefined>(
-    undefined,
+    restored.benchmark,
   )
-  const [approver, setApprover] = useState('judge')
-  const [evolveForm, setEvolveForm] = useState<EvolveFormState>(defaultEvolveForm)
-  const [skillDiff, setSkillDiff] = useState<SkillDiffPayload | null>(null)
+  const [approver, setApprover] = useState(restored.approver)
+  const [evolveForm, setEvolveForm] = useState<EvolveFormState>(
+    restored.evolveForm,
+  )
+  const [skillDiff, setSkillDiff] = useState<SkillDiffPayload | null>(
+    restored.skillDiff,
+  )
   const [skillDiffFailure, setSkillDiffFailure] = useState<SkillDiffFailure>(
-    emptySkillDiffFailure,
+    restored.skillDiffFailure,
   )
   const fileInputRef = useRef<HTMLInputElement>(null)
   const fileInputId = useId()
-  const handledEvalJobs = useRef(new Set<string>())
+  const handledEvalJobs = useRef(new Set(restored.handledEvalJobIds))
 
   const pushLog = (entry: StepLogEntry) => {
     setStepLog((prev) => [entry, ...prev].slice(0, 40))
   }
+
+  useEffect(() => {
+    saveDemoSession({
+      projectId,
+      projectName,
+      projectDescription,
+      sources,
+      knowledgeCount,
+      skillId,
+      versionId,
+      skillName,
+      skillDescription,
+      triggersText,
+      faultId,
+      evalJobId,
+      benchmark,
+      approver,
+      evolveForm,
+      skillDiff,
+      skillDiffFailure,
+      stepLog,
+      handledEvalJobIds: Array.from(handledEvalJobs.current),
+      events,
+    })
+  }, [
+    projectId,
+    projectName,
+    projectDescription,
+    sources,
+    knowledgeCount,
+    skillId,
+    versionId,
+    skillName,
+    skillDescription,
+    triggersText,
+    faultId,
+    evalJobId,
+    benchmark,
+    approver,
+    evolveForm,
+    skillDiff,
+    skillDiffFailure,
+    stepLog,
+    events,
+  ])
 
   // API health badge — real GET /health only; no invented DGX tokens/s (C9.10).
   useEffect(() => {
@@ -194,6 +256,7 @@ export default function DemoPage() {
           : JSON.stringify(completed.output)
       // Defer setState out of the sync effect body.
       queueMicrotask(() => {
+        setEvalJobId(null)
         pushLog({
           id: nextLogId(),
           step: 'evaluate',
@@ -214,6 +277,9 @@ export default function DemoPage() {
       return
     }
     handledEvalJobs.current.add(jobKey)
+    queueMicrotask(() => {
+      setEvalJobId(null)
+    })
     let cancelled = false
     void (async () => {
       const runs: EvaluationRunWire[] = []
@@ -251,6 +317,90 @@ export default function DemoPage() {
       cancelled = true
     }
   }, [events, skillId])
+
+  // The accept log says "等待评测完成" immediately. Job status is the
+  // completion signal when the WebSocket event was missed.
+  useEffect(() => {
+    if (!evalJobId || !skillId) {
+      return
+    }
+    let cancelled = false
+    const tick = async () => {
+      if (handledEvalJobs.current.has(evalJobId)) {
+        setEvalJobId(null)
+        return
+      }
+      const result = await apiRequest<EvalJobWire>(`/api/jobs/${evalJobId}`)
+      if (cancelled) {
+        return
+      }
+      if (!result.ok) {
+        if (result.status === 404) {
+          handledEvalJobs.current.add(evalJobId)
+          setEvalJobId(null)
+          pushLog({
+            id: nextLogId(),
+            step: 'evaluate',
+            status: 404,
+            detail: '评测任务已结束或服务已重启，请再点一次评测',
+            at: new Date().toISOString(),
+          })
+        }
+        return
+      }
+      const status = result.data.status
+      if (status === 'pending' || status === 'running') {
+        return
+      }
+      if (handledEvalJobs.current.has(evalJobId)) {
+        return
+      }
+      handledEvalJobs.current.add(evalJobId)
+      setEvalJobId(null)
+      if (status !== 'completed' || !Array.isArray(result.data.result)) {
+        pushLog({
+          id: nextLogId(),
+          step: 'evaluate',
+          status: null,
+          detail: `评测失败 job=${evalJobId}：${shortBody(result.data.error ?? status)}`,
+          at: new Date().toISOString(),
+        })
+        return
+      }
+      const runIds = result.data.result.filter(
+        (id): id is string => typeof id === 'string',
+      )
+      const runs: EvaluationRunWire[] = []
+      for (const runId of runIds) {
+        const loaded = await apiRequest<EvaluationRunWire>(
+          `/api/skills/${skillId}/evaluations/${runId}`,
+        )
+        if (cancelled) {
+          return
+        }
+        if (loaded.ok) {
+          runs.push(loaded.data)
+        }
+      }
+      pushLog({
+        id: nextLogId(),
+        step: 'evaluate',
+        status: null,
+        detail: `评测完成 job=${evalJobId} run_ids=${runIds.join(',')}`,
+        at: new Date().toISOString(),
+      })
+      const data = buildBenchmarkFromRuns(runs)
+      if (data) {
+        setBenchmark(data)
+      }
+    }
+    void tick()
+    const id = window.setInterval(() => void tick(), 2000)
+    return () => {
+      cancelled = true
+      window.clearInterval(id)
+    }
+  }, [evalJobId, skillId])
 
   const suggestedRunId = (() => {
     const filled = prefillEvolveFromEvents(events, defaultEvolveForm())
@@ -972,6 +1122,9 @@ export default function DemoPage() {
               }
               aria-label="source_map 更新 JSON"
             />
+            <p className="text-xs text-muted-foreground">
+              会把旧版本和新版本的全部故障各跑一遍，通常要十几分钟。按钮会一直不可点，结束前不要刷新。
+            </p>
             <Button
               type="button"
               size="sm"

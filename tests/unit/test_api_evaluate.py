@@ -127,6 +127,11 @@ def test_evaluate_returns_job_id_and_emits_bus_events(tmp_path: Path) -> None:
         assert job_events[1].output["status"] == "completed"
         assert job_events[1].output["run_ids"] == ["eval_run_1"]
 
+        job_resp = client.get(f"/api/jobs/{job_id}")
+        assert job_resp.status_code == 200
+        assert job_resp.json()["status"] == "completed"
+        assert job_resp.json()["result"] == ["eval_run_1"]
+
         get_resp = client.get("/api/skills/skill_eval/evaluations/eval_run_1")
         assert get_resp.status_code == 200
         run_body = get_resp.json()

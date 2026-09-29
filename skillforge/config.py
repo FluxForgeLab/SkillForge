@@ -73,6 +73,7 @@ class Settings(BaseSettings):
     opslab_nginx_conf: Path = Path("demo/ops-lab/nginx/nginx.conf")
     sandbox_image: str = "skillforge-sandbox:local"
     sandbox_backend: Literal["docker", "openshell"] = "docker"
+    sandbox_workspace_root: str = ""
 
     retrieval_backend: RetrievalBackendName = "sqlite_fts"
     retrieval_default_mode: RetrievalModeName = "keyword"

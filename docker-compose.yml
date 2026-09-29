@@ -104,9 +104,14 @@ services:
       SKILLFORGE_OPSLAB_BASE_URL: http://127.0.0.1:8088
       SKILLFORGE_OPSLAB_PROJECT: skillforge
       SKILLFORGE_OPSLAB_NGINX_CONF: /lab/nginx.conf
+      SKILLFORGE_SANDBOX_WORKSPACE_ROOT: /tmp/skillforge-workspaces
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/skillforge-workspaces:/tmp/skillforge-workspaces
       - ./demo/ops-lab/nginx/nginx.conf:/lab/nginx.conf
+      # Same host tree the nginx container mounts, so catalog reads and
+      # upstream edits hit the live lab instead of an image-only copy.
+      - ./demo/ops-lab:/app/demo/ops-lab
       - skillforge-data:/app/data
     depends_on:
       vllm:

@@ -129,6 +129,8 @@ docker compose --profile dgx up -d --build
 
 API 用 host network，只听 `127.0.0.1:8000`，千问地址是 `http://127.0.0.1:8001/v1`。`docker.sock` 只挂在 API 上，给白名单 ops-lab 适配器用；沙箱镜像不挂这个套接字。网页发布在 `127.0.0.1:5173`。ops-lab 仍是 `8088`。compose 项目名是 `skillforge`，所以 `SKILLFORGE_OPSLAB_PROJECT=skillforge`。
 
+API 镜像在 `/app/demo/ops-lab` 带上故障目录和注入脚本。编译评测用例、注入故障和校验器都从这里读 `faults/catalog.yaml`。compose 再把宿主机的 `demo/ops-lab` 挂到同一路径，这样改 upstream 写的是 nginx 容器正在用的那份 `nginx.conf`。缺了这棵目录时，编译会在生成评测用例处抛 `FileNotFoundError`，技能不会入库。
+
 这台机器访问 Docker Hub 和 npmjs 会超时。构建前把 DaoCloud 上的 `library/node:22-alpine`、`library/python:3.12-slim`、`library/nginx:alpine` tag 成官方名，不要改 `/etc/docker/daemon.json`。
 
 ```bash

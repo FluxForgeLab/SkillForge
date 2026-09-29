@@ -20,6 +20,7 @@ from skillforge.domain.entities import PatchProposal, Project, SkillVersionStatu
 from skillforge.evolution.apply import apply_patch
 from skillforge.registry import (
     MissingApproverError,
+    PublishPathOccupiedError,
     SkillRegistry,
     approve,
     publish,
@@ -109,11 +110,40 @@ def test_publish_copies_files_and_ends_published(tmp_path: Path) -> None:
 
     assert result.version.status == SkillVersionStatus.PUBLISHED
     assert registry.get_version(version.id).status == SkillVersionStatus.PUBLISHED
-    dest = published / "service-recovery" / "0.1"
+    dest = published / "service-recovery" / skill.id / "0.1"
     assert result.published_path == dest
     assert (dest / "SKILL.md").is_file()
     assert (dest / "scripts" / "check.sh").is_file()
     assert (dest / "approver.txt").read_text(encoding="utf-8").strip() == "bob"
+
+
+def test_publish_same_name_uses_separate_skill_directories(tmp_path: Path) -> None:
+    registry, project_id, published = _make_registry(tmp_path)
+    first = registry.create_skill(project_id, "Service Recovery")
+    second = registry.create_skill(project_id, "Service Recovery")
+    for skill in (first, second):
+        version = registry.create_version(skill.id, "0.1", _minimal_files())
+        _to_candidate(registry, version.id)
+        approve(registry, version.id, "bob")
+        publish(registry, version.id)
+    assert (published / "service-recovery" / first.id / "0.1" / "SKILL.md").is_file()
+    assert (published / "service-recovery" / second.id / "0.1" / "SKILL.md").is_file()
+
+
+def test_publish_refuses_to_overwrite_an_existing_directory(tmp_path: Path) -> None:
+    registry, project_id, published = _make_registry(tmp_path)
+    skill = registry.create_skill(project_id, "Service Recovery")
+    version = registry.create_version(skill.id, "0.1", _minimal_files())
+    _to_candidate(registry, version.id)
+    approve(registry, version.id, "bob")
+    dest = published / "service-recovery" / skill.id / "0.1"
+    dest.mkdir(parents=True)
+    (dest / "SKILL.md").write_text("already published\n", encoding="utf-8")
+
+    with pytest.raises(PublishPathOccupiedError, match="发布目录已被占用"):
+        publish(registry, version.id)
+    assert registry.get_version(version.id).status == SkillVersionStatus.APPROVED
+    assert (dest / "SKILL.md").read_text(encoding="utf-8") == "already published\n"
 
 
 def test_publish_from_candidate_fails(tmp_path: Path) -> None:

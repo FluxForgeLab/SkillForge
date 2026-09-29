@@ -123,38 +123,80 @@ def _apply_hunks(
     original: list[str],
     hunks: list[tuple[int, int, list[str]]],
 ) -> list[str]:
+    located: list[tuple[int, list[str], list[str]]] = []
+    for old_start, old_count, body in hunks:
+        old_lines, new_lines = _hunk_lines(body)
+        if old_count == 0 and not old_lines:
+            start = max(old_start - 1, 0)
+        else:
+            start = _locate_hunk(original, old_start, old_lines)
+        located.append((start, old_lines, new_lines))
+    _reject_overlapping_hunks(located)
     result = list(original)
-    # Apply from bottom to top so line numbers stay valid.
-    for old_start, old_count, body in reversed(hunks):
-        start = max(old_start - 1, 0)
-        old_lines: list[str] = []
-        new_lines: list[str] = []
-        for raw in body:
-            tag = raw[:1]
-            content = raw[1:] if tag in {" ", "+", "-"} else raw
-            if not content.endswith("\n") and tag in {" ", "+", "-"}:
-                content = content + "\n"
-            if tag == " ":
-                old_lines.append(content)
-                new_lines.append(content)
-            elif tag == "-":
-                old_lines.append(content)
-            elif tag == "+":
-                new_lines.append(content)
-            elif tag == "\n" or raw.strip() == "":
-                # rare empty context line without prefix
-                old_lines.append("\n")
-                new_lines.append("\n")
-            else:
-                raise ValueError(f"invalid hunk line: {raw!r}")
+    # Higher indexes first so earlier slices stay valid.
+    for start, old_lines, new_lines in sorted(located, key=lambda item: item[0], reverse=True):
         end = start + len(old_lines)
-        if old_count == 0:
-            end = start
-        expected = result[start:end]
-        if expected != old_lines:
+        if result[start:end] != old_lines:
             raise ValueError(
-                f"hunk context mismatch at line {old_start}: "
-                f"expected {old_lines!r} got {expected!r}"
+                f"hunk context mismatch at line {start + 1}: "
+                f"expected {old_lines!r} got {result[start:end]!r}"
             )
         result[start:end] = new_lines
     return result
+
+
+def _hunk_lines(body: list[str]) -> tuple[list[str], list[str]]:
+    old_lines: list[str] = []
+    new_lines: list[str] = []
+    for raw in body:
+        tag = raw[:1]
+        content = raw[1:] if tag in {" ", "+", "-"} else raw
+        if not content.endswith("\n") and tag in {" ", "+", "-"}:
+            content = content + "\n"
+        if tag == " ":
+            old_lines.append(content)
+            new_lines.append(content)
+        elif tag == "-":
+            old_lines.append(content)
+        elif tag == "+":
+            new_lines.append(content)
+        elif tag == "\n" or raw.strip() == "":
+            old_lines.append("\n")
+            new_lines.append("\n")
+        else:
+            raise ValueError(f"invalid hunk line: {raw!r}")
+    return old_lines, new_lines
+
+
+def _locate_hunk(original: list[str], old_start: int, old_lines: list[str]) -> int:
+    """Use the hunk line number, then a unique exact context match."""
+    hinted = max(old_start - 1, 0)
+    if original[hinted : hinted + len(old_lines)] == old_lines:
+        return hinted
+    if not old_lines:
+        return hinted
+    matches = [
+        index
+        for index in range(len(original) - len(old_lines) + 1)
+        if original[index : index + len(old_lines)] == old_lines
+    ]
+    if len(matches) == 1:
+        return matches[0]
+    shown = old_start
+    got = original[hinted : hinted + len(old_lines)]
+    if not matches:
+        raise ValueError(
+            f"hunk context mismatch at line {shown}: expected {old_lines!r} got {got!r}"
+        )
+    raise ValueError(f"hunk context at line {shown} matched {len(matches)} places: {old_lines!r}")
+
+
+def _reject_overlapping_hunks(located: list[tuple[int, list[str], list[str]]]) -> None:
+    spans = sorted((start, start + len(old_lines)) for start, old_lines, _new in located)
+    for left_end, right_start in zip(
+        (end for _start, end in spans),
+        (start for start, _end in spans[1:]),
+        strict=False,
+    ):
+        if left_end > right_start:
+            raise ValueError("unified diff hunks overlap")

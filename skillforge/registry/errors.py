@@ -41,6 +41,19 @@ class SkillVersionNotFoundError(RegistryError):
         super().__init__(f"skill version not found: {version_id!r}")
 
 
+class PublishPathOccupiedError(RegistryError):
+    """Another skill already owns this published name and version."""
+
+    def __init__(self, skill_name: str, version: str, path: str) -> None:
+        self.skill_name = skill_name
+        self.version = version
+        self.path = path
+        super().__init__(
+            f"发布目录已被占用：{path}。同名技能「{skill_name}」的版本 {version} "
+            "已经发布过。请更换技能名称或版本号后再发布，系统不会覆盖已有目录。"
+        )
+
+
 class MissingApproverError(RegistryError):
     """approve() requires a non-empty approver string."""
 

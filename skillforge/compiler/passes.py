@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from collections.abc import Callable
 from pathlib import Path
 
@@ -32,6 +33,7 @@ _SYSTEM = (
     "Draft a SkillSpec from the supplied knowledge units only. "
     "Do not add tools, paths, hosts, or triggers that those units do not support."
 )
+_SKILL_NAME = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 
 
 class TaskScope(BaseModel):
@@ -151,6 +153,7 @@ def _tighten(draft: SkillSpec, scope: TaskScope, selected: list[KnowledgeUnit]) 
             seen_docs.add(unit.document_id)
     return draft.model_copy(
         update={
+            "name": _skill_name(scope.name, draft.name),
             "triggers": list(scope.triggers),
             "tools": tools,
             "sources": sources,
@@ -164,6 +167,15 @@ def _tighten(draft: SkillSpec, scope: TaskScope, selected: list[KnowledgeUnit]) 
             ),
         },
     )
+
+
+def _skill_name(requested: str, drafted: str) -> str:
+    """Keep a NVIDIA-legal name. The compile form wins over a model title."""
+    for raw in (requested, drafted):
+        slug = re.sub(r"[^a-z0-9]+", "-", raw.strip().lower()).strip("-")
+        if _SKILL_NAME.fullmatch(slug):
+            return slug
+    return "skill"
 
 
 def _allowed_hosts(hosts: list[str], policy: SandboxPolicy) -> list[str]:

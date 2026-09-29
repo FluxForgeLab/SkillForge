@@ -40,11 +40,13 @@ async def test_unselected_citation_is_dropped_and_ids_are_assigned(tmp_path: Pat
 
     assert "nginx -t" not in rendered.skill_md
     assert "this_is_not_valid_nginx" not in rendered.skill_md
-    assert "ins_01 Inspect the backend." in rendered.skill_md
-    assert "ins_02 Read the upstream line." in rendered.skill_md
+    assert "Inspect the backend." not in rendered.skill_md
+    assert "ins_01 docker.inspect backend." in rendered.skill_md
+    assert "ins_02 If stopped, docker.restart backend." in rendered.skill_md
+    upstream = "ins_03 If the upstream line is not `server backend:8080;`, replace it."
+    assert upstream in rendered.skill_md
     assert "ins_20 Do not restart mock-db." in rendered.skill_md
-    assert "docker.inspect" in rendered.skill_md
-    assert list(rendered.source_map) == ["ins_01", "ins_02", "ins_20"]
+    assert list(rendered.source_map) == ["ins_01", "ins_02", "ins_03", "ins_20"]
     assert rendered.source_map["ins_01"]["knowledge_unit_id"] == "ku_down"
     assert rendered.source_map["ins_01"]["document"] == "runbook.md"
     assert rendered.source_map["ins_01"]["sha256"] == _SHA
@@ -137,7 +139,21 @@ def _seed(tmp_path: Path) -> Path:
                 created_at=created,
             ),
         )
-        for unit in (_unit("ku_down", "Service Down"), _unit("ku_proxy", "502 from proxy")):
+        for unit in (
+            _unit(
+                "ku_down",
+                "Service Down",
+                steps=[
+                    "docker.inspect backend.",
+                    "If stopped, docker.restart backend.",
+                ],
+            ),
+            _unit(
+                "ku_proxy",
+                "502 from proxy",
+                steps=["If the upstream line is not `server backend:8080;`, replace it."],
+            ),
+        ):
             insert_knowledge_unit(conn, unit)
         insert_knowledge_unit(
             conn,

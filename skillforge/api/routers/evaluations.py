@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import asyncio
-import tempfile
 from collections.abc import Awaitable, Callable
 from datetime import datetime
 from pathlib import Path
@@ -27,7 +26,9 @@ from skillforge.domain.enums import TraceEventType
 from skillforge.evaluator.cases import load_eval_cases
 from skillforge.evaluator.suite import run_suite
 from skillforge.models.gateway import ModelGateway, build_adapter
+from skillforge.orchestrator.jobs import JobRunner
 from skillforge.runtime.agent import LocalHarness
+from skillforge.sandbox.workspace import open_workspace
 from skillforge.tracing.bus import EventBus
 from skillforge.tracing.emitter import emit
 from skillforge.tracing.sink import SqliteTraceSink, TraceSink
@@ -90,7 +91,7 @@ async def default_evaluate_runner(
             run_id=run_id,
         )
 
-    with tempfile.TemporaryDirectory(prefix="skillforge-eval-") as workspace:
+    with open_workspace("skillforge-eval-") as workspace:
         report = await run_suite(
             cases,
             skill_path=skill_dir,
@@ -129,6 +130,7 @@ async def _run_evaluate_job(
     settings: Settings,
     bus: EventBus,
     runner: EvaluateRunner,
+    jobs: JobRunner,
 ) -> None:
     sink = SqliteTraceSink(settings.sqlite_path)
     await emit(
@@ -153,6 +155,7 @@ async def _run_evaluate_job(
             settings=settings,
             bus=bus,
         )
+        jobs.finish(job_id, result=run_ids)
         await emit(
             job_id,
             TraceEventType.EVALUATION_COMPLETED,
@@ -163,6 +166,7 @@ async def _run_evaluate_job(
             sink=sink,
         )
     except Exception as exc:
+        jobs.finish(job_id, error=str(exc))
         await emit(
             job_id,
             TraceEventType.EVALUATION_COMPLETED,
@@ -239,7 +243,9 @@ async def start_evaluate(
         skill_id,
     )
     bus: EventBus = request.app.state.bus
+    jobs: JobRunner = request.app.state.job_runner
     job_id = "job_" + uuid4().hex
+    jobs.begin(job_id)
     background_tasks.add_task(
         _run_evaluate_job,
         job_id=job_id,
@@ -250,6 +256,7 @@ async def start_evaluate(
         settings=settings,
         bus=bus,
         runner=runner,
+        jobs=jobs,
     )
     return EvaluateJobResponse(job_id=job_id)
 

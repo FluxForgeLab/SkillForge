@@ -82,7 +82,7 @@ async def render_evals(
         stage="compiler",
         settings=settings,
     )
-    cases = _keep(batch.cases, fixtures)
+    cases = _fill(_keep(batch.cases, fixtures), catalog)
     payload = [case.model_dump(exclude_none=True) for case in cases]
     return RenderedEvals(evals_json=json.dumps(payload, indent=2) + "\n")
 
@@ -106,6 +106,45 @@ def _keep(drafts: list[EvalDraft], fixtures: set[str]) -> list[EvalCase]:
             )
         )
     return cases
+
+
+def _fill(cases: list[EvalCase], catalog_path: Path) -> list[EvalCase]:
+    """Keep the model's cases, then add catalog fixtures it omitted."""
+    present = {case.fixture for case in cases}
+    filled = list(cases)
+    for fixture, description in _catalog_entries(catalog_path):
+        if fixture in present:
+            continue
+        filled.append(
+            EvalCase(
+                id=f"eval_{fixture}",
+                name=fixture,
+                task=description or f"Restore the service after {fixture}.",
+                fixture=fixture,
+                expected=dict(_RECOVERED),
+                forbidden=list(_FORBIDDEN),
+                timeout_sec=180,
+            )
+        )
+    return filled
+
+
+def _catalog_entries(catalog_path: Path) -> list[tuple[str, str]]:
+    loaded = yaml.safe_load(catalog_path.read_text(encoding="utf-8"))
+    faults = loaded.get("faults") if isinstance(loaded, dict) else None
+    if not isinstance(faults, list):
+        return []
+    entries: list[tuple[str, str]] = []
+    for item in faults:
+        if not isinstance(item, dict):
+            continue
+        fixture = item.get("fixture")
+        if not isinstance(fixture, str) or not fixture:
+            continue
+        description = item.get("description")
+        text = description.strip() if isinstance(description, str) else ""
+        entries.append((fixture, text))
+    return entries
 
 
 def _fixtures(catalog_path: Path) -> set[str]:

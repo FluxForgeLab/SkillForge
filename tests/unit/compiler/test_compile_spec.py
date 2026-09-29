@@ -80,6 +80,25 @@ async def test_scope_excludes_appendix_b_and_tightens_permissions(tmp_path: Path
     assert spec.permissions.network.allow == ["localhost"]
     assert spec.permissions.shell.destructive_commands is False
     assert spec.sources == [_DOCUMENT]
+    assert spec.name == "service-recovery"
+
+
+async def test_model_title_is_replaced_by_the_requested_skill_name(tmp_path: Path) -> None:
+    db_path, settings, retriever = await _world(tmp_path, _units())
+    payload = json.loads(_draft().content or "")
+    payload["name"] = "Service Recovery"
+    compiled = await compile_skill_spec(
+        db_path,
+        _PROJECT,
+        _scope(),
+        _gateway(
+            _Remember(FakeModelAdapter([ModelResponse(content=json.dumps(payload))])),
+            settings,
+        ),
+        retriever=retriever,
+        settings=settings,
+    )
+    assert compiled.spec.name == "service-recovery"
 
 
 async def test_matching_diagnostic_rule_stays_selected(tmp_path: Path) -> None:

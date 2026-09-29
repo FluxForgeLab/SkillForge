@@ -31,6 +31,29 @@ class _Sink:
         del event
 
 
+async def test_omitted_catalog_fixtures_are_added(tmp_path: Path) -> None:
+    settings = Settings(
+        _env_file=None, sqlite_path=tmp_path / "app.sqlite", data_dir=tmp_path / "data"
+    )
+    draft = {
+        "cases": [_case("eval_nginx_bad_config_reload", "nginx_bad_config_reload")],
+    }
+    rendered = await render_evals(
+        [_unit("HTTP 200 from the health check.")],
+        _gateway(_Remember(FakeModelAdapter([ModelResponse(content=json.dumps(draft))])), settings),
+        settings=settings,
+    )
+    skill = tmp_path / "skill"
+    (skill / "evals").mkdir(parents=True)
+    (skill / "evals" / "evals.json").write_text(rendered.evals_json, encoding="utf-8")
+    fixtures = [item.case.fixture for item in load_eval_cases(skill)]
+    assert fixtures == [
+        "nginx_bad_config_reload",
+        "backend_stopped",
+        "nginx_wrong_upstream",
+    ]
+
+
 async def test_unknown_fixture_dropped_and_expected_is_recovered(tmp_path: Path) -> None:
     remembered = _Remember(FakeModelAdapter([_draft()]))
     settings = Settings(

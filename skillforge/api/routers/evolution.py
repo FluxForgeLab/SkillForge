@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import difflib
-import tempfile
 from collections.abc import Awaitable, Callable, Mapping, Sequence
 from pathlib import Path
 from typing import Annotated, Any
@@ -31,6 +30,7 @@ from skillforge.models.gateway import ModelGateway, build_adapter
 from skillforge.registry.errors import (
     DuplicateSkillVersionError,
     MissingApproverError,
+    PublishPathOccupiedError,
     SkillNotFoundError,
     SkillVersionNotFoundError,
 )
@@ -38,6 +38,7 @@ from skillforge.registry.human import approve as human_approve
 from skillforge.registry.human import publish as human_publish
 from skillforge.registry.service import SkillRegistry
 from skillforge.runtime.agent import LocalHarness
+from skillforge.sandbox.workspace import open_workspace
 from skillforge.tracing.bus import EventBus
 from skillforge.tracing.sink import TraceSink
 
@@ -174,7 +175,7 @@ def get_evolve_suite_pair(request: Request, settings: SettingsDep) -> SuitePairF
                 run_id=run_id,
             )
 
-        with tempfile.TemporaryDirectory(prefix="skillforge-evolve-prev-") as prev_ws:
+        with open_workspace("skillforge-evolve-prev-") as prev_ws:
             previous = await run_regression(
                 cases,
                 skill_path=str(parent_dir),
@@ -183,7 +184,7 @@ def get_evolve_suite_pair(request: Request, settings: SettingsDep) -> SuitePairF
                 harness_factory=harness_factory,
                 db_path=settings.sqlite_path,
             )
-        with tempfile.TemporaryDirectory(prefix="skillforge-evolve-cand-") as cand_ws:
+        with open_workspace("skillforge-evolve-cand-") as cand_ws:
             candidate = await run_regression(
                 cases,
                 skill_path=str(candidate_dir),
@@ -318,6 +319,8 @@ async def publish_skill_version(
     _require_skill_version(settings, skill_id, version_id)
     try:
         result = human_publish(registry, version_id)
+    except PublishPathOccupiedError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
     except SkillVersionNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except SkillNotFoundError as exc:

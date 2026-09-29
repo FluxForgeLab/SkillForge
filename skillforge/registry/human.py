@@ -11,7 +11,11 @@ from skillforge.db.repositories.skills import get_skill
 from skillforge.domain.entities import SkillVersion
 from skillforge.domain.errors import InvalidStateTransition
 from skillforge.domain.state_machines import SkillVersionStatus
-from skillforge.registry.errors import MissingApproverError, SkillNotFoundError
+from skillforge.registry.errors import (
+    MissingApproverError,
+    PublishPathOccupiedError,
+    SkillNotFoundError,
+)
 from skillforge.registry.manifest import skill_key_from_name
 from skillforge.registry.service import SkillRegistry
 
@@ -88,7 +92,10 @@ def publish(
 
     skill_key = skill_key_from_name(skill.name)
     src = registry.artifact_dir(version_id)
-    dest = root / skill_key / version.version
+    # skill.id keeps two skills that share a display name from overwriting each other.
+    dest = root / skill_key / skill.id / version.version
+    if dest.exists():
+        raise PublishPathOccupiedError(skill.name, version.version, dest.as_posix())
     dest.parent.mkdir(parents=True, exist_ok=True)
     shutil.copytree(src, dest)
 
